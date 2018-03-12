@@ -38,8 +38,9 @@ switch(program.mode) {
     global.acct3 = web3.eth.accounts[2];
     global.acct4 = web3.eth.accounts[3];
     global.acct5 = web3.eth.accounts[4];
-    var Decypher = require("./src/local");
-    global.decypher = new Decypher({ web3: global.web3});
+    
+    var Tools = require("./src/local");
+    global.tools = new Tools({ web3: global.web3});
     require('repl').start({});
 
     break;
@@ -58,8 +59,8 @@ switch(program.mode) {
 
       global.web3 = new Web3(new Web3.providers.HttpProvider(`${program.endpoint}`));
 
-      var Decypher = require("./src/remote");
-      global.decypher = new Decypher({ privateKey: result.privateKey, web3: global.web3 });
+      var Tools = require("./src/remote");
+      global.tools = new Tools({ privateKey: result.privateKey, web3: global.web3 });
 
       require('repl').start({});
     });

@@ -1,20 +1,78 @@
-
-----------This is an explanation on how to use the command line development tools taken and adjusted form https://github.com/AlwaysBCoding/decyphertv----------
-
-Disclaimer : These tools have been adjusted to newer versions of libraries it uses. It's use is for basic interactions with the blockchain via web3 and a node console. For this you will need to have npm and 			nodejs and testrpc installed on your machine. In later versions we can maybe dockerize a development environment for testing purposes.
-
-1. The file package.json defines all the libraries that will be used by these tools. Run "npm install" to install all libraries. A folder node_modules will be created and is ignored by git. The libraries are :
-	-"chalk": "^2.3.2",
-    	-"cli-spinner": "^0.2.8",
-    	-"commander": "^2.15.0",
-    	-"ethereumjs-tx": "^1.3.4",
-    	-"ethereumjs-util": "^5.1.5",
-    	-"fs": "0.0.1-security",
-    	-"lodash": "^4.17.5",
-    	-"prompt": "^1.0.0",
-    	-"q": "^1.5.1",
-    	-"solc": "^0.4.21",
-    	-"web3": "^1.0.0-beta.30".
+# Ethereum Decentralized App development Tools
 
 
-2.
+These development tools for creating, compiling and deploying contract to the Ethereum blockchain (local or remote nodes). Code was taken from decyphertv : https://github.com/AlwaysBCoding/decyphertv and adapted for newer versions of used libraries.
+
+This text you see here is *actually* written in Markdown! To get a feel for Markdown's syntax, type some text into the left window and watch the results in the right.
+
+## Main Libraries  Used
+* [Ethereumjs-tx] - Javascript library for ethereum transactions version 1.3.4
+* [Ethereumjs-util] - Utility functions version 5.1.5
+* [Solc] - Solidity compiler version 0.4.21
+* [Web3] - Javascript library to interact with the blockchain version 0.20.5
+
+## Installation
+
+The development tools require some dependencies for them to work.
+
+Install the dependencies and devDependencies and start the server.
+
+```sh
+$ apt-get install git
+$ apt-get install npm
+$ npm install -g ethereumjs-testrpc
+$ cd /Development-tools
+```
+#### Running the application 
+After installing all dependencies, cd into the application folder and run the following commands
+
+```sh
+$ npm install
+$ node index.js -m <mode> -e <endpoint> -i <privateKey>
+```
+
+| Mode | Endpoint | privateKey | Other |
+| ------ | ------ | ------ | ------ |
+| testrpc | default=http://localhost:8545 | none |
+| ropsten | no need to specify | ropsten account address | privateKey of account
+| local | address of local node | none |
+| remote | address of remote node | address of corresponding network |
+
+#### Docker
+A Dockerfile is also available and creates an environment to run the app.
+It will build the docker image exposing port 8545 for testrpc (might take time depending on internet connection speed) 
+```sh
+$ docker build -t <name> .
+```
+To launch a container in background with a testrpc instance 
+```sh
+$ docker run -d <name> testrpc
+```
+Check for the testrpc container's IP address (in "NetworkSettings")
+```sh
+$ docker inspect <container_name>
+```
+To use the tools run the following command to open another container and install all dependencies
+```sh
+$ docker run -ti <name>
+$ root@docker-container # cd /dna_development
+$ root@docker-container # node index.js -m <mode> -e <endpoint> -i <privateKey> 
+```
+
+To connect to the docker container running testrpc (usually on 172.17.0.1:8545 but can change if you have running containers)
+ ``` sh
+ $ root@docker-container # node index.js -m local -e http://<testrpc_ip>:8545
+ ```
+
+# Development
+
+#### Local node
+To be completed
+#### Remote node 
+To be completed
+
+   
+   [Ethereumjs-tx]: <https://github.com/ethereumjs/ethereumjs-tx>
+   [Ethereumjs-util]: <https://github.com/ethereumjs/ethereumjs-util>
+   [Solc]: <https://github.com/ethereum/solc-js>
+   [Web3]: <https://github.com/ethereum/web3.js/>

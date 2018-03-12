@@ -4,7 +4,6 @@ var EthTx = require("ethereumjs-tx");
 var EthUtil = require("ethereumjs-util");
 var fs = require("fs");
 var lodash = require("lodash");
-//var SolidityFunction = require("web3/lib/web3/function");
 var Spinner = require("cli-spinner").Spinner;
 var Q = require('q');
 var utils = require('web3/lib/utils/utils');
@@ -35,7 +34,12 @@ class Remote {
     }
   }
 
-  // Synchronous calls
+  /*
+  * Extracts contract name from source
+  *
+  * @param {string} Contract source
+  * @returns {string} Contract name
+  * */
   contractName(source) {
     try {
       var re1 = /contract.*{/g
@@ -47,6 +51,11 @@ class Remote {
     }
   }
 
+  /*
+  * Extracts contract opcode from source
+  * @param {string} Contract source code or file location
+  * @returns {string} The opcodes
+  * */
   opcodes(source) {
     var contractSource;
     if(this.contractName(source)) {
@@ -55,9 +64,14 @@ class Remote {
       contractSource = fs.readFileSync(source, 'utf8'); }
     var compiled = solc.compile(contractSource);
     var contractName = this.contractName(contractSource);
-    return compiled["contracts"][`:${contractName}`]["opcodes"];
+    return compiled.contracts[`:${contractName}`].opcodes;
   }
 
+  /*
+  * Extracts contract abi
+  * @param {string} Contract source code or file location
+  * @returns {JSON} The contract abi
+  * */
   abi(source) {
     var contractSource;
     if(this.contractName(source)) {
@@ -66,9 +80,14 @@ class Remote {
       contractSource = fs.readFileSync(source, 'utf8'); }
     var compiled = solc.compile(contractSource);
     var contractName = this.contractName(contractSource);
-    return JSON.parse(compiled["contracts"][`:${contractName}`]["interface"]);
+    return JSON.parse(compiled.contracts[`:${contractName}`].interface);
   }
 
+  /*
+  * Creates contract from contract source
+  * @param {string} Contract source code or file location
+  * @returns {Contract} Contract created from source code
+  * */
   contract(source) {
     var contractSource;
     if(this.contractName(source)) {
@@ -78,6 +97,12 @@ class Remote {
     return this.web3.eth.contract(this.abi(contractSource));
   }
 
+  /*
+  * Creates an instance of a contract
+  * @param source{string} Contract source code or file location
+  * @param address{string} The address of the deployed contract
+  * @returns {Contract} A new contract instance
+  * */
   deployed(source, address) {
     var contractSource;
     if(this.contractName(source)) {
@@ -87,6 +112,11 @@ class Remote {
     return this.contract(contractSource).at(address);
   }
 
+  /*
+  * Returns the balance in ether of the given address
+  * @param {Contract, address} Contract or address
+  * @returns {int} The ether balance of the given contract or address
+  * */
   etherBalance(contract) {
     switch(typeof(contract)) {
       case "object":
@@ -102,7 +132,14 @@ class Remote {
     }
   }
 
-  // Async Calls
+  /*
+  * Sends ether from one account to another. From account that has started the program
+  * @param _to{string} The address of the receiver
+  * @param _value{int} The amount in ether to be transfered
+  * @param options{JSON} Options to be passed to the transaction
+  * @returns {string} The transaction hash once it has been mined
+  *
+  * */
   sendEther({to, value}, options={}) {
     var renderContext = this;
     var deferred = Q.defer();
@@ -149,6 +186,12 @@ class Remote {
     this.web3.eth.sendRawTransaction(`0x${txData}`, callback);
   }
 
+  /*
+  * Deploys a new contract to the blockchain (From the acct1 by default)
+  * @param source{string} Contract source code or file location
+  * @param params{Array} The parameters to be passed to the constructor upon creation
+  * @param options{JSON} The options to pass to the transaction of contract creation (typically some gas)
+  * */
   deployContract(source, params=[], options={}) {
     var renderContext = this;
     var deferred = Q.defer();
@@ -167,7 +210,7 @@ class Remote {
     var bytecode = compiled.contracts[`:${contractName}`].bytecode;
     var abi = JSON.parse(compiled.contracts[`:${contractName}`].interface);
     var contract = this.web3.eth.contract(abi);
-    var contractData = `0x${contract.new.getData(...params, {data: bytecode})}`
+    var contractData = `0x${contract.new.getData(...params, {data: bytecode})}`;
 
     deferred.promise
     .then((data) => {
@@ -193,7 +236,7 @@ class Remote {
           }
         }, 1000)
       }
-    }
+    };
 
     //Create transaction to deploy contract
     var rawTx = {
@@ -202,7 +245,7 @@ class Remote {
       data: contractData,
       gasLimit: this.web3.toHex(options.gas || this.web3.eth.estimateGas({ data: contractData })),
       gasPrice: this.web3.toHex(options.gasPrice || this.web3.eth.gasPrice)
-    }
+    };
 
     var tx = new EthTx(rawTx);
     tx.sign(this.privateKeyx);
@@ -214,7 +257,13 @@ class Remote {
 
 
 
-  //To encode the method call data
+  /*
+  * Auxiliary Function to encode the method to be called
+  * @param deployed_abi{JSON} The abi of the contract to call
+  * @param methodName{string} The name of the method to be called
+  * @param params{Array} the parameters to pass to the method
+  * @returns {hex} The encoded payload data
+  * */
   encodePayloadData(deployed_abi, methodName, params=[]){
     var method_abi = lodash.find(deployed_abi, {name : methodName});
     var name = utils.transformToFullName(method_abi);
@@ -228,8 +277,16 @@ class Remote {
     var method_signature = sha3(name).slice(0, 8);
     var data = '0x' + method_signature + coder.encodeParams(inputTypes, params);
     return data;
-  }//var dep = decypher.deployed("crowd-fund2.sol", '0x57b1578d1236dcae313afe8cf03127cc3bb076b8')
+  }
 
+  /*
+  * Function used to call methods that are not constant (require a change of state of the EVM)
+  * @param deployed{Contract} The contract instance to call
+  * @param methodName{string} The name of the method to call
+  * @param params{Array} The parameters to pass to the method
+  * @param options{JSON} The options to pass to the transaction of contract creation (typically some gas)
+  *
+  * */
   callContract(deployed, methodName, params=[], options={}) {
     var renderContext = this;
     var deferred = Q.defer();
@@ -284,4 +341,4 @@ class Remote {
 
 }
 
-module.exports = Remote
+module.exports = Remote;

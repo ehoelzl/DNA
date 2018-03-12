@@ -1,41 +1,55 @@
-contract crowdfund {
+pragma solidity ^0.4.20;
+
+contract CrowdFund {
 
   address public beneficiary;
   uint256 public goal;
   uint256 public deadline;
 
-  struct Funder {
-    address addr;
-    uint256 value;
-  }
+  //Mapping is faster in array
+  //Any address that is not in the mapping will give  result of 0 when queried
+  mapping(address => uint256) public funders;
+  address[] funderAddresses;
 
-  Funder[] funders;
+  //To write an even to chain data (Less expensive than sate trie)
+  //To be able to know when an event happened from outside the chain
+  //Keyword 'indexed' is used to be able to listen to one specific value of that field
+  event NewContribution(address indexed _from, uint256 _value);
 
-  function crowdfund(address _beneficiary, uint256 _goal, uint256 _timelimit) {
+  function CrowdFund(address _beneficiary, uint256 _goal, uint256 _duration) public payable {
     beneficiary = _beneficiary;
     goal = _goal;
-    deadline = now + _timelimit;
+    deadline = _duration + now;
   }
 
-  function getBeneficiary() constant returns (address) {
-    return beneficiary;
+  function getFunderContribution(address _addr) public constant returns (uint256){
+    return funders[_addr];
   }
 
-  function contribute() payable {
-    funders.push(Funder(msg.sender, msg.value));
+  function funderAddress(uint _index) public constant returns (address) {
+    return funderAddresses[_index];
   }
 
-  function payout() {
-    if(this.balance >= goal && now > deadline) beneficiary.send(this.balance);
+  function funderAddressLength() public constant returns (uint) {
+    return funderAddresses.length;
   }
 
-  function refund() {
-    if(msg.sender != beneficiary) throw;
-    uint256 index = 0;
-    while (index < funders.length) {
-      funders[index].addr.send(funders[index].value);
-      index++;
+  function contribute() payable public {
+    if(funders[msg.sender] == 0) funderAddresses.push(msg.sender);
+    funders[msg.sender] += msg.value;
+    NewContribution(msg.sender, msg.value);
+  }
+
+  function payout() public {
+    if(this.balance >= goal && now > deadline) beneficiary.transfer(this.balance);
+  }
+
+  function refund() public payable{
+    if (now > deadline && this.balance < goal) {
+      msg.sender.transfer(funders[msg.sender]);
+      funders[msg.sender] = 0;
     }
-  }
 
+
+  }
 }
