@@ -59,7 +59,7 @@ $ root@docker-container # cd /dna_development
 $ root@docker-container # node index.js -m <mode> -e <endpoint> -i <privateKey> 
 ```
 
-To connect to the docker container running testrpc (usually on 172.17.0.1:8545 but can change if you have running containers)
+To connect to the docker container running testrpc (usually on 172.17.0.2:8545 but can change if you have running containers)
  ``` sh
  $ root@docker-container # node index.js -m local -e http://<testrpc_ip>:8545
  ```
