@@ -277,7 +277,9 @@ class App extends Component {
   contribute(event){
     var ev = this.instance.NewContribution({_from: window.web3.coinbase});
     ev.watch((error, result) => {
-      alert("Contribution of :"+ window.web3.fromWei(result.args._value,'ether')+" ETH recieved");
+      ether_val = window.web3.fromWei(result.args._value,'ether')
+      alert("Contribution of :"+ ether_val +" ETH recieved");
+      this.setState({contributed : this.state.contributed + ether_val })
       this.reveal();
     });
     this.instance.contribute({from : window.web3.eth.coinbase, value : window.web3.toWei(this.state.contribution, 'ether'), gas :1000000}, function (error, result) {
