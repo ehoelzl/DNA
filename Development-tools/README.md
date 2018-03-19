@@ -3,7 +3,6 @@
 
 These development tools for creating, compiling and deploying contract to the Ethereum blockchain (local or remote nodes). Code was taken from decyphertv : https://github.com/AlwaysBCoding/decyphertv and adapted for newer versions of used libraries.
 
-This text you see here is *actually* written in Markdown! To get a feel for Markdown's syntax, type some text into the left window and watch the results in the right.
 
 ## Main Libraries  Used
 * [Ethereumjs-tx] - Javascript library for ethereum transactions version 1.3.4
