@@ -1,0 +1,12 @@
+{
+  "name": "Node-Server",
+  "version": "0.0.1",
+  "dependencies": {
+    "http": "^0.0.0",
+    "os": "^0.1.1",
+    "web3": "^0.20.5",
+    "truffle-hdwallet-provider": "^0.0.3",
+    "truffle-contract": "^3.0.4",
+    "merkle": "^0.6.0"
+  }
+}

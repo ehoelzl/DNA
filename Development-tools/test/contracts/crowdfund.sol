@@ -1,4 +1,4 @@
-pragma solidity ^0.4.20;
+pragma solidity ^0.4.21;
 
 contract CrowdFund {
 
@@ -37,7 +37,7 @@ contract CrowdFund {
   function contribute() payable public {
     if(funders[msg.sender] == 0) funderAddresses.push(msg.sender);
     funders[msg.sender] += msg.value;
-    NewContribution(msg.sender, msg.value);
+    emit NewContribution(msg.sender, msg.value);
   }
 
   function payout() public {
