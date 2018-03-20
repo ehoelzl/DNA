@@ -1,3 +1,14 @@
+/* TODO
+* 1. Accumulate hashes (time or number of hashes)
+* 2. Create merkle tree
+* 3. Compute signature for each element
+* 4. Keep track of users
+* 5. Publish root on twitter
+* 6. Send root to smart Contract (to be done when smart contract is done)
+* 7. Send signatures to corresponding user
+*
+* */
+
 
 //1. Import required files and set the provider (Ropsten address at 0x6A9aa07E06033Ac0Da85ac8a9b11fe8Ab65c253e)
 Http = require('http');
@@ -20,12 +31,12 @@ var hashes = [];
 
 //Simple server to accumulate hashes
 server = Http.createServer( function(req, res) {
-  if (req.method == 'POST') {
+  if (req.method === 'POST') {
     console.log("POST");
     body = [];
     req.on('data', (chunk) => body.push(chunk)).on('end', ()  => {
       hashes.push(Buffer.concat(body).toString());
-      if (hashes.length == 5){
+      if (hashes.length === 5){
         computeMerkleTree(hashes);
         hashes = []
       }
@@ -58,5 +69,5 @@ host = getIPAddress();
 hashes = [1,2,3,4,5,6,7,8];
 var x = Merkle('sha1').sync(hashes);
 var y = Merkle('sha1').sync([1]);
-console.log(x.root());
+console.log(x.getProofPath(1));
 console.log('Listening at http://' + host + ':' + port);

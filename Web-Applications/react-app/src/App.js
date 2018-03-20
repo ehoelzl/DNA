@@ -8,6 +8,8 @@ import './css/pure-min.css'
 import './App.css'
 
 class App extends Component {
+
+
   constructor(props) {
     super(props);
 
@@ -20,7 +22,8 @@ class App extends Component {
       search_hash : 0,
       time_stamp : 0,
       user : 0,
-      ether_price : 0
+      ether_price : 0,
+      server_ip : "http://127.0.0.1:4000"
     };
     this.timeStampButton = this.timeStampButton.bind(this);
     this.submitHashChange = this.submitHashChange.bind(this);
@@ -87,12 +90,11 @@ class App extends Component {
     if (this.state.web3 == null){
       alert("no web3");
       var axios = require('axios');
-      axios.post("http://127.0.0.1:4000", this.state.hash);
+      axios.post(this.state.server_ip, this.state.hash);
     } else {
-      this.state.timeStampInstance.stamp(sha256(this.state.hash), {from : this.state.web3.eth.coinbase, value : this.state.price}).then(function (result) {
-        alert("Successful, tx :"+ result.tx);
-
-      }).catch(error => alert("Could not time stamp the given hash"));
+      this.state.timeStampInstance.stamp(sha256(this.state.hash), {from : this.state.web3.eth.coinbase, value : this.state.price})
+        .then(rs => alert("Successful, tx :"+ rs.tx))
+        .catch(error => alert("Could not time stamp the given hash"));
     }
   }
 
@@ -103,7 +105,7 @@ class App extends Component {
       if (x.toNumber() !== 0){
         this.setState({time_stamp : x.toNumber()})
       } else {
-        alert("Hash not found")
+        alert("Hash not found");
       }
     }).catch(e => console.log(e));
     this.state.timeStampInstance.getUser.call(sha256(this.state.search_hash)).then(x => this.setState({user : x})).catch(e => console.log(e));
