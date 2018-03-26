@@ -23,6 +23,20 @@ code {
   padding: 45px 20px;
 }
 
+.time-stamp-container{
+  text-align: center;
+  width : 100%;
+  padding : 45px 20px
+}
+
+.form-container {
+  margin : auto;
+  text-align: left;
+  width: 50%;
+  padding: 40px 40px;
+}
+
+
 .pure-button-primary {
   background-color: #0c1a2b;
 }
@@ -35,35 +49,20 @@ code {
   border-color: #0c1a2b;
 }
 
-/* NAVBAR */
+.pure-button-ethereum , .pure-button-ethereum:hover{
+  padding: 100px;
+  text-align: center;
 
-.navbar {
-  position: fixed;
-  padding: 5px;
-  background: #0c1a2b;
-  font-family: 'Oswald', 'Arial Narrow', sans-serif;
+  background-image : url("../eth-logo.png");
+  background-color: #ffffff;
+  background-size : cover;
+  background-repeat: no-repeat;
 }
 
-.navbar a {
-  color: #fff;
+.pure-button-ethereum:hover,
+.pure-button-ethereum:focus {
+  box-shadow: 0 0.5em 0.5em -0.4em ;
+  transform: translateY(-0.25em);
 }
 
-.navbar a:active,
-.navbar a:focus,
-.navbar a:hover {
-  background: #233e5e;
-}
 
-.navbar .pure-menu-heading {
-  font-weight: bold;
-  text-transform: none;
-}
-
-.navbar .navbar-right {
-  float: right;
-}
-
-.navbar .uport-logo {
-  height: 16px;
-  margin-right: 10px;
-}
