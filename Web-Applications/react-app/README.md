@@ -1,4 +1,4 @@
-# Decentralized Notary Web Application client App
+# Decentralized Notary Application client Web App
 
 [![N|Solid](https://image.spreadshirtmedia.net/image-server/v1/mp/designs/138535075,width=178,height=178/ethereum-logo.png)](https://nodesource.com/products/nsolid)
 
