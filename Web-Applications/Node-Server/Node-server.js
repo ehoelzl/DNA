@@ -1,73 +1,154 @@
-/* TODO
-* 1. Accumulate hashes (time or number of hashes)
-* 2. Create merkle tree
-* 3. Compute signature for each element
-* 4. Keep track of users
-* 5. Publish root on twitter
-* 6. Send root to smart Contract (to be done when smart contract is done)
-* 7. Send signatures to corresponding user
-*
-* */
-
-
 //1. Import required files and set the provider (Ropsten address at 0x6A9aa07E06033Ac0Da85ac8a9b11fe8Ab65c253e)
-Http = require('http');
-HDWalletProvider = require('truffle-hdwallet-provider');
+http = require('http');
+//HDWalletProvider = require('truffle-hdwallet-provider');
 Contract = require('truffle-contract');
 Merkle = require('merkle');
-const mnemonic = "response exit whisper shuffle energy obey upon bean system derive educate make";
-const provider = new HDWalletProvider(mnemonic, "https://ropsten.infura.io/");
+crypto = require('crypto');
+Twitter = require('twitter');
+nodemailer = require('nodemailer');
+
+//const mnemonic = "response exit whisper shuffle energy obey upon bean system derive educate make";
+//const provider = new HDWalletProvider(mnemonic, "https://ropsten.infura.io/");
 
 //2.Get the abi of the contract and its instance
-TimeStamping = require('./build/contracts/TimeStamping.json');
+/*TimeStamping = require('./build/contracts/TimeStamping.json');
 const timeStamping = Contract(TimeStamping);
 timeStamping.setProvider(provider);
 var contractInstance;
-timeStamping.deployed().then(x => contractInstance = x);
+timeStamping.deployed().then(x => contractInstance = x);*/
 
-//3. Array that accumulates hashes
-var hashes = [];
+var client = new Twitter({
+  consumer_key: 'iy77PEbTevF4Bpg9ibbWuEGzR',
+  consumer_secret: 'r1sGVhZN8HnIYHSMtXDSRBBTXzdCl0clZis2JXCluXYdejsrlv',
+  access_token_key: '978262011166511104-F7QUJqq30bqmajWTW144yK30uxWFrAZ',
+  access_token_secret: 'I4GTTYBFFRBqID1DOyGRuVXojsESdYI1q3SZ4GOuMsumC'
+});
+ 
+var params = {screen_name: 'nodejs'};
 
-
-//Simple server to accumulate hashes
-server = Http.createServer( function(req, res) {
-  if (req.method === 'POST') {
-    console.log("POST");
-    body = [];
-    req.on('data', (chunk) => body.push(chunk)).on('end', ()  => {
-      hashes.push(Buffer.concat(body).toString());
-      if (hashes.length === 5){
-        computeMerkleTree(hashes);
-        hashes = []
-      }
-    });
-    res.writeHead(200);
-    res.end('post received');
+var transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'DNA@gmail.com',
+    pass: 'password'
   }
-
-
 });
 
+// Array that accumulates hashes
+var hashes = [];
+// time at which we began to accumulate hashes
+start = Date.now();
+// number of hashes to accumulate before creating the merkle tree
+const N_HASHES = 4; 
+// maximum time to wait before creating the merkle tree (in minutes)
+const MAX_TIME = 1; 
+
+var mailToHash = new Map();
+
+//Simple server to accumulate hashes
+server = http.createServer( function(req, res) {
+  	if (req.method === 'POST') {
+    	console.log("POST:");
+	    req.on('data', function(data) {
+	    	try{
+		    	json = JSON.parse(data);
+		    	email = json['email'];
+		    	hash = json['hash'];
+		    	console.log("email", email, "hash", hash)
+		    }
+		    catch(error){
+		    	console.log(error)
+		    }
+	    });
+    	req.on('end', () => {
+	      	hashes.push(hash); 
+	      	// possibilité d'en faire plusieurs en meme temps ? 
+	      	// ou map dans l'autre sens et check si hash deja present
+			mailToHash.set(email, hash)
+			//console.log((Date.now()-start)/60000)
+			if (hashes.length === N_HASHES){
+				reset();
+			}
+    	});
+    	res.writeHead(200);
+    	res.end('post received');
+ 	}
+    /*if((Date.now()-start)/60000 >= MAX_TIME){
+    	if(hashes.length > 0){
+    		reset();
+    	}
+    	else {
+    		start = Date.now();
+	 	}
+  	}*/
+});
+
+function reset(){
+	// if we didn't get enough hashes, just complete with random ones ?
+	for(var i=hashes.length; i<N_HASHES; i++){
+		// SHA 256 => 32 bytes: 
+		hashes.push(crypto.randomBytes(32).toString('hex'));
+	}
+	merkleTree = computeMerkleTree(hashes);
+	console.log(hashes)
+	console.log("Merkle Tree created with root:", merkleTree.root())
+    hashes = []
+    // 5. publish root on Twitter
+    publishRootOnTwitter(merkleTree.root())
+	// 6. Send root to smart Contract (to be done when smart contract is done)
+	// 7. Send signatures to corresponding user
+	send(merkleTree.root(), 'axel.vandebrouck@eplf.ch')
+
+	// clean la map et toutes les listes
+	
+    start = Date.now();
+}
+
+function publishRootOnTwitter(root){
+	client.post('statuses/update', {status: root},  function(error, tweet, response) {
+		if(error){
+	  		console.log(error);
+		} 
+		else {
+			console.log("Tweet published, root:", tweet.text);
+			//console.log(tweet);  // Tweet body. 
+			//console.log(response);  // Raw response object. 
+		}
+	});
+}
+
+function send(signature, user){
+	var mailOptions = {
+		from: 'DNA@gmail.com',
+		to: user,
+		subject: 'Signature',
+		text: signature
+	};
+	transporter.sendMail(mailOptions, function(error, info){
+		if (error) {
+    		console.log(error);
+		} 
+		else {
+    		console.log('Email sent: ' + info.response);
+  		}
+	});
+}
+
 function computeMerkleTree(hashes){
-  var tree = Merkle('sha1').sync(hashes);
-  console.log(tree)
+  	return Merkle('sha256').sync(hashes);
 }
 
 //Helper function to get ip address
-function getIPAddress(local=true){
-  var address, ifaces = require('os').networkInterfaces();
-  for (var dev in ifaces) {
-    ifaces[dev].filter((details) => details.family === 'IPv4' && details.internal === local ? address = details.address: undefined);
-  }
-  return address
+function getIPAddress(local=false){
+	var address, ifaces = require('os').networkInterfaces();
+	for (var dev in ifaces) {
+	    ifaces[dev].filter((details) => details.family === 'IPv4' && details.internal === local ? address = details.address: undefined);
+	}
+	return address
 }
 
-
 port = 4000;
-host = getIPAddress();
-//server.listen(port, host);
-hashes = [1,2,3,4,5,6,7,8];
-var x = Merkle('sha1').sync(hashes);
-var y = Merkle('sha1').sync([1]);
-console.log(x.getProofPath(1));
+host = getIPAddress(true);
+server.listen(port, host);
 console.log('Listening at http://' + host + ':' + port);
+
