@@ -2,6 +2,10 @@ import React, { Component } from 'react';
 import { Navbar,Nav, NavItem, NavDropdown, MenuItem} from 'react-bootstrap';
 import {LinkContainer} from 'react-router-bootstrap'
 
+
+/*
+* Class representing the Navigation Bar component
+* */
 export default class NavigationBar extends Component {
 
   render() {

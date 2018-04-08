@@ -14,10 +14,18 @@ const KOVAN = "4";
 const LOCALRPC = "5777";
 
 
-
+/*
+* This Web component communicates with the Web3 object injected by Metamask and handles the choice of Network
+*
+* This page requires a Web3 object injected into the web page
+*
+* The component passed to the constructor as a props is the Child component (Submit or verify timestamp)
+* */
 class MetaMaskApp extends Component {
 
-
+  /* Constructor for the Component
+  *
+  * */
   constructor(props) {
     super(props);
 
@@ -31,6 +39,7 @@ class MetaMaskApp extends Component {
 
   }
 
+  /* Resets the state of the Component*/
   resetState() {
     this.setState({
       web3: null,
@@ -39,20 +48,22 @@ class MetaMaskApp extends Component {
     });
   }
 
+  /* Tries to get the injected web3 object of the chosen network by Network ID
+  * */
   getWeb3Object(networkId) {
     getWeb3.then(result => {
       this.setState({web3: result.web3});
-      this.setNetwork(networkId);
+      this.verifyNetwork(networkId);
     }).catch(e => {
       alert('Web3 not found ');
     });
   }
 
-
-  setNetwork(networkId) {
+  /*Verifies the if the chosen network corresponds to the one in metamask
+  * */
+  verifyNetwork(networkId) {
     this.state.web3.version.getNetwork((err, id) => {
       if (id !== networkId.toString()) {
-        console.log(id);
         alert("Please choose the network that corresponds to your current Metamask account");
         this.resetState();
       } else {
@@ -77,16 +88,13 @@ class MetaMaskApp extends Component {
   }
 
 
-  chooseNetwork(id) {
-    this.getWeb3Object(id);
-  }
 
   buttons() {
     return (<div className="pure-button-group xlarge">
-              <button className="pure-button" onClick={this.chooseNetwork.bind(this, 1)}>Ethereum Main Net</button>
-              <button className="pure-button" onClick={this.chooseNetwork.bind(this, 3)}>Ropsten Test Net</button>
-              <button className="pure-button" onClick={this.chooseNetwork.bind(this, 4)}>Kovan Test Net</button>
-              <button className="pure-button" onClick={this.chooseNetwork.bind(this, 5777)}>Local RPC</button>
+              <button className="pure-button" onClick={this.getWeb3Object.bind(this, 1)}>Ethereum Main Net</button>
+              <button className="pure-button" onClick={this.getWeb3Object.bind(this, 3)}>Ropsten Test Net</button>
+              <button className="pure-button" onClick={this.getWeb3Object.bind(this, 4)}>Kovan Test Net</button>
+              <button className="pure-button" onClick={this.getWeb3Object.bind(this, 5777)}>Local RPC</button>
             </div>);
           }
 

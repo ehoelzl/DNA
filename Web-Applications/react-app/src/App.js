@@ -12,7 +12,8 @@ import VerifyTimeStamp from './VerifyTimeStamp'
 import TimeStampForm from "./TimeStampForm";
 
 
-
+/*Main Web App component
+* */
 class Router extends Component {
 
   render(){ return (
