@@ -31,6 +31,8 @@ http://localhost:3000/
 ```
 The client app is now available at http://localhost:3000
 
+Don't forget to install Metamask !
+
    
    [Truffle]: <http://truffleframework.com/>
    [ReactJS]: <https://reactjs.org/>
