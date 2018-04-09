@@ -1,3 +1,14 @@
+/* TODO: 
+package.json
+Status codes
+Mettre signature mail dans un fichier txt/json
+Comm smart contract
+modulariser / clean code
+
+verification timestamp:
+- hash + signature (fichier)
+*/
+
 //1. Import required files and set the provider (Ropsten address at 0x6A9aa07E06033Ac0Da85ac8a9b11fe8Ab65c253e)
 http = require('http');
 //HDWalletProvider = require('truffle-hdwallet-provider');
@@ -26,11 +37,14 @@ var client = new Twitter({
  
 var params = {screen_name: 'nodejs'};
 
+const SERVER_EMAIL = 'eth.notary@gmail.com'
+const EMAIL_PASSWORD = 'GHS-pc7-ewM-8t9'
+
 var transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'DNA@gmail.com',
-    pass: 'password'
+    user: SERVER_EMAIL,
+    pass: EMAIL_PASSWORD
   }
 });
 
@@ -46,6 +60,8 @@ const MAX_TIME = 1;
 var hashToMail = new Map();
 
 //Simple server to accumulate hashes
+
+// MODULARISER EN FONCTION DE SI TIMESTAMP OU VERIFICATION
 server = http.createServer( function(req, res) {
 	res.setHeader('Access-Control-Allow-Origin', '*');
   	if (req.method === 'POST') {
@@ -70,12 +86,13 @@ server = http.createServer( function(req, res) {
 				response_data = {email : email, hash : hash}
 				statusCode = 200
 	      	}
+	      	res.writeHead(statusCode, {'Content-type' : 'application/json'});
+	    	res.end(JSON.stringify(response_data));
 			//console.log((Date.now()-start)/60000)
 			if (hashes.length === N_HASHES){
 				reset();
 			}
-	    	res.writeHead(statusCode, {'Content-type' : 'application/json'});
-	    	res.end(JSON.stringify(response_data));
+	    	
     	});
  	}
     /*if((Date.now()-start)/60000 >= MAX_TIME){
@@ -105,7 +122,7 @@ function reset(){
 	
 	// 7. Send signatures to corresponding users
 	for(var i=0; i<n_hashes; i++){
-		//send(merkleTree.getProothPath(i, true), hashToMail(hashes[i]))
+		send(merkleTree.getProofPath(i, true), hashToMail.get(hashes[i]))
 		console.log('send mail to ', hashToMail.get(hashes[i]), merkleTree.getProofPath(i, true))
 	}
 	hashes = []
@@ -129,10 +146,10 @@ function publishRootOnTwitter(root){
 
 function send(signature, user){
 	var mailOptions = {
-		from: 'DNA@gmail.com',
+		//from: 'DNA@gmail.com',
 		to: user,
 		subject: 'Signature',
-		text: signature
+		text: JSON.stringify(signature)
 	};
 	transporter.sendMail(mailOptions, function(error, info){
 		if (error) {
