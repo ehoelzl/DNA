@@ -16,14 +16,17 @@ server = http.createServer( function(req, res) {
 		    	email = json['email'];
 		    	hash = json['hash'];
 		    	console.log("email", email, "hash", hash)
-          res.writeHead(200, {'Content-Type': 'application/json'});
-          res.end(JSON.stringify({email : email, hash : hash}));
+
 		    }
 		    catch(error){
 		    	console.log('Cannot load data')
 		    }
 	    });
 
+      req.on('end', () => {
+        res.writeHead(200, {'Content-Type': 'application/json'});
+        res.end(JSON.stringify({email : email, hash : hash}));
+      });
       return
     	//res.end('post received');
  	}
@@ -39,6 +42,6 @@ function getIPAddress(local=false){
 }
 
 port = 4000;
-host = getIPAddress(true);
+host = getIPAddress(false);
 server.listen(port, host);
 console.log('Listening at http://' + host + ':' + port);

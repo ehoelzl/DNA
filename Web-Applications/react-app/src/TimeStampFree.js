@@ -17,7 +17,7 @@ import {FieldGroup, SubmitButton, validateEmail} from './utils/htmlElements';
 * Does not require Metamask or any Web3 object
 * */
 
-const SERVER_ADDRESS = 'http://127.0.0.1:4000';
+const SERVER_ADDRESS = 'http://128.179.162.217:4000'//'http://128.179.128.107:4000';//http://127.0.0.1:4000';
 
 class TimeStampFree extends Component {
 
@@ -59,7 +59,6 @@ class TimeStampFree extends Component {
   verifyServerResponse(response) {
     let email = response.data.email;
     let hash = response.data.hash;
-
     return email === this.state.email_address && hash === this.state.hash
   }
 
