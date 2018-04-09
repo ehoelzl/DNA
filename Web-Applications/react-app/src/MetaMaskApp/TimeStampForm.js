@@ -1,15 +1,15 @@
-import './css/oswald.css'
-import './css/open-sans.css'
-import './css/pure-min.css'
-import './css/loading-btn.css'
-import './css/loading.css'
-import './App.css'
+import '../css/oswald.css'
+import '../css/open-sans.css'
+import '../css/pure-min.css'
+import '../css/loading-btn.css'
+import '../css/loading.css'
+import '../App.css'
 
 import React, {Component} from 'react'
 
-import TimeStamping from '../build/contracts/TimeStamping'
-import {getFileHash, toEther} from './utils/stampUtil';
-import {FieldGroup, SubmitButton, ContractNotFound} from './utils/htmlElements';
+import TimeStamping from '../../build/contracts/TimeStamping'
+import {getFileHash, toEther} from '../utils/stampUtil';
+import {FieldGroup, SubmitButton, ContractNotFound, validateEmail} from '../utils/htmlElements';
 
 
 /*Class that handles the submission of a Timestamp by directly communicating with the contract itself
@@ -33,7 +33,7 @@ class TimeStampForm extends Component {
       etherStampPrice: 0,
       email_address: "",
       repeat_email: "",
-      hash: "",
+      hash: ""
     };
 
     //Bindings for helper methods
@@ -67,17 +67,9 @@ class TimeStampForm extends Component {
   /* Helper method that resets the form fields
   */
   resetForm() {
-    this.setState({email_address: "", repeat_email: "", waitingTransaction: false});
+    this.setState({email_address: "", repeat_email: "", hash : "", waitingTransaction: false});
   }
 
-  /* Helper method for the components to validate the email (user interface)
-  */
-  validateEmail() {
-    if (this.state.email_address === "") {
-      return null;
-    }
-    return this.state.email_address !== this.state.repeat_email ? 'error' : 'success';
-  }
 
   /* Helper method specific to this form
   * Returns true if the client is not waiting for another transactions and if the form fields are correctly set
@@ -167,12 +159,13 @@ class TimeStampForm extends Component {
       <div className="time-stamp-container">
         <h3>TimeStamping contract at {this.state.contractAddress}</h3>
         <h3>Stamp price at {this.state.etherStampPrice} ETH</h3>
-        <form className="form-container">
+        <form className="form-container" onSubmit={this.submitTimestamp}>
           <FieldGroup name="email_address"  id="formsControlsEmail" label="Email address" type="email" value={this.state.email_address} placeholder="Enter your email" help="" onChange={this.handleChange}/>
-          <FieldGroup name="repeat_email"  id="formsControlsEmail" label="Email address" type="email" value={this.state.repeat_email} placeholder="Re-enter your email" help="" onChange={this.handleChange} validation={this.validateEmail()}/>
-          <FieldGroup name="file"  id="formsControlsFile" label="File" type="file" placeholder="" help="File you wish to timestamp" onChange={this.handleChange}/>
+          <FieldGroup name="repeat_email"  id="formsControlsEmail" label="Email address" type="email" value={this.state.repeat_email} placeholder="Re-enter your email" help="" onChange={this.handleChange} validation={validateEmail(this.state.email_address, this.state.repeat_email)}/>
+          <FieldGroup name="file"  id="formsControlsFile" label="File" type="file"  placeholder="" help="File you wish to timestamp" onChange={this.handleChange}/>
+          <SubmitButton running={this.state.waitingTransaction} />
         </form>
-        <SubmitButton running={this.state.waitingTransaction} onSubmit={this.submitTimestamp}/>
+
 
 
       </div>

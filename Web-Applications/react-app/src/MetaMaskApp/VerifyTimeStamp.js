@@ -1,18 +1,18 @@
 
-import './css/oswald.css'
-import './css/open-sans.css'
-import './css/pure-min.css'
-import './css/loading-btn.css'
-import './css/loading.css'
-import './App.css'
+import '../css/oswald.css'
+import '../css/open-sans.css'
+import '../css/pure-min.css'
+import '../css/loading-btn.css'
+import '../css/loading.css'
+import '../App.css'
 
 import {Well} from 'react-bootstrap';
 
 import React, {Component} from 'react'
-import {getFileHash} from './utils/stampUtil';
-import {FieldGroup, SubmitButton, ContractNotFound} from './utils/htmlElements';
+import {getFileHash} from '../utils/stampUtil';
+import {FieldGroup, SubmitButton, ContractNotFound} from '../utils/htmlElements';
 
-import TimeStamping from '../build/contracts/TimeStamping'
+import TimeStamping from '../../build/contracts/TimeStamping'
 
 /*Class for Timestamp Verification */
 class VerifyTimeStamp extends Component {

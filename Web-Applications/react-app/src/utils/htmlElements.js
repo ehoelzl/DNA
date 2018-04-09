@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
 
-import {FormControl, FormGroup, ControlLabel, HelpBlock} from 'react-bootstrap'
-
+import {FormControl, FormGroup, ControlLabel, HelpBlock, Button} from 'react-bootstrap'
+import '../App.css'
 
 /*
 * React Component for a FieldGroup (Form field with additional useful features)
@@ -28,10 +28,10 @@ class SubmitButton extends Component {
     if (this.props.running) {
       name += ' running';
     }
-    return (<div className={name} onClick={this.props.onSubmit}>
+    return (<Button type='submit' className={name}>
       Submit
       <div className="ld ld-hourglass ld-spin"/>
-    </div>);
+    </Button>);
   }
 }
 
@@ -43,8 +43,21 @@ class ContractNotFound extends Component {
   }
 }
 
+const validateEmail = function (email, repeat){
+  if (email === "") {
+    return null;
+  } else if (email === repeat){
+    return 'success'
+  } else if (email.includes(repeat)){
+    return 'warning';
+  }  else {
+    return 'error'
+  }
+};
+
 module.exports = {
   FieldGroup,
   SubmitButton,
-  ContractNotFound
+  ContractNotFound,
+  validateEmail
 };

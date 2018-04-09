@@ -38,6 +38,8 @@ const toEther = function (priceInWei, web3) {
 };
 
 
+
+
 module.exports = {
   getFileHash,
   toEther,

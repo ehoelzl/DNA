@@ -1,12 +1,12 @@
-import './css/oswald.css'
-import './css/open-sans.css'
-import './css/pure-min.css'
-import './App.css'
+import '../css/oswald.css'
+import '../css/open-sans.css'
+import '../css/pure-min.css'
+import '../App.css'
 
 import React, {Component} from 'react'
 import TimeStampForm from './TimeStampForm'
 import VerifyTimeStamp from './VerifyTimeStamp'
-import getWeb3 from './utils/getWeb3'
+import getWeb3 from '../utils/getWeb3'
 
 const MAINNET = "1";
 const ROPSTEN = "3";
