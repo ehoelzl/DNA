@@ -1,7 +1,7 @@
 //1. Import required files and set the provider (Ropsten address at 0x6A9aa07E06033Ac0Da85ac8a9b11fe8Ab65c253e)
 http = require('http');
 //HDWalletProvider = require('truffle-hdwallet-provider');
-Contract = require('truffle-contract');
+// Contract = require('truffle-contract');
 Merkle = require('merkle');
 crypto = require('crypto');
 Twitter = require('twitter');
@@ -39,14 +39,15 @@ var hashes = [];
 // time at which we began to accumulate hashes
 start = Date.now();
 // number of hashes to accumulate before creating the merkle tree
-const N_HASHES = 4; 
+const N_HASHES = 2; 
 // maximum time to wait before creating the merkle tree (in minutes)
 const MAX_TIME = 1; 
 
-var mailToHash = new Map();
+var hashToMail = new Map();
 
 //Simple server to accumulate hashes
 server = http.createServer( function(req, res) {
+	res.setHeader('Access-Control-Allow-Origin', '*');
   	if (req.method === 'POST') {
     	console.log("POST:");
 	    req.on('data', function(data) {
@@ -62,16 +63,20 @@ server = http.createServer( function(req, res) {
 	    });
     	req.on('end', () => {
 	      	hashes.push(hash); 
-	      	// possibilité d'en faire plusieurs en meme temps ? 
-	      	// ou map dans l'autre sens et check si hash deja present
-			mailToHash.set(email, hash)
+	      	statusCode = 400
+	      	response_data = {}
+	      	if(!hashToMail.has(hash)){
+				hashToMail.set(hash, email)
+				response_data = {email : email, hash : hash}
+				statusCode = 200
+	      	}
 			//console.log((Date.now()-start)/60000)
 			if (hashes.length === N_HASHES){
 				reset();
 			}
+	    	res.writeHead(statusCode, {'Content-type' : 'application/json'});
+	    	res.end(JSON.stringify(response_data));
     	});
-    	res.writeHead(200);
-    	res.end('post received');
  	}
     /*if((Date.now()-start)/60000 >= MAX_TIME){
     	if(hashes.length > 0){
@@ -84,24 +89,29 @@ server = http.createServer( function(req, res) {
 });
 
 function reset(){
-	// if we didn't get enough hashes, just complete with random ones ?
+	// if we didn't get enough hashes, just complete with random ones 
+	n_hashes = hashes.length;
 	for(var i=hashes.length; i<N_HASHES; i++){
 		// SHA 256 => 32 bytes: 
 		hashes.push(crypto.randomBytes(32).toString('hex'));
 	}
-	merkleTree = computeMerkleTree(hashes);
+	merkleTree = Merkle('sha256', false).sync(hashes);
 	console.log(hashes)
 	console.log("Merkle Tree created with root:", merkleTree.root())
-    hashes = []
     // 5. publish root on Twitter
-    publishRootOnTwitter(merkleTree.root())
+    // publishRootOnTwitter(merkleTree.root())
+	
 	// 6. Send root to smart Contract (to be done when smart contract is done)
-	// 7. Send signatures to corresponding user
-	send(merkleTree.root(), 'axel.vandebrouck@eplf.ch')
-
+	
+	// 7. Send signatures to corresponding users
+	for(var i=0; i<n_hashes; i++){
+		//send(merkleTree.getProothPath(i, true), hashToMail(hashes[i]))
+		console.log('send mail to ', hashToMail.get(hashes[i]), merkleTree.getProofPath(i, true))
+	}
+	hashes = []
 	// clean la map et toutes les listes
 	
-    start = Date.now();
+    // start = Date.now();
 }
 
 function publishRootOnTwitter(root){
@@ -135,7 +145,7 @@ function send(signature, user){
 }
 
 function computeMerkleTree(hashes){
-  	return Merkle('sha256').sync(hashes);
+  	return Merkle('sha256').sync(hashes, false);
 }
 
 //Helper function to get ip address
@@ -148,7 +158,7 @@ function getIPAddress(local=false){
 }
 
 port = 4000;
-host = getIPAddress(true);
+host = getIPAddress(false);
 server.listen(port, host);
 console.log('Listening at http://' + host + ':' + port);
 
