@@ -1,4 +1,4 @@
-import './css/oswald.css'
+import '../css/oswald.css'
 import './css/open-sans.css'
 import './css/pure-min.css'
 import './css/loading-btn.css'
@@ -17,7 +17,7 @@ import {FieldGroup, SubmitButton, validateEmail} from './utils/htmlElements';
 * Does not require Metamask or any Web3 object
 * */
 
-const SERVER_ADDRESS = 'http://128.179.162.217:4000'//'http://128.179.128.107:4000';//http://127.0.0.1:4000';
+const SERVER_ADDRESS = 'http://127.0.0.1:4000';//'http://128.179.128.107:4000';//http://127.0.0.1:4000';
 
 class TimeStampFree extends Component {
 
@@ -88,10 +88,10 @@ class TimeStampFree extends Component {
           alert('Data submitted successfully, you will receive an email shortly');
           this.resetForm();
         } else {
-          alert('There was a problem relaying the information, please try again');
+          alert('Data corrupted');
           this.resetForm()
         }
-      }).catch(e => {TimeStampFree.handleStampError(e.message); this.resetForm();})
+      }).catch(e => {TimeStampFree.handleStampError(e); this.resetForm();})
 
     } else {
       alert('Please verify your information');
@@ -102,11 +102,13 @@ class TimeStampFree extends Component {
   /*
   * Error handling when submitting a Timestamp
   * */
-  static handleStampError(message) {
+  static handleStampError(error) {
+    let message = error.message;
     if (message === 'Network Error') {
       alert('There was a problem relaying the information, please try again');
-    } else {
-      alert('An Unknown error occurred')
+    } else if (error.response) {
+      let statusMessage = error.response.statusText;
+      alert('Error from server : ' + statusMessage)
     }
   }
 

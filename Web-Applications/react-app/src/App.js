@@ -7,9 +7,9 @@ import './css/pure-min.css'
 import './App.css'
 import NavigationBar from './NavigationBar'
 import MetaMaskApp from './MetaMaskApp/MetaMaskApp';
-import VerifyTimeStamp from './MetaMaskApp/VerifyTimeStamp'
-import TimeStampForm from "./MetaMaskApp/TimeStampForm";
-import TimeStampFree from './TimeStampFree';
+import VerifyTimeStamp from './MetaMaskApp/VerifyMetaMask'
+import TimeStampForm from "./MetaMaskApp/TimestampMetaMask";
+import TimeStampFree from './FreeApp/TimestampFree';
 
 
 /*Main Web App component

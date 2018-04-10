@@ -4,8 +4,8 @@ import '../css/pure-min.css'
 import '../App.css'
 
 import React, {Component} from 'react'
-import TimeStampForm from './TimeStampForm'
-import VerifyTimeStamp from './VerifyTimeStamp'
+import TimeStampForm from './TimestampMetaMask'
+import VerifyTimeStamp from './VerifyMetaMask'
 import getWeb3 from '../utils/getWeb3'
 
 const MAINNET = "1";
