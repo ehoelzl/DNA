@@ -1,15 +1,15 @@
 import '../css/oswald.css'
-import './css/open-sans.css'
-import './css/pure-min.css'
-import './css/loading-btn.css'
-import './css/loading.css'
-import './App.css'
+import '../css/open-sans.css'
+import '../css/pure-min.css'
+import '../css/loading-btn.css'
+import '../css/loading.css'
+import '../App.css'
 
 import axios from 'axios'
 import React, {Component} from 'react'
-import TimeStamping from '../build/contracts/TimeStamping'
-import {getFileHash} from './utils/stampUtil';
-import {FieldGroup, SubmitButton, validateEmail} from './utils/htmlElements';
+import TimeStamping from '../../build/contracts/TimeStamping'
+import {getFileHash} from '../utils/stampUtil';
+import {FieldGroup, SubmitButton, validateEmail} from '../utils/htmlElements';
 
 
 /*Class that handles the submission of a Timestamp by relaying the data to the server
@@ -19,7 +19,7 @@ import {FieldGroup, SubmitButton, validateEmail} from './utils/htmlElements';
 
 const SERVER_ADDRESS = 'http://127.0.0.1:4000';//'http://128.179.128.107:4000';//http://127.0.0.1:4000';
 
-class TimeStampFree extends Component {
+class TimestampFree extends Component {
 
   /*
   * Constructor for the Timestamping form on /Timestamp
@@ -27,9 +27,8 @@ class TimeStampFree extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      email_address: "",
-      repeat_email: "",
       hash: "",
+      signature : "",
       waitingFeedback: false
     };
 
@@ -91,7 +90,7 @@ class TimeStampFree extends Component {
           alert('Data corrupted');
           this.resetForm()
         }
-      }).catch(e => {TimeStampFree.handleStampError(e); this.resetForm();})
+      }).catch(e => {TimestampFree.handleStampError(e); this.resetForm();})
 
     } else {
       alert('Please verify your information');
@@ -167,4 +166,4 @@ class TimeStampFree extends Component {
   }
 }
 
-export default TimeStampFree;
+export default TimestampFree;

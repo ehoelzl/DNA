@@ -7,10 +7,10 @@ import './css/pure-min.css'
 import './App.css'
 import NavigationBar from './NavigationBar'
 import MetaMaskApp from './MetaMaskApp/MetaMaskApp';
-import VerifyTimeStamp from './MetaMaskApp/VerifyMetaMask'
-import TimeStampForm from "./MetaMaskApp/TimestampMetaMask";
-import TimeStampFree from './FreeApp/TimestampFree';
 
+import TimestampMetaMask from "./MetaMaskApp/TimestampMetaMask";
+import TimeStampFree from './FreeApp/VerifyFree';
+import VerifyTimestamp from './VerifyTimestamp'
 
 /*Main Web App component
 * */
@@ -22,8 +22,9 @@ class Router extends Component {
       <switch>
         {/*<Route exact path='/' component={Home}/>*/}
         <Route exact path='/Timestamp' component={TimeStampFree} />
-        <Route exact path='/PersonalTimestamp' render={(props) => (<MetaMaskApp component={TimeStampForm.name}/>)}/>
-        <Route exact path='/VerifyTimestamp' render={(props) => (<MetaMaskApp component={VerifyTimeStamp.name}/>)}/>
+        <Route exact path='/PersonalTimestamp' render={(props) => (<MetaMaskApp component={TimestampMetaMask.name}/>)}/>
+        {/*<Route exact path='/VerifyTimestamp' render={(props) => (<MetaMaskApp component={VerifyTimeStamp.name}/>)}/>*/}
+        <Route exact path='/VerifyTimestamp' component={VerifyTimestamp}/>
       </switch>
     </div>
   );

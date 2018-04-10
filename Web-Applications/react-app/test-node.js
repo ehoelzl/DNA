@@ -8,29 +8,18 @@ server = http.createServer( function(req, res) {
   //res.setHeader('Access-Control-Allow-Headers', '*');
   	if (req.method === 'POST') {
     	console.log("POST:");
-      email = ""
-      hash = ""
 	    req.on('data', function(data) {
-	    	try{
-		    	json = JSON.parse(data);
-		    	email = json['email'];
-		    	hash = json['hash'];
-		    	console.log("email", email, "hash", hash)
-
-		    }
-		    catch(error){
-		    	console.log('Cannot load data')
-		    }
+	    	signature = JSON.parse(data.toString());
+	    	console.log(signature)
 	    });
 
       req.on('end', () => {
-        res.writeHead(200, {'Content-Type': 'application/json'});
-        res.end(JSON.stringify({email : email, hash : hash}));
+        res.writeHead(200);
+        res.end();
       });
-      return
     	//res.end('post received');
  	}
-})
+});
 
 //Helper function to get ip address
 function getIPAddress(local=false){
@@ -42,6 +31,6 @@ function getIPAddress(local=false){
 }
 
 port = 4000;
-host = getIPAddress(false);
+host = getIPAddress(true);
 server.listen(port, host);
 console.log('Listening at http://' + host + ':' + port);

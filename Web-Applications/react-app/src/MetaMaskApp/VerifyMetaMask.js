@@ -15,7 +15,7 @@ import {FieldGroup, SubmitButton, ContractNotFound} from '../utils/htmlElements'
 import TimeStamping from '../../build/contracts/TimeStamping'
 
 /*Class for Timestamp Verification */
-class VerifyTimeStamp extends Component {
+class VerifyMetaMask extends Component {
 
   /*Constructor for the class*/
   constructor(props) {
@@ -90,10 +90,10 @@ class VerifyTimeStamp extends Component {
     return (
       <div className="time-stamp-container">
         <h3>TimeStamping contract at {this.state.contractAddress}</h3>
-        <form className="form-container">
+        <form className="form-container" onSubmit={this.submitFile}>
           <FieldGroup name="file"  id="formsControlsFile" label="File" type="file" placeholder="" help="File to verify" onChange={this.handleChange}/>
+          <SubmitButton running={this.state.waitingTransaction}/>
         </form>
-        <SubmitButton running={this.state.waitingTransaction} onSubmit={this.submitFile}/>
         {this.renderSearchResults()}
       </div>
 
@@ -109,4 +109,4 @@ class VerifyTimeStamp extends Component {
   }
 }
 
-export default VerifyTimeStamp
+export default VerifyMetaMask

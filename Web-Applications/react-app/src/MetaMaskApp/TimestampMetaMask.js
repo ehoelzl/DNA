@@ -17,7 +17,7 @@ import {FieldGroup, SubmitButton, ContractNotFound, validateEmail} from '../util
 * Requires Metamask of any other plugin that injects a Web3 object into the page
 * */
 
-class TimeStampForm extends Component {
+class TimestampMetaMask extends Component {
 
   /*
   * Constructor for the Timestamping form on /PersonalTimestamp
@@ -100,7 +100,7 @@ class TimeStampForm extends Component {
         })
         .catch(err => {
           let msg = err.message.split('\n')[0];
-          TimeStampForm.handleStampError(msg);
+          TimestampMetaMask.handleStampError(msg);
           this.resetForm();
         });
     } else {
@@ -181,4 +181,4 @@ class TimeStampForm extends Component {
   }
 }
 
-export default TimeStampForm;
+export default TimestampMetaMask;

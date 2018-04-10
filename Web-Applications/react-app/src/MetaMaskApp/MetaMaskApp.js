@@ -4,14 +4,20 @@ import '../css/pure-min.css'
 import '../App.css'
 
 import React, {Component} from 'react'
-import TimeStampForm from './TimestampMetaMask'
-import VerifyTimeStamp from './VerifyMetaMask'
+import TimestampMetaMask from './TimestampMetaMask'
+import VerifyMetaMask from './VerifyMetaMask'
 import getWeb3 from '../utils/getWeb3'
 
-const MAINNET = "1";
-const ROPSTEN = "3";
-const KOVAN = "4";
-const LOCALRPC = "5777";
+const MAINNET = 1;
+const ROPSTEN = 3;
+const KOVAN = 4;
+const LOCALRPC = 5777;
+
+const MAINNET_STRING = "Main Net";
+const ROPSTEN_STRING = "Ropsten Test Net";
+const KOVAN_STRING = "Kovan Test Net";
+const LOCALRPC_STRING = "Local RPC";
+
 
 
 /*
@@ -63,25 +69,27 @@ class MetaMaskApp extends Component {
   * */
   verifyNetwork(networkId) {
     this.state.web3.version.getNetwork((err, id) => {
-      if (id !== networkId.toString()) {
+      id = parseInt(id, 10);
+      if (id !== networkId) {
         alert("Please choose the network that corresponds to your current Metamask account");
         this.resetState();
       } else {
         switch (id) {
           case MAINNET:
-            this.setState({selectedNetwork: "Main Net", loadChild: true});
+            this.setState({selectedNetwork: MAINNET, loadChild: true});
             break;
           case ROPSTEN:
-            this.setState({selectedNetwork: "Ropsten Test Net", loadChild: true});
+            this.setState({selectedNetwork: ROPSTEN, loadChild: true});
             break;
           case KOVAN:
-            this.setState({selectedNetwork: "Kovan Test Net", loadChild: true});
+            this.setState({selectedNetwork: KOVAN, loadChild: true});
             break;
           case LOCALRPC:
-            this.setState({selectedNetwork : "Local RPC", loadChild : true});
+            this.setState({selectedNetwork : LOCALRPC, loadChild : true});
             break;
           default :
             this.setState({selectedNetwork: "Unknown Network", loadChild: false});
+            break;
         }
       }
     })
@@ -91,26 +99,44 @@ class MetaMaskApp extends Component {
 
   buttons() {
     return (<div className="pure-button-group xlarge">
-              <button className="pure-button" onClick={this.getWeb3Object.bind(this, 1)}>Ethereum Main Net</button>
-              <button className="pure-button" onClick={this.getWeb3Object.bind(this, 3)}>Ropsten Test Net</button>
-              <button className="pure-button" onClick={this.getWeb3Object.bind(this, 4)}>Kovan Test Net</button>
-              <button className="pure-button" onClick={this.getWeb3Object.bind(this, 5777)}>Local RPC</button>
+              <button className="pure-button" onClick={this.getWeb3Object.bind(this, MAINNET)}>Ethereum Main Net</button>
+              <button className="pure-button" onClick={this.getWeb3Object.bind(this, ROPSTEN)}>Ropsten Test Net</button>
+              <button className="pure-button" onClick={this.getWeb3Object.bind(this, KOVAN)}>Kovan Test Net</button>
+              <button className="pure-button" onClick={this.getWeb3Object.bind(this, LOCALRPC)}>Local RPC</button>
             </div>);
           }
 
   revealForm() {
     if (this.state.loadChild) {
       switch (this.state.childComponent){
-        case TimeStampForm.name :
-          return <TimeStampForm web3={this.state.web3}/>;
-        case VerifyTimeStamp.name:
-          return <VerifyTimeStamp web3={this.state.web3}/>;
+        case TimestampMetaMask.name :
+          return <TimestampMetaMask web3={this.state.web3}/>;
+        case VerifyMetaMask.name:
+          return <VerifyMetaMask web3={this.state.web3}/>;
         default:
           break;
       }
 
     } else {
       return this.buttons();
+    }
+  }
+
+  currentNetwork(){
+    if (this.state.selectedNetwork !== null){
+      switch (this.state.selectedNetwork){
+        case MAINNET :
+          return <h3>Current network {MAINNET_STRING}</h3>;
+        case ROPSTEN :
+          return <h3>Current network {ROPSTEN_STRING}</h3>;
+        case KOVAN :
+          return <h3>Current network {KOVAN_STRING}</h3>;
+        case LOCALRPC :
+          return <h3>Current network {LOCALRPC_STRING}</h3>;
+        default:
+          break;
+      }
+
     }
   }
 
@@ -122,7 +148,7 @@ class MetaMaskApp extends Component {
             <div className="pure-u-1-1">
               <h1>Document time-stamping on the Ethereum Blockchain</h1>
               <h2>Please choose the network to use</h2>
-              <h3>Current network {this.state.selectedNetwork}</h3>
+              {this.currentNetwork()}
             </div>
           </div>
         </main>
