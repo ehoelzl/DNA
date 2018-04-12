@@ -28,7 +28,7 @@ class SubmitButton extends Component {
     if (this.props.running) {
       name += ' running';
     }
-    return (<Button type='submit' className={name}>
+    return (<Button type='submit' className={name} disabled={this.props.running}>
       Submit
       <div className="ld ld-hourglass ld-spin"/>
     </Button>);

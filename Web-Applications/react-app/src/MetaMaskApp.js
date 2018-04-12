@@ -1,12 +1,13 @@
-import '../css/oswald.css'
-import '../css/open-sans.css'
-import '../css/pure-min.css'
-import '../App.css'
+import './css/oswald.css'
+import './css/open-sans.css'
+import './css/pure-min.css'
+import './App.css'
 
 import React, {Component} from 'react'
-import TimestampMetaMask from './TimestampMetaMask'
-import VerifyMetaMask from './VerifyMetaMask'
-import getWeb3 from '../utils/getWeb3'
+import {ButtonGroup, Button} from 'react-bootstrap'
+import TimestampMetaMask from './Timestamp/TimestampMetaMask'
+import VerifyMetaMask from './VerifyTimestamp/VerifyMetaMask'
+import getWeb3 from './utils/getWeb3'
 
 const MAINNET = 1;
 const ROPSTEN = 3;
@@ -17,7 +18,6 @@ const MAINNET_STRING = "Main Net";
 const ROPSTEN_STRING = "Ropsten Test Net";
 const KOVAN_STRING = "Kovan Test Net";
 const LOCALRPC_STRING = "Local RPC";
-
 
 
 /*
@@ -39,7 +39,7 @@ class MetaMaskApp extends Component {
       web3: null,
       selectedNetwork: null,
       loadChild: false,
-      childComponent : props.component
+      childComponent: props.component
     };
     this.resetState = this.resetState.bind(this);
 
@@ -59,7 +59,7 @@ class MetaMaskApp extends Component {
   getWeb3Object(networkId) {
     getWeb3.then(result => {
       this.setState({web3: result.web3});
-      this.verifyNetwork(networkId);
+      this.setNetwork(networkId);
     }).catch(e => {
       alert('Web3 not found ');
     });
@@ -67,7 +67,7 @@ class MetaMaskApp extends Component {
 
   /*Verifies the if the chosen network corresponds to the one in metamask
   * */
-  verifyNetwork(networkId) {
+  setNetwork(networkId) {
     this.state.web3.version.getNetwork((err, id) => {
       id = parseInt(id, 10);
       if (id !== networkId) {
@@ -85,7 +85,7 @@ class MetaMaskApp extends Component {
             this.setState({selectedNetwork: KOVAN, loadChild: true});
             break;
           case LOCALRPC:
-            this.setState({selectedNetwork : LOCALRPC, loadChild : true});
+            this.setState({selectedNetwork: LOCALRPC, loadChild: true});
             break;
           default :
             this.setState({selectedNetwork: "Unknown Network", loadChild: false});
@@ -96,35 +96,55 @@ class MetaMaskApp extends Component {
   }
 
 
+  /*
+  * Returns a set of buttons that help choose the Network to timestamp on (Contract must have been deployed before)
+  * */
+
 
   buttons() {
-    return (<div className="pure-button-group xlarge">
-              <button className="pure-button" onClick={this.getWeb3Object.bind(this, MAINNET)}>Ethereum Main Net</button>
-              <button className="pure-button" onClick={this.getWeb3Object.bind(this, ROPSTEN)}>Ropsten Test Net</button>
-              <button className="pure-button" onClick={this.getWeb3Object.bind(this, KOVAN)}>Kovan Test Net</button>
-              <button className="pure-button" onClick={this.getWeb3Object.bind(this, LOCALRPC)}>Local RPC</button>
-            </div>);
-          }
-
-  revealForm() {
-    if (this.state.loadChild) {
-      switch (this.state.childComponent){
-        case TimestampMetaMask.name :
-          return <TimestampMetaMask web3={this.state.web3}/>;
-        case VerifyMetaMask.name:
-          return <VerifyMetaMask web3={this.state.web3}/>;
-        default:
-          break;
-      }
-
-    } else {
-      return this.buttons();
-    }
+    return (
+      <ButtonGroup bsSize="large">
+        <Button onClick={this.getWeb3Object.bind(this, MAINNET)} disabled={this.state.selectedNetwork === MAINNET}>Ethereum Main Net</Button>
+        <Button onClick={this.getWeb3Object.bind(this, ROPSTEN)} disabled={this.state.selectedNetwork === ROPSTEN}>Ropsten Test Net</Button>
+        <Button onClick={this.getWeb3Object.bind(this, KOVAN)} disabled={this.state.selectedNetwork === KOVAN}>Kovan Test Net</Button>
+        <Button onClick={this.getWeb3Object.bind(this, LOCALRPC)} disabled={this.state.selectedNetwork === LOCALRPC}>Local RPC</Button>
+      </ButtonGroup>
+    );
   }
 
-  currentNetwork(){
-    if (this.state.selectedNetwork !== null){
-      switch (this.state.selectedNetwork){
+  /*
+  * Conditional rendering for the child component (either timestamping or verifying the timestamp)
+  * */
+  renderChild() {
+    let child;
+    if (this.state.loadChild) {
+      switch (this.state.childComponent) {
+        case TimestampMetaMask.name :
+          child = <TimestampMetaMask web3={this.state.web3}/>;
+          break;
+        case VerifyMetaMask.name:
+          child = <VerifyMetaMask web3={this.state.web3}/>;
+          break;
+        default:
+          child = "";
+          break;
+      }
+    }
+
+    return (
+      <div className="body-container">
+        {this.buttons()}
+        {child}
+      </div>
+    );
+  }
+
+  /*
+  * Returns the string value of the chosen network to display
+  * */
+  currentNetwork() {
+    if (this.state.selectedNetwork !== null) {
+      switch (this.state.selectedNetwork) {
         case MAINNET :
           return <h3>Current network {MAINNET_STRING}</h3>;
         case ROPSTEN :
@@ -140,21 +160,26 @@ class MetaMaskApp extends Component {
     }
   }
 
+  /*
+  * Rendering for the page
+  *
+  * TODO : Arrange the buttons to react bootstrap
+  * */
   render() {
+    let header;
+    if (this.state.childComponent === TimestampMetaMask.name) {
+      header = <div className="pure-g">
+                  <div className="pure-u-1-1">
+                    <h1>Document time-stamping on the Ethereum Blockchain</h1>
+                    <h2>Please choose the network to use</h2>
+                    {this.currentNetwork()}
+                  </div>
+                </div>
+              }
     return (
-      <div className="App">
-        <main className="container">
-          <div className="pure-g">
-            <div className="pure-u-1-1">
-              <h1>Document time-stamping on the Ethereum Blockchain</h1>
-              <h2>Please choose the network to use</h2>
-              {this.currentNetwork()}
-            </div>
-          </div>
-        </main>
-        <main className="container">
-          {this.revealForm()}
-        </main>
+      <div className="container">
+        {header}
+        {this.renderChild()}
       </div>
 
     );

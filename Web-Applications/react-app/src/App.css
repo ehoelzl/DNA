@@ -1,5 +1,4 @@
 /* PAGE */
-
 body,
 .pure-g [class*=pure-u] {
   font-family: 'Open Sans', sans-serif;
@@ -16,24 +15,32 @@ code {
   background: #eee;
 }
 
+.App {
+  width : 100%;
+  margin : 50px 0 0;
+}
+
+.body-container{
+  width : 100%;
+  margin : 50px 0 0 0;
+}
 .container {
   text-align: center;
-  box-sizing: border-box;
   width: 100%;
-  padding: 45px 20px;
 }
 
 .time-stamp-container{
   text-align: center;
   width : 100%;
-  padding : 45px 20px
+  margin : 45px 0 0 0;
 }
 
 .form-container {
-  margin : auto;
+  position : relative;
+  left : 10%;
   text-align: left;
   width: 50%;
-  padding: 40px 40px;
+  margin: 40px 40px;
 }
 
 

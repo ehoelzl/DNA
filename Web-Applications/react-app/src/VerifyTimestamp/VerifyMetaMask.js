@@ -14,7 +14,10 @@ import {FieldGroup, SubmitButton, ContractNotFound} from '../utils/htmlElements'
 
 import TimeStamping from '../../build/contracts/TimeStamping'
 
-/*Class for Timestamp Verification */
+/*Class for Timestamp Verification and signature
+*
+* Uses the injected Web3 object to communicate with the contract
+* */
 class VerifyMetaMask extends Component {
 
   /*Constructor for the class*/
@@ -30,7 +33,7 @@ class VerifyMetaMask extends Component {
     };
 
     this.submitFile = this.submitFile.bind(this);
-    this.resetState = this.resetState.bind(this);
+    this.resetForm = this.resetForm.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.renderSearchResults = this.renderSearchResults.bind(this);
   }
@@ -43,11 +46,11 @@ class VerifyMetaMask extends Component {
     timeStamping.deployed().then(instance => {
       this.setState({contractInstance: instance});
       this.setState({contractAddress: instance.address});
-    }).catch(error => this.resetState())
+    }).catch(error => this.resetForm())
   }
 
-  /*Helper method to reset the state*/
-  resetState(){
+  /*Helper method to reset the form*/
+  resetForm(){
     this.setState({hash : "", timestamp : 0, user : 0});
   }
 
@@ -55,7 +58,6 @@ class VerifyMetaMask extends Component {
   handleChange(e){
     e.preventDefault();
     if (e.target.name === 'file') {
-      //this.setState({file : e.target.files[0]});
       getFileHash(e.target.files[0], window).then(res => this.setState({hash : res})).catch(err => console.log(err))
     }
   }
@@ -65,21 +67,23 @@ class VerifyMetaMask extends Component {
     e.preventDefault();
     if (this.state.hash !== "") {
       this.state.contractInstance.getTimestamp.call(this.state.hash).then(res => {
-        let date = new Date(res*1000);
-        this.setState({timestamp : date});
+        this.setState({timestamp : res});
         return this.state.contractInstance.getUser.call(this.state.hash);
       }).then(res => this.setState({user : res})).catch(error => console.log('Error from contract' + error));
     } else {
       alert("Please select a file");
-      this.resetState();
+      this.resetForm();
     }
   }
 
 
+  /* Renders the results of the query
+  * */
   renderSearchResults(){
     if (this.state.timestamp !== 0){
+      let date = new Date(this.state.timestamp*1000);
       return (<div className="time-stamp-container">
-                <Well bsSize="large">Document timestamped on {this.state.timestamp.toDateString()} at {this.state.timestamp.toTimeString()}
+                <Well bsSize="large">Document timestamped on {date.toDateString()} at {date.toTimeString()}
                                      <br/> By account {this.state.user}
                 </Well>
               </div>);

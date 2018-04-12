@@ -28,14 +28,15 @@ class TimestampFree extends Component {
     super(props);
     this.state = {
       hash: "",
-      signature : "",
+      email_address: "",
+      repeat_email: "",
       waitingFeedback: false
     };
 
     //Bindings for helper methods
     this.submitTimestamp = this.submitTimestamp.bind(this);
     this.handleChange = this.handleChange.bind(this);
-    this.resetForm = this.resetForm.bind(this);
+    this.resetState = this.resetState.bind(this);
   }
 
 
@@ -43,8 +44,8 @@ class TimestampFree extends Component {
 
   /* Helper method that resets the form fields
   */
-  resetForm() {
-    this.setState({email_address: "", repeat_email: "", hash: ""});
+  resetState() {
+    this.setState({email_address: "", repeat_email: "", hash: "", waitingFeedback: false});
   }
 
 
@@ -55,6 +56,9 @@ class TimestampFree extends Component {
     return (!(validateEmail(this.state.email_address, this.state.repeat_email) !== 'success' || this.state.hash === ""));
   }
 
+  /*
+  * Verifies that the server has the correct data
+  * */
   verifyServerResponse(response) {
     let email = response.data.email;
     let hash = response.data.hash;
@@ -78,6 +82,7 @@ class TimestampFree extends Component {
         hash: this.state.hash
       };
 
+      this.setState({waitingFeedback: true});
       axios({
         method: 'post',
         url: SERVER_ADDRESS,
@@ -85,16 +90,19 @@ class TimestampFree extends Component {
       }).then(res => {
         if (this.verifyServerResponse(res)) {
           alert('Data submitted successfully, you will receive an email shortly');
-          this.resetForm();
+          this.resetState();
         } else {
           alert('Data corrupted');
-          this.resetForm()
+          this.resetState()
         }
-      }).catch(e => {TimestampFree.handleStampError(e); this.resetForm();})
+      }).catch(e => {
+        TimestampFree.handleStampError(e);
+        this.resetState();
+      })
 
     } else {
       alert('Please verify your information');
-      this.resetForm();
+      this.resetState();
     }
   }
 
@@ -135,35 +143,47 @@ class TimestampFree extends Component {
 
   /*--------------------------------- USER INTERFACE COMPONENTS ---------------------------------*/
 
-  /*
-  * Form component
-  * */
+
   renderForm() {
     return (
-      <div className="time-stamp-container">
-        <h3>TimeStamping contract at {TimeStamping.networks[3].address} (Ropsten Testnet)</h3>
-        <form className="form-container" onSubmit={this.submitTimestamp}>
-          <FieldGroup name="email_address" id="formsControlsEmail" label="Email address" type="email"
-                      value={this.state.email_address} placeholder="john@doe.com" help=""
-                      onChange={this.handleChange}/>
-          <FieldGroup name="repeat_email" id="formsControlsEmail" label="Repeat Email address" type="email"
-                      value={this.state.repeat_email} placeholder="john@doe.com" help=""
-                      onChange={this.handleChange}
-                      validation={validateEmail(this.state.email_address, this.state.repeat_email)}/>
-          <FieldGroup name="file" id="formsControlsFile" label="File" type="file" placeholder=""
-                      help="File you wish to timestamp" onChange={this.handleChange}/>
-          <SubmitButton running={this.state.waitingFeedback}/>
-        </form>
-
-
-
-      </div>
+      <form className="form-container" onSubmit={this.submitTimestamp}>
+        <FieldGroup name="email_address" id="formsControlsEmail" label="Email address" type="email"
+                    value={this.state.email_address} placeholder="john@doe.com" help=""
+                    onChange={this.handleChange}/>
+        <FieldGroup name="repeat_email" id="formsControlsEmail" label="Repeat Email address" type="email"
+                    value={this.state.repeat_email} placeholder="john@doe.com" help=""
+                    onChange={this.handleChange}
+                    validation={validateEmail(this.state.email_address, this.state.repeat_email)}/>
+        <FieldGroup name="file" id="formsControlsFile" label="File" type="file" placeholder=""
+                    help="File you wish to timestamp" onChange={this.handleChange}/>
+        <SubmitButton running={this.state.waitingFeedback}/>
+      </form>
     );
   }
 
+  /*
+  * Form component
+  *
+  * */
   render() {
-    return this.renderForm()
+    return (
+      <div className="container">
+        <div className="pure-g">
+          <div className="pure-u-1-1">
+            <h1>Document time-stamping on the Ethereum Blockchain</h1>
+            <h2>Use this page to time-stamp a Document for Free</h2>
+          </div>
+        </div>
+
+        <div className="time-stamp-container">
+          <h3>TimeStamping contract at {TimeStamping.networks[3].address} (Ropsten Testnet)</h3>
+          {this.renderForm()}
+        </div>
+      </div>
+
+    );
   }
+
 }
 
 export default TimestampFree;

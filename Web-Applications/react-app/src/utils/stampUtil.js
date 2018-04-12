@@ -5,7 +5,7 @@ import sha256 from "sha256";
 *
 * Returns a Promise containing the hash of the file hashed as a byte array using SHA256
 * */
-const getFileHash = function (file, window) {
+const getFileHash = function (file, window, hash = true) {
   return new Promise(function (resolve, reject) {
     let f = file;
     if (typeof window.FileReader !== 'function') {
@@ -16,17 +16,28 @@ const getFileHash = function (file, window) {
       reject("Please select a file");
     } else {
       let fr = new window.FileReader();
-      fr.onload = showResult;
-      fr.readAsArrayBuffer(f);
+
+      if (hash) {
+        fr.onload = computeHash;
+        fr.readAsArrayBuffer(f);
+      } else {
+        fr.onload = show;
+        fr.readAsText(f);
+      }
     }
 
-    function showResult(data) {
+    function show(data) {
+      resolve(data.target.result)
+    }
+
+    function computeHash(data) {
       let buffer = data.target.result;
       let bytes = new Uint8Array(buffer);
       resolve(sha256(bytes));
     }
   })
 };
+
 
 /*
   * Helper function that converts Wei to Ether
@@ -36,8 +47,6 @@ const toEther = function (priceInWei, web3) {
     return web3.fromWei(priceInWei.toNumber(), 'ether');
   }
 };
-
-
 
 
 module.exports = {

@@ -17,6 +17,9 @@ import {FieldGroup, SubmitButton, ContractNotFound, validateEmail} from '../util
 * Requires Metamask of any other plugin that injects a Web3 object into the page
 * */
 
+
+const GAS_LIMIT = 500000;
+
 class TimestampMetaMask extends Component {
 
   /*
@@ -61,20 +64,19 @@ class TimestampMetaMask extends Component {
   }
 
 
-
   /*--------------------------------- HELPER METHODS AND VALIDATION ---------------------------------*/
 
   /* Helper method that resets the form fields
   */
   resetForm() {
-    this.setState({email_address: "", repeat_email: "", hash : "", waitingTransaction: false});
+    this.setState({email_address: "", repeat_email: "", hash: "", waitingTransaction: false});
   }
 
 
   /* Helper method specific to this form
   * Returns true if the client is not waiting for another transactions and if the form fields are correctly set
   * */
-  validateForm(){
+  validateForm() {
     return (!(this.state.waitingTransaction || this.state.hash === ""));
   }
 
@@ -92,7 +94,7 @@ class TimestampMetaMask extends Component {
       this.state.contractInstance.stamp(this.state.hash, {
         from: this.state.web3.eth.coinbase,
         value: this.state.weiStampPrice,
-        gas: 500000 //TODO : Change this to a global variable
+        gas: GAS_LIMIT
       })
         .then(tx => {
           alert("Timestamping successful, tx : " + tx.tx);
@@ -112,16 +114,18 @@ class TimestampMetaMask extends Component {
   /*
   * Error handling when submitting a Timestamp
   * */
-  static handleStampError(message){
-    if (message === 'invalid address'){
+  static handleStampError(message) {
+    if (message === 'invalid address') {
       alert('Please check your MetaMask Client');
     } else {
       let tmp = message.split(' ');
-      let status_code = tmp[tmp.length -1 ][0];
-      if (status_code === '0'){
-        alert('Hash already exists in database')
-      } else {
-        alert('An Unknown error occured')
+      if (tmp.length > 0){
+        let status_code = tmp[tmp.length - 1][0];
+        if (status_code === '0') {
+          alert('Error from Contract')
+        } else {
+          alert('An Unknown error occurred')
+        }
       }
     }
   }
@@ -139,14 +143,13 @@ class TimestampMetaMask extends Component {
     e.preventDefault();
     let state = this.state;
     if (e.target.name === 'file') {
-      getFileHash(e.target.files[0], window).then(res => this.setState({hash : res})).catch(err => console.log(err))
+      getFileHash(e.target.files[0], window).then(res => this.setState({hash: res})).catch(err => console.log(err))
     } else {
       state[e.target.name] = e.target.value;
       this.setState(state);
     }
 
   }
-
 
 
   /*--------------------------------- USER INTERFACE COMPONENTS ---------------------------------*/
@@ -160,14 +163,17 @@ class TimestampMetaMask extends Component {
         <h3>TimeStamping contract at {this.state.contractAddress}</h3>
         <h3>Stamp price at {this.state.etherStampPrice} ETH</h3>
         <form className="form-container" onSubmit={this.submitTimestamp}>
-          <FieldGroup name="email_address"  id="formsControlsEmail" label="Email address" type="email" value={this.state.email_address} placeholder="Enter your email" help="" onChange={this.handleChange}/>
-          <FieldGroup name="repeat_email"  id="formsControlsEmail" label="Email address" type="email" value={this.state.repeat_email} placeholder="Re-enter your email" help="" onChange={this.handleChange} validation={validateEmail(this.state.email_address, this.state.repeat_email)}/>
-          <FieldGroup name="file"  id="formsControlsFile" label="File" type="file"  placeholder="" help="File you wish to timestamp" onChange={this.handleChange}/>
-          <SubmitButton running={this.state.waitingTransaction} />
+          <FieldGroup name="email_address" id="formsControlsEmail" label="Email address" type="email"
+                      value={this.state.email_address} placeholder="Enter your email" help=""
+                      onChange={this.handleChange}/>
+          <FieldGroup name="repeat_email" id="formsControlsEmail" label="Email address" type="email"
+                      value={this.state.repeat_email} placeholder="Re-enter your email" help=""
+                      onChange={this.handleChange}
+                      validation={validateEmail(this.state.email_address, this.state.repeat_email)}/>
+          <FieldGroup name="file" id="formsControlsFile" label="File" type="file" placeholder=""
+                      help="File you wish to timestamp" onChange={this.handleChange}/>
+          <SubmitButton running={this.state.waitingTransaction}/>
         </form>
-
-
-
       </div>
     );
   }
