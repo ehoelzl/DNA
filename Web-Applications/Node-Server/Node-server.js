@@ -8,7 +8,6 @@ verification timestamp OK
 // que fait on si hash deja submit ???
 */
 
-
 //1. Import required files and set the provider (Ropsten address at 0x6A9aa07E06033Ac0Da85ac8a9b11fe8Ab65c253e)
 var http = require('http');
 //HDWalletProvider = require('truffle-hdwallet-provider');
@@ -30,16 +29,16 @@ timeStamping.setProvider(provider);
 var contractInstance;
 timeStamping.deployed().then(x => contractInstance = x);*/
 
- 
 // var params = {screen_name: 'nodejs'};
 
+
+// =====================================================================================================================
 function timestamp(json){
     var email = "";
     var hash = "";
     try{
         email = json['email'];
         hash = json['hash'];
-        console.log("email", email, "hash", hash)
     }
     catch(error){
         console.log(error)
@@ -48,22 +47,22 @@ function timestamp(json){
     if(!hashes.includes(hash)){
         hashes.push(hash);
         hashToMail.set(hash, email)
-        response_data = "hash " + hash + " succesfully submitted for user " + email;
+        console.log("hash " + hash + " succesfully submitted for user " + email)
     }
     else {
         if(hashToMail.get(hash) === email){
-            response_data = "hash " + hash + " has already been submitted";
+            console.log("hash " + hash + " has already been submitted");
         }
         else {
-            response_data = "hash " + hash + " has already been submitted by another user";
+            console.log("hash " + hash + " has already been submitted by another user");
         }
     }
     //console.log((Date.now()-start)/60000)
     if (hashes.length === N_HASHES){
         reset();
     }
+    var response_data = ""
     return response_data;
-
 }
 
 // verification timestamp: hash + signature (fichier)
@@ -78,30 +77,37 @@ function verify(json){
     catch(error){
         console.log(error);
     }
-    var response_data = "verification successful"
+    var check = true
+    // first check that hash is a leaf of the tree
     if(hash != signature[0]['left'] && hash != signature[0]['right']){
-        response_data = "verification failed"
+        check = false
     }
     else {
+        // then check that the tree is consistent
         for(var i=0; i<signature.length-1; i++){
             var h = sha256(signature[i]['left']+signature[i]['right'])
             if(h != signature[i+1]['left'] && h != signature[i+1]['right']){
-                response_data = "verification failed"
+                check = false
             }
         }
     }
-    var expectedRoot = sha256(signature[signature.length-1]['left']+signature[signature.length-1]['right'])
-    // send expectedRoot to smartContract and get timestamp (0 if root does not exist)
-    var timeStamp = 0;//smartContract.getTimeStamp(expectedRoot);
-    /*if(timeStamp === 0){
-        response_data = "verification failed"
-    }*/
-    console.log(expectedRoot)
-    console.log(response_data)
-    if(response_data === "verification successful"){
-        response_data += "hash " + hash + " has been timestamped at " + new Date(timeStamp*1000)
+    // and finally compute the root and ensure it exists
+    if(check) {
+        var expectedRoot = sha256(signature[signature.length - 1]['left'] + signature[signature.length - 1]['right'])
+        console.log("expected root: " + expectedRoot)
+        // send expectedRoot to smartContract and get timestamp (0 if root does not exist)
+        var timeStamp = 0;//smartContract.getTimeStamp(expectedRoot);
+        /*if(timeStamp === 0){
+            check = false
+        }*/
     }
-    console.log(response_data)
+    if(check){
+        console.log("Verification successful: hash " + hash + " has been timestamped at " + new Date(timeStamp*1000))
+    }
+    else {
+        console.log("Verification failed")
+    }
+    var response_data = ""
     return response_data;
 }
 
@@ -113,7 +119,7 @@ function reset(){
 		// SHA 256 => 32 bytes: 
 		hashes.push(crypto.randomBytes(32).toString('hex'));
 	}
-	merkleTree = computeMerkleTree(hashes);
+	const merkleTree = computeMerkleTree(hashes);
 	console.log(hashes)
 	console.log("Merkle Tree created with root:", merkleTree.root())
     // 5. publish root on Twitter
@@ -124,15 +130,14 @@ function reset(){
 	// 7. Send signatures to corresponding users
 	for(var i=0; i<n_hashes; i++){
 		mailer.send(hashes[i], merkleTree.getProofPath(i, true), hashToMail.get(hashes[i]))
-		console.log('send signature to ', hashToMail.get(hashes[i]))
+		console.log('Send signature to ', hashToMail.get(hashes[i]))
 	}
     // clean
     hashes = []
     hashToMail.clear()
-
-    // start = Date.now();
+    // reset timer
+    start = Date.now();
 }
-
 
 function computeMerkleTree(hashes){
   	return Merkle('sha256', false).sync(hashes);
@@ -148,21 +153,19 @@ function getIPAddress(local=false){
 }
 
 
-
+// =====================================================================================================================
 // Array that accumulates hashes
 var hashes = [];
 // time at which we began to accumulate hashes
-start = Date.now();
+var start = Date.now();
 // number of hashes to accumulate before creating the merkle tree
 const N_HASHES = 4;
 // maximum time to wait before creating the merkle tree (in minutes)
 const MAX_TIME = 1;
-
+// maps hashes to mail of corresponding user
 var hashToMail = new Map();
 
 // Simple server to accumulate hashes
-
-// MODULARISER EN FONCTION DE SI TIMESTAMP OU VERIFICATION
 var server = http.createServer( function(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     if(req.method === 'POST') {
@@ -172,14 +175,13 @@ var server = http.createServer( function(req, res) {
                 var json = JSON.parse(data);
                 var op = json['operation']
                 if (op === 'verify') {
-                    console.log("POST for verification:");
+                    console.log("=================== POST for verification =================== ");
                     rep = verify(json)
                 }
                 else if (op === 'timestamp') {
-                    console.log("POST for timestamping:");
+                    console.log("===================  POST for timestamping =================== ");
                     rep = timestamp(json)
                 }
-                console.log(rep)
             }
             catch (error) {
                 console.log(error);
@@ -190,14 +192,14 @@ var server = http.createServer( function(req, res) {
             res.end(rep);
         })
     }
-    /*if((Date.now()-start)/60000 >= MAX_TIME){
+    if((Date.now()-start)/60000 >= MAX_TIME){
     	if(hashes.length > 0){
     		reset();
     	}
     	else {
     		start = Date.now();
 	 	}
-  	}*/
+  	}
 });
 
 var port = 4000;
@@ -205,11 +207,8 @@ var host = getIPAddress(false);
 server.listen(port, host);
 console.log('Listening at http://' + host + ':' + port);
 
-
 /*var tree = computeMerkleTree([0, 1, 2, 3])
 console.log(tree.root())
 console.log(tree.level(2))
 console.log(tree.getProofPath(0, true))
 console.log(sha256('0'))*/
-
-
