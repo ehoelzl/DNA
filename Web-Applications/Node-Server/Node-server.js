@@ -1,4 +1,4 @@
-/* TODO: 
+/* TODO:
 Status codes: OK
 Mettre signature mail dans un fichier txt/json OK
 Communiquer smart contract
@@ -9,14 +9,13 @@ verification timestamp OK
 */
 
 //1. Import required files and set the provider (Ropsten address at 0x6A9aa07E06033Ac0Da85ac8a9b11fe8Ab65c253e)
-var http = require('http');
+const http = require('http');
 //HDWalletProvider = require('truffle-hdwallet-provider');
 // Contract = require('truffle-contract');
-var Merkle = require('merkle');
-var crypto = require('crypto');
-var mailer = require('./Mail-server')
-var Twitter = require('./Tweets-server')
-var sha256 = require('sha256')
+const Merkle = require('merkle');
+const crypto = require('crypto');
+const mailer = require('./Mail-server');
+const sha256 = require('sha256');
 
 
 //const mnemonic = "response exit whisper shuffle energy obey upon bean system derive educate make";
@@ -33,177 +32,196 @@ timeStamping.deployed().then(x => contractInstance = x);*/
 
 
 // =====================================================================================================================
-function timestamp(json){
-    var email = "";
-    var hash = "";
-    try{
-        email = json['email'];
-        hash = json['hash'];
-    }
-    catch(error){
-        console.log(error)
-    }
-    var response_data = ""
-    if(!hashes.includes(hash)){
-        hashes.push(hash);
-        hashToMail.set(hash, email)
-        console.log("hash " + hash + " succesfully submitted for user " + email)
+function timestamp(json) {
+  let email;
+  let hash;
+  let response_data;
+  try {
+    email = json['email'];
+    hash = json['hash'];
+  }
+  catch (error) {
+    console.log(error);
+  }
+
+
+  if (!hashes.includes(hash)) {
+    hashes.push(hash);
+    hashToMail.set(hash, email);
+    response_data = 'Hash successfully submitted';
+    console.log("hash " + hash + " succesfully submitted for user " + email)
+  }
+  else {
+    if (hashToMail.get(hash) === email) {
+      response_data = 'Hash already submitted by user';
+      console.log("hash " + hash + " has already been submitted");
     }
     else {
-        if(hashToMail.get(hash) === email){
-            console.log("hash " + hash + " has already been submitted");
-        }
-        else {
-            console.log("hash " + hash + " has already been submitted by another user");
-        }
+      response_data = 'Hash already submitted by another user';
+      console.log("hash " + hash + " has already been submitted by another user");
     }
-    //console.log((Date.now()-start)/60000)
-    if (hashes.length === N_HASHES){
-        reset();
+  }
+  //console.log((Date.now()-start)/60000)
+  if (hashes.length === N_HASHES) {
+    reset();
+  }
+  return response_data;
+}
+
+/*
+* Function that takes in a hash and returns the root of the tree generated with the given proof path
+*
+* Throws an error if the proof did not work
+* */
+function getRoot(hash, signature) {
+
+  if (signature.length === 0) {
+    return hash;
+  }
+
+  let current = hash;
+  for (let i = 0; i < signature.length; i++) {
+    let left = signature[i]['left'];
+    let right = signature[i]['right'];
+    if (!(current === left || current === right)) {
+      console.log(signature[i], current);
+      throw Error('Signature does not match');
+    } else {
+      current = sha256(left+right);
     }
-    var response_data = ""
-    return response_data;
+  }
+
+  return current
+
 }
 
 // verification timestamp: hash + signature (fichier)
-function verify(json){
-    var hash = ""
-    var signature = ""
-    try {
-        hash = json['hash'];
-        signature = JSON.parse(json['signature']);
-        console.log("verifying hash " + hash + " with signature " + JSON.stringify(signature))
-    }
-    catch(error){
-        console.log(error);
-    }
-    var check = true
-    // first check that hash is a leaf of the tree
-    if(hash != signature[0]['left'] && hash != signature[0]['right']){
-        check = false
+function verify(json) {
+  let hash;
+  let signature;
+  let response_data;
+
+  try {
+    hash = json['hash'];
+    signature = JSON.parse(json['signature']);
+    console.log("verifying hash " + hash + " with signature " + JSON.stringify(signature));
+    let root = getRoot(hash, signature);
+
+    response_data = 'Found root ' + root;
+    //Check if the root is in the smart contract using truffle
+
+    //if ROOT in smart contract, it will return the timestamp
+    /*if (check) {
+      console.log("Verification successful: hash " + hash + " has been timestamped at " + new Date(timeStamp * 1000))
     }
     else {
-        // then check that the tree is consistent
-        for(var i=0; i<signature.length-1; i++){
-            var h = sha256(signature[i]['left']+signature[i]['right'])
-            if(h != signature[i+1]['left'] && h != signature[i+1]['right']){
-                check = false
-            }
-        }
-    }
-    // and finally compute the root and ensure it exists
-    if(check) {
-        var expectedRoot = sha256(signature[signature.length - 1]['left'] + signature[signature.length - 1]['right'])
-        console.log("expected root: " + expectedRoot)
-        // send expectedRoot to smartContract and get timestamp (0 if root does not exist)
-        var timeStamp = 0;//smartContract.getTimeStamp(expectedRoot);
-        /*if(timeStamp === 0){
-            check = false
-        }*/
-    }
-    if(check){
-        console.log("Verification successful: hash " + hash + " has been timestamped at " + new Date(timeStamp*1000))
-    }
-    else {
-        console.log("Verification failed")
-    }
-    var response_data = ""
-    return response_data;
+      console.log("Verification failed")
+    }*/
+  }
+  catch (error) {
+    //Error handling here (assign error message to response data)
+    console.log(error);
+  }
+
+
+  return response_data;
 }
 
-function reset(){
-    // number of effective hashes before completing with random ones
-    n_hashes = hashes.length;
-    // if we didn't get enough hashes, just complete with random ones
-	for(var i=hashes.length; i<N_HASHES; i++){
-		// SHA 256 => 32 bytes: 
-		hashes.push(crypto.randomBytes(32).toString('hex'));
-	}
-	const merkleTree = computeMerkleTree(hashes);
-	console.log(hashes)
-	console.log("Merkle Tree created with root:", merkleTree.root())
-    // 5. publish root on Twitter
-    // Twitter.tweet(merkleTree.root())
-	
-	// 6. Send root to smart Contract (to be done when smart contract is done)
-	
-	// 7. Send signatures to corresponding users
-	for(var i=0; i<n_hashes; i++){
-		mailer.send(hashes[i], merkleTree.getProofPath(i, true), hashToMail.get(hashes[i]))
-		console.log('Send signature to ', hashToMail.get(hashes[i]))
-	}
-    // clean
-    hashes = []
-    hashToMail.clear()
-    // reset timer
-    start = Date.now();
+function reset() {
+  // number of effective hashes before completing with random ones
+  n_hashes = hashes.length;
+  // if we didn't get enough hashes, just complete with random ones
+  for (let i = hashes.length; i < N_HASHES; i++) {
+    // SHA 256 => 32 bytes:
+    hashes.push(crypto.randomBytes(32).toString('hex'));
+  }
+  const merkleTree = computeMerkleTree(hashes);
+  console.log(hashes)
+  console.log("Merkle Tree created with root:", merkleTree.root())
+  // 5. publish root on Twitter
+  // Twitter.tweet(merkleTree.root())
+
+  // 6. Send root to smart Contract (to be done when smart contract is done)
+
+  // 7. Send signatures to corresponding users
+  for (var i = 0; i < n_hashes; i++) {
+    mailer.send(hashes[i], merkleTree.getProofPath(i, true), hashToMail.get(hashes[i]))
+    console.log('Send signature to ', hashToMail.get(hashes[i]))
+  }
+  // clean
+  hashes = []
+  hashToMail.clear()
+  // reset timer
+  start = Date.now();
 }
 
-function computeMerkleTree(hashes){
-  	return Merkle('sha256', false).sync(hashes);
+function computeMerkleTree(hashes) {
+  return Merkle('sha256', false).sync(hashes);
 }
 
 //Helper function to get ip address
-function getIPAddress(local=false){
-	var address, ifaces = require('os').networkInterfaces();
-	for (var dev in ifaces) {
-	    ifaces[dev].filter((details) => details.family === 'IPv4' && details.internal === local ? address = details.address: undefined);
-	}
-	return address
+function getIPAddress(local = false) {
+  let address, ifaces = require('os').networkInterfaces();
+  for (let dev in ifaces) {
+    ifaces[dev].filter((details) => details.family === 'IPv4' && details.internal === local ? address = details.address : undefined);
+  }
+  return address
 }
 
 
 // =====================================================================================================================
 // Array that accumulates hashes
-var hashes = [];
+let hashes = [];
 // time at which we began to accumulate hashes
-var start = Date.now();
+let start = Date.now();
 // number of hashes to accumulate before creating the merkle tree
 const N_HASHES = 4;
 // maximum time to wait before creating the merkle tree (in minutes)
 const MAX_TIME = 1;
 // maps hashes to mail of corresponding user
-var hashToMail = new Map();
+let hashToMail = new Map();
 
 // Simple server to accumulate hashes
-var server = http.createServer( function(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    if(req.method === 'POST') {
-        var rep = ''
-        req.on('data', function (data) {
-            try {
-                var json = JSON.parse(data);
-                var op = json['operation']
-                if (op === 'verify') {
-                    console.log("=================== POST for verification =================== ");
-                    rep = verify(json)
-                }
-                else if (op === 'timestamp') {
-                    console.log("===================  POST for timestamping =================== ");
-                    rep = timestamp(json)
-                }
-            }
-            catch (error) {
-                console.log(error);
-            }
-        });
-        req.on('end', function(){
-            res.writeHead(200, {'Content-type' : 'application/json'});
-            res.end(rep);
-        })
+var server = http.createServer(function (req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  if (req.method === 'POST') {
+    let response;
+    req.on('data', function (data) {
+      try {
+        let json = JSON.parse(data);
+        let op = json['operation'];
+        if (op === 'verify') {
+          console.log("=================== POST for verification =================== ");
+          response = verify(json)
+        }
+        else if (op === 'timestamp') {
+          console.log("===================  POST for timestamping =================== ");
+          response = timestamp(json)
+        } else {
+          console.log('Unkown Operation');
+        }
+      }
+      catch (error) {
+        console.log(error);
+      }
+    });
+    req.on('end', function () {
+      res.writeHead(200, {'Content-type': 'application/json'});
+      res.end(response);
+    })
+  }
+  /*if ((Date.now() - start) / 60000 >= MAX_TIME) {
+    if (hashes.length > 0) {
+      reset();
     }
-    if((Date.now()-start)/60000 >= MAX_TIME){
-    	if(hashes.length > 0){
-    		reset();
-    	}
-    	else {
-    		start = Date.now();
-	 	}
-  	}
+    else {
+      start = Date.now();
+    }
+  }*/
 });
 
 var port = 4000;
-var host = getIPAddress(false);
+var host = getIPAddress(true);
 server.listen(port, host);
 console.log('Listening at http://' + host + ':' + port);
 

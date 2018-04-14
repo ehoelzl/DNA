@@ -9,7 +9,7 @@ import React, {Component} from 'react'
 import {getFileHash, extractJson} from "../utils/stampUtil";
 import axios from "axios/index";
 
-const SERVER_ADDRESS = 'http://192.168.43.36:4000';//'http://127.0.0.1:4000';
+const SERVER_ADDRESS = 'http://127.0.0.1:4000';
 const OPERATION = 'verify';
 
 const SIGNATURE = 'signature';
@@ -92,6 +92,7 @@ class VerifyFree extends Component {
         url: SERVER_ADDRESS,
         data: JSON.stringify(data), //this.state.signature//JSON.stringify(data)//this.state.signature
       }).then(res => {
+        alert(res.data);
         console.log(res); // TODO : receive response and share with user
         this.resetState();
       }).catch(e => {

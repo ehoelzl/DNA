@@ -17,7 +17,7 @@ import {FieldGroup, SubmitButton, validateEmail} from '../utils/htmlElements';
 * Does not require Metamask or any Web3 object
 * */
 
-const SERVER_ADDRESS = 'http://192.168.43.36:4000'//'http://127.0.0.1:4000';//'http://128.179.128.107:4000';//http://127.0.0.1:4000';
+const SERVER_ADDRESS = 'http://127.0.0.1:4000';//'http://128.179.128.107:4000';//http://127.0.0.1:4000';
 
 const OPERATION = 'timestamp';
 
@@ -93,6 +93,7 @@ class TimestampFree extends Component {
         url: SERVER_ADDRESS,
         data: JSON.stringify(data)
       }).then(res => {
+        alert(res.data);
         if (this.verifyServerResponse(res)) {
           alert('Data submitted successfully, you will receive an email shortly');
           this.resetState();
