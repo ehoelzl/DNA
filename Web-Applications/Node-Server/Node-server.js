@@ -41,7 +41,7 @@ function timestamp(json) {
     hash = json['hash'];
   }
   catch (error) {
-    console.log(error);
+    response_data = 'Data is corrupted'
   }
 
 
@@ -89,7 +89,7 @@ function getRoot(hash, signature) {
     } else {
       current = sha256(left+right);
     }
-  }
+                                                                            }
 
   return current
 
@@ -186,6 +186,8 @@ var server = http.createServer(function (req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   if (req.method === 'POST') {
     let response;
+    let status_code;
+
     req.on('data', function (data) {
       try {
         let json = JSON.parse(data);
@@ -200,13 +202,15 @@ var server = http.createServer(function (req, res) {
         } else {
           console.log('Unkown Operation');
         }
+        status_code = 200;
       }
       catch (error) {
-        console.log(error);
+        status_code = 400;
+        response = 'Error occurred when parsing data'
       }
     });
     req.on('end', function () {
-      res.writeHead(200, {'Content-type': 'application/json'});
+      res.writeHead(status_code);//, {'Content-type': 'application/json'});
       res.end(response);
     })
   }
@@ -221,7 +225,7 @@ var server = http.createServer(function (req, res) {
 });
 
 var port = 4000;
-var host = getIPAddress(true);
+var host = getIPAddress(process.argv[2] === 'true');
 server.listen(port, host);
 console.log('Listening at http://' + host + ':' + port);
 

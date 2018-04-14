@@ -93,7 +93,6 @@ class VerifyFree extends Component {
         data: JSON.stringify(data), //this.state.signature//JSON.stringify(data)//this.state.signature
       }).then(res => {
         alert(res.data);
-        console.log(res); // TODO : receive response and share with user
         this.resetState();
       }).catch(e => {
         console.log(e); // TODO : share error message with user

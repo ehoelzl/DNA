@@ -17,7 +17,7 @@ import {FieldGroup, SubmitButton, validateEmail} from '../utils/htmlElements';
 * Does not require Metamask or any Web3 object
 * */
 
-const SERVER_ADDRESS = 'http://127.0.0.1:4000';//'http://128.179.128.107:4000';//http://127.0.0.1:4000';
+const SERVER_ADDRESS = 'http://192.168.43.217:4000';//'http://128.179.128.107:4000';//http://127.0.0.1:4000';
 
 const OPERATION = 'timestamp';
 
@@ -94,20 +94,14 @@ class TimestampFree extends Component {
         data: JSON.stringify(data)
       }).then(res => {
         alert(res.data);
-        if (this.verifyServerResponse(res)) {
-          alert('Data submitted successfully, you will receive an email shortly');
-          this.resetState();
-        } else {
-          alert('Data corrupted');
-          this.resetState()
-        }
+        this.resetState()
       }).catch(e => {
         TimestampFree.handleStampError(e);
         this.resetState();
       })
 
     } else {
-      alert('Please verify your information');
+      alert('Please verify your information' + this.state.hash);
       this.resetState();
     }
   }
@@ -138,7 +132,7 @@ class TimestampFree extends Component {
     e.preventDefault();
     let state = this.state;
     if (e.target.name === 'file') {
-      getFileHash(e.target.files[0], window).then(res => this.setState({hash: res})).catch(err => console.log(err))
+      getFileHash(e.target.files[0], window).then(res => this.setState({hash: res})).catch(err => alert(err.message))
     } else {
       state[e.target.name] = e.target.value;
       this.setState(state);
