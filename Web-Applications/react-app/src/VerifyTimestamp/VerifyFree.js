@@ -6,11 +6,14 @@ import TimeStamping from '../../build/contracts/TimeStamping'
 import {FieldGroup, SubmitButton} from '../utils/htmlElements';
 
 import React, {Component} from 'react'
-import {getFileHash} from "../utils/stampUtil";
-import FormData from "form-data";
+import {getFileHash, extractJson} from "../utils/stampUtil";
 import axios from "axios/index";
 
-const SERVER_ADDRESS = 'http://192.168.43.36:4000'//'http://127.0.0.1:4000';
+const SERVER_ADDRESS = 'http://192.168.43.36:4000';//'http://127.0.0.1:4000';
+const OPERATION = 'verify';
+
+const SIGNATURE = 'signature';
+const FILE = 'file';
 
 /*
 * Component that serves to verify a timestamp of a document that has been done on the free platform
@@ -28,7 +31,6 @@ class VerifyFree extends Component {
     this.state = {
       hash: "",
       signature: "",
-      signatureFile : null,
       waitingServer: false
     };
 
@@ -41,21 +43,29 @@ class VerifyFree extends Component {
   /* Resets the state of the component
   * */
   resetState() {
-    this.setState({hash: "", signature: "", signatureFile : null, waitingServer: false});
+    this.setState({hash: "", signature: "", waitingServer: false});
   }
 
 
   /* Handles the changes in the form elements (two documents to upload)
+  *
+  * TODO : change error handling
   * */
   handleChange(e) {
     e.preventDefault();
-    if (e.target.name === 'file') {
-      getFileHash(e.target.files[0], window).then(res => this.setState({hash: res})).catch(err => console.log(err))
-    } else if (e.target.name === 'signature') {
-      if (e.target.files[0].type === 'application/json') {
-        this.setState({signatureFile : e.target.files[0]});
-        getFileHash(e.target.files[0], window, false).then(res => this.setState({signature : res})).catch(err => console.log(err))
-      }
+    if (e.target.name === FILE) {
+      getFileHash(e.target.files[0], window).then(res => {
+        console.log(res);
+        this.setState({hash: res})
+      }).catch(err => console.log(err))
+    } else if (e.target.name === SIGNATURE) {
+      extractJson(e.target.files[0], window).then(res => {
+        console.log(res);
+        this.setState({signature: res})
+      }).catch(err => {
+        alert(err);
+      })
+
     }
   }
 
@@ -70,21 +80,22 @@ class VerifyFree extends Component {
       this.setState({waitingServer: true});
 
       let data = {
-        hash : this.state.hash,
-        signature : this.state.signature
+        operation: OPERATION,
+        hash: this.state.hash,
+        signature: this.state.signature
       };
 
-
+      console.log('sent' + JSON.stringify(data));
       //data.submit(SERVER_ADDRESS, (err, res) => console.log(err, res));
       axios({
         method: 'post',
         url: SERVER_ADDRESS,
         data: JSON.stringify(data), //this.state.signature//JSON.stringify(data)//this.state.signature
       }).then(res => {
-        console.log(res);
+        console.log(res); // TODO : receive response and share with user
         this.resetState();
       }).catch(e => {
-        console.log(e);
+        console.log(e); // TODO : share error message with user
         this.resetState()
       })
     } else {
@@ -92,18 +103,14 @@ class VerifyFree extends Component {
     }
   }
 
-  /* Validates the documents and verifies that the signature is a json file
+  /* Validates the documents and verifies that the signature is a non corrupted json string
   * */
   validateForm() {
-    console.log(this.state.signature);
     if (this.state.signature === "" || this.state.hash === "") {
       alert("Please verify the files");
       return false
     } else {
-      if (this.state.signatureFile.type !== 'application/json') {
-        alert('The signature must be a JSON file')
-      }
-      return this.state.signatureFile.type === 'application/json' && this.state.hash !== ""
+      return this.state.signature !== "" && this.state.hash !== ""
     }
   }
 
@@ -114,10 +121,10 @@ class VerifyFree extends Component {
       <div className="time-stamp-container">
         <h3>TimeStamping contract at {TimeStamping.networks[3].address} (Ropsten Testnet)</h3>
         <form className="form-container" onSubmit={this.submitVerification}>
-          <FieldGroup name="file" id="formsControlsFile" label="File" type="file" placeholder="" help="File to verify"
+          <FieldGroup name={FILE} id="formsControlsFile" label="File" type="file" placeholder="" help="File to verify"
                       onChange={this.handleChange}/>
-          <FieldGroup name="signature" id="formsControlsFile" label="Signature" type="file" placeholder=""
-                      help="Signature of the file (.json file)" onChange={this.handleChange}/>
+          <FieldGroup name={SIGNATURE} id="formsControlsFile" label="Signature" type="file" placeholder=""
+                      help="Signature of the file (.json file)"  onChange={this.handleChange}/>
           <SubmitButton running={this.state.waitingServer}/>
         </form>
       </div>

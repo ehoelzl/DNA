@@ -17,7 +17,9 @@ import {FieldGroup, SubmitButton, validateEmail} from '../utils/htmlElements';
 * Does not require Metamask or any Web3 object
 * */
 
-const SERVER_ADDRESS = 'http://127.0.0.1:4000';//'http://128.179.128.107:4000';//http://127.0.0.1:4000';
+const SERVER_ADDRESS = 'http://192.168.43.36:4000'//'http://127.0.0.1:4000';//'http://128.179.128.107:4000';//http://127.0.0.1:4000';
+
+const OPERATION = 'timestamp';
 
 class TimestampFree extends Component {
 
@@ -71,6 +73,8 @@ class TimestampFree extends Component {
   /* Method is called when the submit button is pressed.
   * It expects to find all the form fields in the page state and relays the information to the server
   * Alerts the user in case the process did not complete and resets the form fields
+  *
+  * TODO : Coordinate on server response
   * */
   submitTimestamp(e) {
     e.preventDefault();
@@ -78,6 +82,7 @@ class TimestampFree extends Component {
     if (this.validateForm()) {
 
       let data = {
+        operation : OPERATION,
         email: this.state.email_address,
         hash: this.state.hash
       };

@@ -5,7 +5,7 @@ import sha256 from "sha256";
 *
 * Returns a Promise containing the hash of the file hashed as a byte array using SHA256
 * */
-const getFileHash = function (file, window, hash = true) {
+const getFileHash = function (file, window) {
   return new Promise(function (resolve, reject) {
     let f = file;
     if (typeof window.FileReader !== 'function') {
@@ -16,24 +16,41 @@ const getFileHash = function (file, window, hash = true) {
       reject("Please select a file");
     } else {
       let fr = new window.FileReader();
-
-      if (hash) {
-        fr.onload = computeHash;
-        fr.readAsArrayBuffer(f);
-      } else {
-        fr.onload = show;
-        fr.readAsText(f);
-      }
-    }
-
-    function show(data) {
-      resolve(data.target.result)
+      fr.onload = computeHash;
+      fr.readAsArrayBuffer(f);
     }
 
     function computeHash(data) {
       let buffer = data.target.result;
       let bytes = new Uint8Array(buffer);
       resolve(sha256(bytes));
+    }
+  })
+};
+
+const extractJson = function (file, window) {
+  return new Promise(function (resolve, reject) {
+    let f = file;
+    if (typeof window.FileReader !== 'function') {
+      reject('Browser does not support FileReader');
+    }
+
+    if (!f) {
+      reject("Please select a file");
+    } else if (f.type !== 'application/json'){
+      reject('File is not a JSON')
+    } else {
+      let fr = new window.FileReader();
+      fr.onload = function (data){
+        try {
+          let tmp = data.target.result;
+          JSON.parse(tmp);
+          resolve(tmp)
+        } catch (error) {
+          reject('JSON file is corrupted')
+        }
+      };
+      fr.readAsText(f);
     }
   })
 };
@@ -51,6 +68,7 @@ const toEther = function (priceInWei, web3) {
 
 module.exports = {
   getFileHash,
+  extractJson,
   toEther,
 };
 
