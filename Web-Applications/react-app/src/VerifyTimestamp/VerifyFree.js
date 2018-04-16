@@ -54,18 +54,9 @@ class VerifyFree extends Component {
   handleChange(e) {
     e.preventDefault();
     if (e.target.name === FILE) {
-      getFileHash(e.target.files[0], window).then(res => {
-        console.log(res);
-        this.setState({hash: res})
-      }).catch(err => console.log(err))
+      getFileHash(e.target.files[0], window).then(res => this.setState({hash: res})).catch(err => alert(err.message))
     } else if (e.target.name === SIGNATURE) {
-      extractJson(e.target.files[0], window).then(res => {
-        console.log(res);
-        this.setState({signature: res})
-      }).catch(err => {
-        alert(err);
-      })
-
+      extractJson(e.target.files[0], window).then(res => this.setState({signature: res}))
     }
   }
 
@@ -85,7 +76,6 @@ class VerifyFree extends Component {
         signature: this.state.signature
       };
 
-      console.log('sent' + JSON.stringify(data));
       //data.submit(SERVER_ADDRESS, (err, res) => console.log(err, res));
       axios({
         method: 'post',
@@ -95,7 +85,7 @@ class VerifyFree extends Component {
         alert(res.data);
         this.resetState();
       }).catch(e => {
-        console.log(e); // TODO : share error message with user
+        alert(e.response.data); // TODO : share error message with user
         this.resetState()
       })
     } else {

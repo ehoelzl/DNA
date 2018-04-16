@@ -1,23 +1,29 @@
-var Twitter = require('twitter');
+const HDWalletProvider = require('truffle-hdwallet-provider');
+const contract = require('truffle-contract');
 
-const client = new Twitter({
-    consumer_key: 'iy77PEbTevF4Bpg9ibbWuEGzR',
-    consumer_secret: 'r1sGVhZN8HnIYHSMtXDSRBBTXzdCl0clZis2JXCluXYdejsrlv',
-    access_token_key: '978262011166511104-F7QUJqq30bqmajWTW144yK30uxWFrAZ',
-    access_token_secret: 'I4GTTYBFFRBqID1DOyGRuVXojsESdYI1q3SZ4GOuMsumC'
+const mnemonic = "response exit whisper shuffle energy obey upon bean system derive educate make";
+const provider = new HDWalletProvider(mnemonic, "https://ropsten.infura.io/");
+
+//2.Get the abi of the contract and its instance
+const TimeStamping_abi = require('../react-app/build/contracts/TimeStamping.json');
+const timeStamping = contract(TimeStamping_abi);
+timeStamping.setProvider(provider);
+let contractInstance;
+timeStamping.deployed().then(x => {
+  const sha256 = require('sha256');
+  contractInstance = x
+  let h = sha256('a')
+  console.log(h)
+  contractInstance.getTimestamp.call(h).then(res => console.log(res))
+  /*contractInstance.ownerStamp(h, {
+    from : provider.address,
+    gas : 100000
+  }).then(tx => console.log(tx))*/
+
+
 });
 
-module.exports = {
-    tweet: function(root){
-        client.post('statuses/update', {status: root},  function(error, tweet, response) {
-            if(error){
-                console.log(error);
-            }
-            else {
-                console.log("Tweet published, root:", tweet.text);
-                //console.log(tweet);  // Tweet body.
-                //console.log(response);  // Raw response object.
-            }
-        });
-    }
-}
+
+
+
+
