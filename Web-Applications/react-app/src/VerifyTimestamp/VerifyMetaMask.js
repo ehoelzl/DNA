@@ -6,11 +6,10 @@ import '../css/loading-btn.css'
 import '../css/loading.css'
 import '../App.css'
 
-import {Well} from 'react-bootstrap';
 
 import React, {Component} from 'react'
 import {getFileHash} from '../utils/stampUtil';
-import {FieldGroup, SubmitButton, ContractNotFound} from '../utils/htmlElements';
+import {FieldGroup, SubmitButton, ContractNotFound, stampContainer} from '../utils/htmlElements';
 
 import TimeStamping from '../../build/contracts/TimeStamping'
 
@@ -35,7 +34,7 @@ class VerifyMetaMask extends Component {
     this.submitFile = this.submitFile.bind(this);
     this.resetForm = this.resetForm.bind(this);
     this.handleChange = this.handleChange.bind(this);
-    this.renderSearchResults = this.renderSearchResults.bind(this);
+
   }
 
   /*Instantiate the contract before mounting the component*/
@@ -44,6 +43,7 @@ class VerifyMetaMask extends Component {
     const timeStamping = contract(TimeStamping);
     timeStamping.setProvider(this.state.web3.currentProvider);
     timeStamping.deployed().then(instance => {
+
       this.setState({contractInstance: instance});
       this.setState({contractAddress: instance.address});
     }).catch(error => this.resetForm())
@@ -77,19 +77,6 @@ class VerifyMetaMask extends Component {
   }
 
 
-  /* Renders the results of the query
-  * */
-  renderSearchResults(){
-    if (this.state.timestamp !== 0){
-      let date = new Date(this.state.timestamp*1000);
-      return (<div className="time-stamp-container">
-                <Well bsSize="large">Document timestamped on {date.toDateString()} at {date.toTimeString()}
-                                     <br/> By account {this.state.user}
-                </Well>
-              </div>);
-    }
-  }
-
   renderForm(){
     return (
       <div className="time-stamp-container">
@@ -98,7 +85,7 @@ class VerifyMetaMask extends Component {
           <FieldGroup name="file"  id="formsControlsFile" label="File" type="file" placeholder="" help="File to verify" onChange={this.handleChange}/>
           <SubmitButton running={this.state.waitingTransaction}/>
         </form>
-        {this.renderSearchResults()}
+        {stampContainer(this.state.timestamp, this.state.user)}
       </div>
 
     );

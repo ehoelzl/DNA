@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 
-import {FormControl, FormGroup, ControlLabel, HelpBlock, Button} from 'react-bootstrap'
+import {FormControl, FormGroup, ControlLabel, HelpBlock, Button, Well} from 'react-bootstrap'
 import '../App.css'
 
 /*
@@ -43,6 +43,19 @@ class ContractNotFound extends Component {
   }
 }
 
+
+const stampContainer = function(timestamp, user){
+
+    if (timestamp !== 0 && user !== 0){
+      let date = new Date(timestamp*1000);
+      return (<div className="time-stamp-container">
+                <Well bsSize="large">Document timestamped on {date.toDateString()} at {date.toTimeString()}
+                  <br/> By {user}
+                </Well>
+             </div>);
+    }
+};
+
 const validateEmail = function (email, repeat){
   if (email === "") {
     return null;
@@ -59,5 +72,6 @@ module.exports = {
   FieldGroup,
   SubmitButton,
   ContractNotFound,
-  validateEmail
+  validateEmail,
+  stampContainer
 };

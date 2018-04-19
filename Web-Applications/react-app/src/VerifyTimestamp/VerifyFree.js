@@ -3,7 +3,7 @@ import '../css/open-sans.css'
 import '../css/pure-min.css'
 import '../App.css'
 import TimeStamping from '../../build/contracts/TimeStamping'
-import {FieldGroup, SubmitButton} from '../utils/htmlElements';
+import {FieldGroup, stampContainer, SubmitButton} from '../utils/htmlElements';
 
 import React, {Component} from 'react'
 import {getFileHash, extractJson} from "../utils/stampUtil";
@@ -31,6 +31,7 @@ class VerifyFree extends Component {
     this.state = {
       hash: "",
       signature: "",
+      timestamp: 0,
       waitingServer: false
     };
 
@@ -38,33 +39,33 @@ class VerifyFree extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.validateForm = this.validateForm.bind(this);
     this.submitVerification = this.submitVerification.bind(this);
+    this.fileSubmissionError = this.fileSubmissionError.bind(this);
   }
 
   /* Resets the state of the component
   * */
   resetState() {
-    this.setState({hash: "", signature: "", waitingServer: false});
+    this.setState({hash: "", signature: "", timestamp: 0, waitingServer: false});
+  }
+
+  /*Error handling during file submission and parsing*/
+  fileSubmissionError(err) {
+    alert(err);
+    this.resetState();
   }
 
 
-  /* Handles the changes in the form elements (two documents to upload)
-  *
-  * TODO : change error handling
-  * */
+  /* Handles the changes in the form elements (two documents to upload) */
   handleChange(e) {
     e.preventDefault();
     if (e.target.name === FILE) {
-      getFileHash(e.target.files[0], window).then(res => this.setState({hash: res})).catch(err => alert(err.message))
+      getFileHash(e.target.files[0], window).then(res => this.setState({hash: res})).catch(this.fileSubmissionError)
     } else if (e.target.name === SIGNATURE) {
-      extractJson(e.target.files[0], window).then(res => this.setState({signature: res}))
+      extractJson(e.target.files[0], window).then(res => this.setState({signature: res})).catch(this.fileSubmissionError)
     }
   }
 
-  /* This method sends the documents to the server for verification and transmits the response to the user
-  *  TODO :  Complete this method once the server is operational
-  *  TODO : Error handling
-  *
-  * */
+  /* This method sends the documents to the server for verification and transmits the response to the user*/
   submitVerification(e) {
     e.preventDefault();
     if (this.validateForm()) {
@@ -76,16 +77,15 @@ class VerifyFree extends Component {
         signature: this.state.signature
       };
 
-      //data.submit(SERVER_ADDRESS, (err, res) => console.log(err, res));
       axios({
         method: 'post',
         url: SERVER_ADDRESS,
-        data: JSON.stringify(data), //this.state.signature//JSON.stringify(data)//this.state.signature
+        data: JSON.stringify(data)
       }).then(res => {
-        alert(res.data);
-        this.resetState();
+        let d = res.data;
+        this.setState({timestamp: d, waitingServer: false});
       }).catch(e => {
-        alert(e.response.data); // TODO : share error message with user
+        alert(e.response.data);
         this.resetState()
       })
     } else {
@@ -98,10 +98,9 @@ class VerifyFree extends Component {
   validateForm() {
     if (this.state.signature === "" || this.state.hash === "") {
       alert("Please verify the files");
-      return false
-    } else {
-      return this.state.signature !== "" && this.state.hash !== ""
     }
+    return this.state.signature !== "" && this.state.hash !== ""
+
   }
 
   /* The rendering method
@@ -114,9 +113,10 @@ class VerifyFree extends Component {
           <FieldGroup name={FILE} id="formsControlsFile" label="File" type="file" placeholder="" help="File to verify"
                       onChange={this.handleChange}/>
           <FieldGroup name={SIGNATURE} id="formsControlsFile" label="Signature" type="file" placeholder=""
-                      help="Signature of the file (.json file)"  onChange={this.handleChange}/>
+                      help="Signature of the file (.json file)" onChange={this.handleChange}/>
           <SubmitButton running={this.state.waitingServer}/>
         </form>
+        {stampContainer(this.state.timestamp, 'DNA')}
       </div>
     )
 

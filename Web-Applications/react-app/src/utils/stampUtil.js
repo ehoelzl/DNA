@@ -28,6 +28,8 @@ const getFileHash = function (file, window) {
   })
 };
 
+/*Utility function that extracts the json from a file and returns a promise that resolves into the json object,
+* or is rejected if the parsing could not occur*/
 const extractJson = function (file, window) {
   return new Promise(function (resolve, reject) {
     let f = file;
@@ -37,11 +39,11 @@ const extractJson = function (file, window) {
 
     if (!f) {
       reject("Please select a file");
-    } else if (f.type !== 'application/json'){
+    } else if (f.type !== 'application/json') {
       reject('File is not a JSON')
     } else {
       let fr = new window.FileReader();
-      fr.onload = function (data){
+      fr.onload = function (data) {
         try {
           let tmp = data.target.result;
           JSON.parse(tmp);
@@ -56,9 +58,7 @@ const extractJson = function (file, window) {
 };
 
 
-/*
-  * Helper function that converts Wei to Ether
-  * */
+/* Helper function that converts Wei to Ether*/
 const toEther = function (priceInWei, web3) {
   if (web3 != null) {
     return web3.fromWei(priceInWei.toNumber(), 'ether');
