@@ -23,7 +23,7 @@ const VERIFY = 'verify';
 const TIMESTAMP = 'timestamp';
 
 const hash_regex= /\b[A-Fa-f0-9]{64}\b/;
-const email_regex = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/;
+const email_regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 timeStamping.setProvider(provider);
 let timestamper, verifier;
 
