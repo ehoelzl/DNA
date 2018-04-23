@@ -13,7 +13,7 @@ export default class NavigationBar extends Component {
       <Navbar inverse collapseOnSelect fixedTop fluid>
         <Navbar.Header>
           <Navbar.Brand>
-            <LinkContainer to="/"><a>Decentralized Notary Application</a></LinkContainer>
+            <LinkContainer to="/"><a>DNA</a></LinkContainer>
           </Navbar.Brand>
           <Navbar.Toggle />
         </Navbar.Header>

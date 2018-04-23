@@ -108,8 +108,8 @@ class VerifyFree extends Component {
   render() {
     return (
       <div className="time-stamp-container">
-        <h3>TimeStamping contract at {TimeStamping.networks[3].address} (Ropsten Testnet)</h3>
-        <form className="form-container" onSubmit={this.submitVerification}>
+        <div className='time-stamp-header'>TimeStamping contract at {TimeStamping.networks[3].address} (Ropsten Testnet)</div>
+        <form className="form" onSubmit={this.submitVerification}>
           <FieldGroup name={FILE} id="formsControlsFile" label="File" type="file" placeholder="" help="File to verify"
                       onChange={this.handleChange}/>
           <FieldGroup name={SIGNATURE} id="formsControlsFile" label="Signature" type="file" placeholder=""

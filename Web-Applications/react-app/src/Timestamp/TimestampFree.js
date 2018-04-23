@@ -1,9 +1,4 @@
-import '../css/oswald.css'
-import '../css/open-sans.css'
-import '../css/pure-min.css'
-import '../css/loading-btn.css'
-import '../css/loading.css'
-import '../App.css'
+import '../css/Pages.css'
 
 import axios from 'axios'
 import React, {Component} from 'react'
@@ -146,7 +141,7 @@ class TimestampFree extends Component {
 
   renderForm() {
     return (
-      <form className="form-container" onSubmit={this.submitTimestamp}>
+      <form className="form" onSubmit={this.submitTimestamp}>
         <FieldGroup name="email_address" id="formsControlsEmail" label="Email address" type="email"
                     value={this.state.email_address} placeholder="john@doe.com" help=""
                     onChange={this.handleChange}/>
@@ -167,18 +162,23 @@ class TimestampFree extends Component {
   * */
   render() {
     return (
-      <div className="container">
-        <div className="pure-g">
-          <div className="pure-u-1-1">
-            <h1>Document time-stamping on the Ethereum Blockchain</h1>
-            <h2>Use this page to time-stamp a Document for Free</h2>
+      <div className="app-container">
+        <section className="header">
+          <div className="title">Free document time-stamping
+            <br/>
           </div>
-        </div>
-
-        <div className="time-stamp-container">
-          <h3>TimeStamping contract at {TimeStamping.networks[3].address} (Ropsten Testnet)</h3>
-          {this.renderForm()}
-        </div>
+          <p className="paragraph">This page allows any user with a valid email address to time-stamp a document of any
+            given format in a secure and reliable way.
+            <br/>The service provides less accuracy and only authenticity via the email.
+            <br/>
+            <br/>To time-stamp a document, please upload it and register your email. When the stamp is ready (10 to 30 minutes), you will
+            receive an e-mail with the signature.
+            <br/>
+            <br/>
+            <div className='time-stamp-header'>Time-stamping contract at {TimeStamping.networks[3].address} (Ropsten Testnet)</div>
+          </p>
+        </section>
+        {this.renderForm()}
       </div>
 
     );

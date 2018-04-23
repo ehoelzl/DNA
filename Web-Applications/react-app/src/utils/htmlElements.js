@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
 
 import {FormControl, FormGroup, ControlLabel, HelpBlock, Button, Well} from 'react-bootstrap'
-import '../App.css'
+import '../css/Pages.css'
 
 /*
 * React Component for a FieldGroup (Form field with additional useful features)
@@ -37,7 +37,7 @@ class SubmitButton extends Component {
 
 class ContractNotFound extends Component {
   render() {
-    return (<div className="time-stamp-container">
+    return (<div className="not-found" >
       <h3>Contract not found on this Network, please try another network</h3>
     </div>);
   }
@@ -48,7 +48,7 @@ const stampContainer = function(timestamp, user){
 
     if (timestamp !== 0 && user !== 0){
       let date = new Date(timestamp*1000);
-      return (<div className="time-stamp-container">
+      return (<div className="stamp-result">
                 <Well bsSize="large">Document timestamped on {date.toDateString()} at {date.toTimeString()}
                   <br/> By {user}
                 </Well>

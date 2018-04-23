@@ -80,8 +80,8 @@ class VerifyMetaMask extends Component {
   renderForm(){
     return (
       <div className="time-stamp-container">
-        <h3>TimeStamping contract at {this.state.contractAddress}</h3>
-        <form className="form-container" onSubmit={this.submitFile}>
+        <div className='time-stamp-header'>TimeStamping contract at {this.state.contractAddress}</div>
+        <form className="form" onSubmit={this.submitFile}>
           <FieldGroup name="file"  id="formsControlsFile" label="File" type="file" placeholder="" help="File to verify" onChange={this.handleChange}/>
           <SubmitButton running={this.state.waitingTransaction}/>
         </form>

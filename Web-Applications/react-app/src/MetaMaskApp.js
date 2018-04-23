@@ -1,7 +1,4 @@
-import './css/oswald.css'
-import './css/open-sans.css'
-import './css/pure-min.css'
-import './App.css'
+import './css/Pages.css'
 
 import React, {Component} from 'react'
 import {ButtonGroup, Button} from 'react-bootstrap'
@@ -104,17 +101,44 @@ class MetaMaskApp extends Component {
   buttons() {
     return (
       <ButtonGroup bsSize="large">
-        <Button onClick={this.getWeb3Object.bind(this, MAINNET)} disabled={this.state.selectedNetwork === MAINNET}>Ethereum Main Net</Button>
-        <Button onClick={this.getWeb3Object.bind(this, ROPSTEN)} disabled={this.state.selectedNetwork === ROPSTEN}>Ropsten Test Net</Button>
-        <Button onClick={this.getWeb3Object.bind(this, KOVAN)} disabled={this.state.selectedNetwork === KOVAN}>Kovan Test Net</Button>
-        <Button onClick={this.getWeb3Object.bind(this, LOCALRPC)} disabled={this.state.selectedNetwork === LOCALRPC}>Local RPC</Button>
+        <Button onClick={this.getWeb3Object.bind(this, MAINNET)} disabled={this.state.selectedNetwork === MAINNET}>Ethereum
+          Main Net</Button>
+        <Button onClick={this.getWeb3Object.bind(this, ROPSTEN)} disabled={this.state.selectedNetwork === ROPSTEN}>Ropsten
+          Test Net</Button>
+        <Button onClick={this.getWeb3Object.bind(this, KOVAN)} disabled={this.state.selectedNetwork === KOVAN}>Kovan
+          Test Net</Button>
+        <Button onClick={this.getWeb3Object.bind(this, LOCALRPC)} disabled={this.state.selectedNetwork === LOCALRPC}>Local
+          RPC</Button>
       </ButtonGroup>
     );
   }
 
+
   /*
-  * Conditional rendering for the child component (either timestamping or verifying the timestamp)
+  * Returns the string value of the chosen network to display
   * */
+  currentNetwork() {
+    if (this.state.selectedNetwork !== null) {
+      switch (this.state.selectedNetwork) {
+        case MAINNET :
+          return <a>Current network {MAINNET_STRING}</a>;
+        case ROPSTEN :
+          return <a>Current network {ROPSTEN_STRING}</a>;
+        case KOVAN :
+          return <a>Current network {KOVAN_STRING}</a>;
+        case LOCALRPC :
+          return <a>Current network {LOCALRPC_STRING}</a>;
+        default:
+          break;
+      }
+
+    }
+  }
+
+
+  /*
+* Conditional rendering for the child component (either timestamping or verifying the timestamp)
+* */
   renderChild() {
     let child;
     if (this.state.loadChild) {
@@ -130,54 +154,39 @@ class MetaMaskApp extends Component {
           break;
       }
     }
-
     return (
-      <div className="body-container">
-        {this.buttons()}
+      <div className='metamask-container'>
+        <div className='buttons-container'>
+          {this.buttons()}
+        </div>
         {child}
       </div>
     );
   }
 
   /*
-  * Returns the string value of the chosen network to display
-  * */
-  currentNetwork() {
-    if (this.state.selectedNetwork !== null) {
-      switch (this.state.selectedNetwork) {
-        case MAINNET :
-          return <h3>Current network {MAINNET_STRING}</h3>;
-        case ROPSTEN :
-          return <h3>Current network {ROPSTEN_STRING}</h3>;
-        case KOVAN :
-          return <h3>Current network {KOVAN_STRING}</h3>;
-        case LOCALRPC :
-          return <h3>Current network {LOCALRPC_STRING}</h3>;
-        default:
-          break;
-      }
-
-    }
-  }
-
-  /*
   * Rendering for the page
-  *
-  * TODO : Arrange the buttons to react bootstrap
   * */
   render() {
     let header;
     if (this.state.childComponent === TimestampMetaMask.name) {
-      header = <div className="pure-g">
-                  <div className="pure-u-1-1">
-                    <h1>Document time-stamping on the Ethereum Blockchain</h1>
-                    <h2>Please choose the network to use</h2>
-                    {this.currentNetwork()}
-                  </div>
-                </div>
-              }
+      header =
+        <section className="header">
+          <div className="title">
+            Document time-stamping
+          </div>
+          <p className="paragraph">This page allows users that have an Ethereum account and are using it on the Metamask
+            extension for browsers,
+            to time-stamp and sign documents with their address. Time-stamping is much more accurate and faster using
+            this
+            service.
+            <br/><br/>You only need to unlock your Metamask extension and choose the document.
+            <br/>Note that we do not store any data regarding the documents you upload; Only the hashes are retrieved.
+          </p>
+        </section>
+    }
     return (
-      <div className="container">
+      <div className="app-container">
         {header}
         {this.renderChild()}
       </div>

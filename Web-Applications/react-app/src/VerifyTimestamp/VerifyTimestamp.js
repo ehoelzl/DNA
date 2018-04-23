@@ -1,7 +1,4 @@
-import '../css/oswald.css'
-import '../css/open-sans.css'
-import '../css/pure-min.css'
-import '../App.css'
+import '../css/Pages.css'
 
 
 import React, {Component} from 'react'
@@ -73,8 +70,8 @@ class VerifyTimestamp extends Component {
     }
 
     return (
-      <div className="body-container">
-        {this.buttons()}
+      <div className="metamask-container">
+        <div className='buttons-container'>{this.buttons()}</div>
         {child}
       </div>
     );
@@ -82,7 +79,18 @@ class VerifyTimestamp extends Component {
 
   render() {
     return (
-      <div className="container">
+      <div className='app-container'>
+      <section className='header'>
+        <div className='title'>Time-stamp verification</div>
+        <p className='paragraph'>
+          This page allows user to verify the time-stamp of a document.
+          <br/><br/>If the document was time-stamped using an Ethereum account, you will only need to upload the document.
+          Otherwise, you must include the signature we sent when the document was time-stamped.
+        </p>
+      </section>
+        {this.renderChild()}
+      </div>
+      /*<div className="container">
         <div className="pure-g">
           <div className="pure-u-1-1">
             <h1>Document time-stamp verification on the Ethereum Blockchain</h1>
@@ -90,7 +98,7 @@ class VerifyTimestamp extends Component {
           </div>
         </div>
         {this.renderChild()}
-      </div>
+      </div>*/
     );
   }
 }

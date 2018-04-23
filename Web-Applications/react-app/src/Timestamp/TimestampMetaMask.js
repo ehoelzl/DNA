@@ -1,9 +1,4 @@
-import '../css/oswald.css'
-import '../css/open-sans.css'
-import '../css/pure-min.css'
-import '../css/loading-btn.css'
-import '../css/loading.css'
-import '../App.css'
+import '../css/Pages.css'
 
 import React, {Component} from 'react'
 
@@ -160,9 +155,8 @@ class TimestampMetaMask extends Component {
   renderForm() {
     return (
       <div className="time-stamp-container">
-        <h3>TimeStamping contract at {this.state.contractAddress}</h3>
-        <h3>Stamp price at {this.state.etherStampPrice} ETH</h3>
-        <form className="form-container" onSubmit={this.submitTimestamp}>
+        <div className='time-stamp-header'>TimeStamping contract at {this.state.contractAddress} <br/> Stamp price at {this.state.etherStampPrice} ETH</div>
+        <form className="form" onSubmit={this.submitTimestamp}>
           <FieldGroup name="email_address" id="formsControlsEmail" label="Email address" type="email"
                       value={this.state.email_address} placeholder="Enter your email" help=""
                       onChange={this.handleChange}/>
