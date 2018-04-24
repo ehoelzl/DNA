@@ -1,7 +1,4 @@
-import '../css/oswald.css'
-import '../css/open-sans.css'
-import '../css/pure-min.css'
-import '../App.css'
+import '../css/Pages.css'
 import TimeStamping from '../../build/contracts/TimeStamping'
 import {FieldGroup, stampContainer, SubmitButton} from '../utils/htmlElements';
 

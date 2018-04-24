@@ -1,10 +1,5 @@
 
-import '../css/oswald.css'
-import '../css/open-sans.css'
-import '../css/pure-min.css'
-import '../css/loading-btn.css'
-import '../css/loading.css'
-import '../App.css'
+import '../css/Pages.css'
 
 
 import React, {Component} from 'react'

@@ -12,7 +12,7 @@ import {FieldGroup, SubmitButton, validateEmail} from '../utils/htmlElements';
 * Does not require Metamask or any Web3 object
 * */
 
-const SERVER_ADDRESS = 'http://128.179.133.132:4000'//'http://127.0.0.1:4000';
+const SERVER_ADDRESS = 'http://192.168.43.217:4000'//'http://128.179.133.132:4000'//'http://127.0.0.1:4000';
 
 const OPERATION = 'timestamp';
 

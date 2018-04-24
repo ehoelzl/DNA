@@ -10,7 +10,10 @@ import MetaMaskApp from './MetaMaskApp';
 import Home from './Home';
 import TimestampMetaMask from "./Timestamp/TimestampMetaMask";
 import TimestampFree from './Timestamp/TimestampFree';
-import VerifyTimestamp from './VerifyTimestamp/VerifyTimestamp'
+import VerifyTimestamp from './VerifyTimestamp/VerifyTimestamp';
+
+import About from './About';
+import AdditionalInfo from './AdditionalInfo';
 
 ReactDOM.render(
   <BrowserRouter>
@@ -20,8 +23,9 @@ ReactDOM.render(
         <Route exact path='/' component={Home}/>
         <Route exact path='/Timestamp' component={TimestampFree}/>
         <Route exact path='/PersonalTimestamp' render={(props) => (<MetaMaskApp component={TimestampMetaMask.name}/>)}/>
-        {/*<Route exact path='/VerifyTimestamp' render={(props) => (<MetaMaskApp component={VerifyTimeStamp.name}/>)}/>*/}
         <Route exact path='/VerifyTimestamp' component={VerifyTimestamp}/>
+        <Route exact path='/AdditionalInfo' component={AdditionalInfo}/>
+        <Route exact path='/About' component={About}/>
 
       </switch>
     </div>
