@@ -15,9 +15,13 @@ class Timestamper {
   }
 
   /*Resets the state*/
-  resetState() {
-    this.hashList = [];
-    this.hashToMail = new Map();
+  reset() {
+      //if(this.hashList.length > 0) {
+          let root = this.sendSignatures();
+          this.contractStamp(root);
+          this.hashList = [];
+          this.hashToMail = new Map();
+      //}
   }
 
   /*Sends the root of the Merkle tree to the contract*/
@@ -27,7 +31,6 @@ class Timestamper {
       gas: 100000
     }).then(tx => {
       console.log('Successful ' + tx.tx);
-      this.resetState()
     }).catch(e => console.log('Error ' + e))
   }
 
@@ -52,8 +55,7 @@ class Timestamper {
     }
 
     if (this.hashList.length === this.hashLimit) {
-      let root = this.sendSignatures();
-      this.contractStamp(root);
+      this.reset()
     }
 
     return response;

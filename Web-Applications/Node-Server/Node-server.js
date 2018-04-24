@@ -17,7 +17,7 @@ const timeStamping = contract(TimeStamping_abi);
 
 
 const N_HASHES = 4;
-const MAX_TIME = 1;
+const MAX_TIME = 5; // in minutes
 
 const VERIFY = 'verify';
 const TIMESTAMP = 'timestamp';
@@ -125,9 +125,14 @@ var server = http.createServer(function (req, res) {
   }*/
 });
 
+function timeout() {
+  timestamper.reset()
+}
+
 var port = 4000;
 var host = getIPAddress(process.argv[2] === 'true');
 server.listen(port, host);
+setInterval(timeout, MAX_TIME*60*1000);
 console.log('Listening at http://' + host + ':' + port);
 
 /*var tree = computeMerkleTree([0, 1, 2, 3])

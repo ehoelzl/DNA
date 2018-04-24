@@ -1,3 +1,5 @@
+// TODO: rajouter le nom du doc dans le mail
+
 var nodemailer = require('nodemailer');
 
 const SERVER_EMAIL = 'eth.notary@gmail.com';
@@ -21,6 +23,7 @@ module.exports = {
             "This is an automatic email, please do not answer. \n\n The DNA team \n\n",
             attachments: [{
                 filename: 'signature.json',
+                // TODO: append user to signature
                 content: JSON.stringify(signature)
             }]
         };
