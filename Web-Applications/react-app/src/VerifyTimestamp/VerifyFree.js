@@ -6,7 +6,7 @@ import React, {Component} from 'react'
 import {getFileHash, extractJson} from "../utils/stampUtil";
 import axios from "axios/index";
 
-const SERVER_ADDRESS = 'http://128.179.133.132:4000'//'http://127.0.0.1:4000';
+const SERVER_ADDRESS = 'http://127.0.0.1:4000';
 const OPERATION = 'verify';
 
 const SIGNATURE = 'signature';
@@ -29,6 +29,7 @@ class VerifyFree extends Component {
       hash: "",
       signature: "",
       timestamp: 0,
+      email : "",
       waitingServer: false
     };
 
@@ -42,7 +43,7 @@ class VerifyFree extends Component {
   /* Resets the state of the component
   * */
   resetState() {
-    this.setState({hash: "", signature: "", timestamp: 0, waitingServer: false});
+    this.setState({hash: "", signature: "", timestamp: 0,email : "", waitingServer: false});
   }
 
   /*Error handling during file submission and parsing*/
@@ -80,7 +81,7 @@ class VerifyFree extends Component {
         data: JSON.stringify(data)
       }).then(res => {
         let d = res.data;
-        this.setState({timestamp: d, waitingServer: false});
+        this.setState({timestamp: d.stamp, email : d.email, waitingServer: false});
       }).catch(e => {
         alert(e.response.data);
         this.resetState()
@@ -113,7 +114,7 @@ class VerifyFree extends Component {
                       help="Signature of the file (.json file)" onChange={this.handleChange}/>
           <SubmitButton running={this.state.waitingServer}/>
         </form>
-        {stampContainer(this.state.timestamp, 'DNA')}
+        {stampContainer(this.state.timestamp, this.state.email)}
       </div>
     )
 

@@ -17,7 +17,7 @@ const timeStamping = contract(TimeStamping_abi);
 
 
 const N_HASHES = 4;
-const MAX_TIME = 5; // in minutes
+const MAX_TIME = 0.5; // in minutes
 
 const VERIFY = 'verify';
 const TIMESTAMP = 'timestamp';
@@ -51,7 +51,7 @@ function isRegex(str, regex){
 
 /*Verifies that the given JSON file is a json*/
 function isSignature(json){
-  for (let i=0; i<json.length; i++){
+  for (let i=0; i<json.length-1; i++){
     let level = json[i];
     if (level['left'] === undefined || level['right'] === undefined) return false;
   }
@@ -95,8 +95,10 @@ var server = http.createServer(function (req, res) {
         let op = json['operation'];
         if (op === VERIFY) {
           console.log("=================== POST for verification =================== ");
-          let stamp = await verifier.getTimestamp(json);
-          response = Verifier.getResponse(stamp.toNumber()) //Response is 200 if and only if a timestamp was found, otherwise 400
+          let stamp_user = verifier.getTimestamp(json);
+          let stamp = await stamp_user[0];
+          let email = stamp_user[1];
+          response = Verifier.getResponse(stamp.toNumber(), email) //Response is 200 if and only if a timestamp was found, otherwise 400
         }
         else if (op === TIMESTAMP) {
           console.log("===================  POST for timestamping =================== ");
@@ -115,28 +117,12 @@ var server = http.createServer(function (req, res) {
 
 
   }
-  /*if ((Date.now() - start) / 60000 >= MAX_TIME) {
-    if (hashes.length > 0) {
-      reset();
-    }
-    else {
-      start = Date.now();
-    }
-  }*/
 });
 
-function timeout() {
-  timestamper.reset()
-}
 
 var port = 4000;
 var host = getIPAddress(process.argv[2] === 'true');
 server.listen(port, host);
-setInterval(timeout, MAX_TIME*60*1000);
+
 console.log('Listening at http://' + host + ':' + port);
 
-/*var tree = computeMerkleTree([0, 1, 2, 3])
-console.log(tree.root())
-console.log(tree.level(2))
-console.log(tree.getProofPath(0, true))
-console.log(sha256('0'))*/

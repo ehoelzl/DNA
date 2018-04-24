@@ -15,6 +15,8 @@ var transporter = nodemailer.createTransport({
 
 module.exports = {
     send: function(hash, signature, user) {
+        let complete_signature = signature;
+        complete_signature.push({'email' : user});
         var mailOptions = {
             from: '"DNA" <eth.notary@gmail.com>',
             to: user,
@@ -24,7 +26,7 @@ module.exports = {
             attachments: [{
                 filename: 'signature.json',
                 // TODO: append user to signature
-                content: JSON.stringify(signature)
+                content: JSON.stringify(complete_signature)
             }]
         };
         transporter.sendMail(mailOptions, function (error, info) {

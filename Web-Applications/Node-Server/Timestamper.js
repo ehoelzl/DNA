@@ -5,24 +5,29 @@ const mailer = require('./Mail-server');
 /*This class helps accumulate the timestamps, create the merkle tree and send the signatures to the users and the root to the contract*/
 class Timestamper {
 
-  constructor(contractInstance_, address_, hashLimit_, timeLimit_) {
+  constructor(contractInstance_, address_, hashLimit_, timeLimit_, minHashLimit_ = 1) {
     this.contractInstance = contractInstance_;
     this.hashLimit = hashLimit_;
     this.timeLimit = timeLimit_;
     this.address = address_;
+    this.minHashLimit = minHashLimit_;
     this.hashList = [];
+    this.timer = null;
     this.hashToMail = new Map();
   }
 
+
   /*Resets the state*/
   reset() {
-      //if(this.hashList.length > 0) {
-          let root = this.sendSignatures();
-          this.contractStamp(root);
-          this.hashList = [];
-          this.hashToMail = new Map();
-      //}
+    if (this.hashList.length > 0){
+      let root = this.sendSignatures();
+      this.contractStamp(root);
+      this.hashList = [];
+      this.hashToMail = new Map();
+    }
   }
+
+
 
   /*Sends the root of the Merkle tree to the contract*/
   contractStamp(root) {
@@ -44,8 +49,8 @@ class Timestamper {
     hash = json['hash'];
 
     if (!this.hashList.includes(hash)) {
-      this.hashList.push(hash);
-      this.hashToMail.set(hash, email);
+      this.hashList.push(hash+email);
+      this.hashToMail.set(hash+email, email);
       response = [200, 'Hash successfully submitted'];
       console.log('Hash ' + hash + ' submitted for user ' + email)
     } else if (this.hashToMail.get(hash) === email) {
@@ -55,8 +60,12 @@ class Timestamper {
     }
 
     if (this.hashList.length === this.hashLimit) {
+      clearTimeout(this.timer);
       this.reset()
+    } else if (this.hashList.length === this.minHashLimit) {
+      this.timer = setTimeout(() => this.reset(), this.timeLimit*60000)
     }
+
 
     return response;
   }

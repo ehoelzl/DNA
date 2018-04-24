@@ -24,8 +24,8 @@ ReactDOM.render(
         <Route exact path='/Timestamp' component={TimestampFree}/>
         <Route exact path='/PersonalTimestamp' render={(props) => (<MetaMaskApp component={TimestampMetaMask.name}/>)}/>
         <Route exact path='/VerifyTimestamp' component={VerifyTimestamp}/>
-        <Route exact path='/AdditionalInfo' component={AdditionalInfo}/>
-        <Route exact path='/About' component={About}/>
+    {/*    <Route exact path='/AdditionalInfo' component={AdditionalInfo}/>
+        <Route exact path='/About' component={About}/>*/}
 
       </switch>
     </div>

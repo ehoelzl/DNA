@@ -13,13 +13,13 @@ class Verifier {
   /* Function that takes in a hash and returns the root of the tree generated with the given proof path
   * Throws an error if the proof did not work
   * */
-  static getRootFromProof(hash, proofPath) {
+  static getRootFromProof(hash, email, proofPath) {
     let levels = proofPath.length;
     if (levels === 0) {
       return hash;
     }
 
-    let current = hash;
+    let current = sha256(hash+email);
     for (let i = 0; i < levels; i++) {
       let left = proofPath[i]['left'];
       let right = proofPath[i]['right'];
@@ -37,28 +37,31 @@ class Verifier {
   * Returns : A promise that resolves into the timestamp
   */
   getTimestamp(json) {
-    let hash, signature;
+    let hash, signature, email;
 
     try {
       hash = json['hash'];
       signature = json['signature'];
+      email = signature.pop()['email'];
     } catch (error) {
       throw Error(CORRUPTED)
     }
 
     console.log("verifying hash " + hash);
-    let root = Verifier.getRootFromProof(hash, signature);
+
+    let root = Verifier.getRootFromProof(hash,email, signature);
     console.log('Found root ' + root);
-    return this.contractInstance.getTimestamp.call(root);
+    return [this.contractInstance.getTimestamp.call(root), email];
   }
 
   /*Static function that returns the response depending on the resulting timestamp*/
-  static getResponse(stamp) {
+  static getResponse(stamp, email) {
     let response;
     if (stamp === 0) {
       response = [400, NOT_FOUND]
     } else {
-      response = [200, stamp.toString()];
+      let data = {'email' : email, 'stamp' : stamp.toString()};
+      response = [200, JSON.stringify(data)];
     }
 
     return response;
