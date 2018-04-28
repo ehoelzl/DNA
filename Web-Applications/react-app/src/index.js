@@ -12,8 +12,8 @@ import TimestampMetaMask from "./Timestamp/TimestampMetaMask";
 import TimestampFree from './Timestamp/TimestampFree';
 import VerifyTimestamp from './VerifyTimestamp/VerifyTimestamp';
 
-import About from './About';
-import AdditionalInfo from './AdditionalInfo';
+//import About from './About';
+//import AdditionalInfo from './AdditionalInfo';
 
 ReactDOM.render(
   <BrowserRouter>

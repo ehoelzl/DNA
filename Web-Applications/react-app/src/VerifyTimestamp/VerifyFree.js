@@ -4,9 +4,10 @@ import {FieldGroup, stampContainer, SubmitButton} from '../utils/htmlElements';
 
 import React, {Component} from 'react'
 import {getFileHash, extractJson} from "../utils/stampUtil";
+import Constants from '../Constants';
 import axios from "axios/index";
 
-const SERVER_ADDRESS = 'http://127.0.0.1:4000';
+const SERVER_ADDRESS = Constants.SERVER_IP;
 const OPERATION = 'verify';
 
 const SIGNATURE = 'signature';

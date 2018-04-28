@@ -5,6 +5,7 @@ import React, {Component} from 'react'
 import TimeStamping from '../../build/contracts/TimeStamping'
 import {getFileHash} from '../utils/stampUtil';
 import {FieldGroup, SubmitButton, validateEmail} from '../utils/htmlElements';
+import Constants from '../Constants'
 
 
 /*Class that handles the submission of a Timestamp by relaying the data to the server
@@ -12,7 +13,7 @@ import {FieldGroup, SubmitButton, validateEmail} from '../utils/htmlElements';
 * Does not require Metamask or any Web3 object
 * */
 
-const SERVER_ADDRESS = 'http://127.0.0.1:4000';
+const SERVER_ADDRESS = Constants.SERVER_IP;
 
 const OPERATION = 'timestamp';
 
@@ -73,7 +74,6 @@ class TimestampFree extends Component {
   * */
   submitTimestamp(e) {
     e.preventDefault();
-
     if (this.validateForm()) {
 
       let data = {
