@@ -1,6 +1,6 @@
 const sha256 = require('sha256');
 
-const NO_MATCH = 'SIgnature does not match';
+const NO_MATCH = 'Signature does not match';
 const CORRUPTED = 'Data is corrupted';
 const NOT_FOUND = "No timestamp found in Database";
 

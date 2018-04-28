@@ -17,7 +17,7 @@ const timeStamping = contract(TimeStamping_abi);
 
 
 const N_HASHES = 4;
-const MAX_TIME = 0.5; // in minutes
+const MAX_TIME = 0.1; // in minutes
 
 const VERIFY = 'verify';
 const TIMESTAMP = 'timestamp';
@@ -55,7 +55,8 @@ function isSignature(json){
     let level = json[i];
     if (level['left'] === undefined || level['right'] === undefined) return false;
   }
-  return true;
+
+  return json[json.length - 1]['email'] !== undefined
 }
 
 /* Function that takes in the data as a string and tries to parse all the information from it depending on the operation
