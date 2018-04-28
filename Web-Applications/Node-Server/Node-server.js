@@ -7,7 +7,7 @@ const Verifier = require('./Verifier');
 
 const HDWalletProvider = require('truffle-hdwallet-provider');
 const contract = require('truffle-contract');
-const TimeStamping_abi = require('../react-app/build/contracts/TimeStamping.json');
+const TimeStamping_abi = require('./build/contracts/TimeStamping.json');
 
 /*-------------------------------Constants for storage and Blockchain interaction-------------------------------*/
 
