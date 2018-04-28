@@ -21,11 +21,10 @@ module.exports = {
             from: '"DNA" <eth.notary@gmail.com>',
             to: user,
             subject: 'Signature',
-            text: "Dear user, \n\n please find attached your signature for your timestamped document with hash 0x" + hash + ". \n Keep it safe. \n\n" +
+            text: "Dear user, \n\n please find attached your signature for your timestamped document with hash 0x" + hash[:64] + ". \n Keep it safe. \n\n" +
             "This is an automatic email, please do not answer. \n\n The DNA team \n\n",
             attachments: [{
                 filename: 'signature.json',
-                // TODO: append user to signature
                 content: JSON.stringify(complete_signature)
             }]
         };
