@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import {BrowserRouter, Route} from 'react-router-dom'
+import {BrowserRouter, Route, browserHistory} from 'react-router-dom'
 import 'bootstrap/dist/css/bootstrap.css'
 
 import './css/Home.css'
@@ -16,7 +16,7 @@ import VerifyTimestamp from './VerifyTimestamp/VerifyTimestamp';
 //import AdditionalInfo from './AdditionalInfo';
 
 ReactDOM.render(
-  <BrowserRouter>
+  <BrowserRouter history={browserHistory}>
     <div>
       <NavigationBar/>
       <switch>
