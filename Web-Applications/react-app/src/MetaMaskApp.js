@@ -1,17 +1,19 @@
 import './css/Pages.css'
 
-import React, {Component} from 'react'
-import {ButtonGroup, Button} from 'react-bootstrap'
-import TimestampMetaMask from './Timestamp/TimestampMetaMask'
-import VerifyMetaMask from './VerifyTimestamp/VerifyMetaMask'
+import React, {Component} from 'react';
+import {ButtonGroup, Button} from 'react-bootstrap';
+import TimestampMetaMask from './Timestamp/TimestampMetaMask';
+import VerifyMetaMask from './VerifyTimestamp/VerifyMetaMask';
+import DepositPatent from './Patenting/DepositPatent';
 import getWeb3 from './utils/getWeb3'
+
 
 const MAINNET = 1;
 const ROPSTEN = 3;
 const KOVAN = 4;
 const LOCALRPC = 5777;
 
-const MAINNET_STRING = "Main Net";
+const MAINNET_STRING = "Ethereum Main Net";
 const ROPSTEN_STRING = "Ropsten Test Net";
 const KOVAN_STRING = "Kovan Test Net";
 const LOCALRPC_STRING = "Local RPC";
@@ -27,7 +29,6 @@ const LOCALRPC_STRING = "Local RPC";
 class MetaMaskApp extends Component {
 
   /* Constructor for the Component
-  *
   * */
   constructor(props) {
     super(props);
@@ -36,7 +37,8 @@ class MetaMaskApp extends Component {
       web3: null,
       selectedNetwork: null,
       loadChild: false,
-      childComponent: props.component
+      childComponent: props.component,
+      header : props.header
     };
     this.resetState = this.resetState.bind(this);
 
@@ -101,14 +103,10 @@ class MetaMaskApp extends Component {
   buttons() {
     return (
       <ButtonGroup bsSize="large">
-        <Button onClick={this.getWeb3Object.bind(this, MAINNET)} disabled={this.state.selectedNetwork === MAINNET}>Ethereum
-          Main Net</Button>
-        <Button onClick={this.getWeb3Object.bind(this, ROPSTEN)} disabled={this.state.selectedNetwork === ROPSTEN}>Ropsten
-          Test Net</Button>
-        <Button onClick={this.getWeb3Object.bind(this, KOVAN)} disabled={this.state.selectedNetwork === KOVAN}>Kovan
-          Test Net</Button>
-        <Button onClick={this.getWeb3Object.bind(this, LOCALRPC)} disabled={this.state.selectedNetwork === LOCALRPC}>Local
-          RPC</Button>
+        <Button onClick={this.getWeb3Object.bind(this, MAINNET)} disabled={this.state.selectedNetwork === MAINNET}>{MAINNET_STRING}</Button>
+        <Button onClick={this.getWeb3Object.bind(this, ROPSTEN)} disabled={this.state.selectedNetwork === ROPSTEN}>{ROPSTEN_STRING}</Button>
+        <Button onClick={this.getWeb3Object.bind(this, KOVAN)} disabled={this.state.selectedNetwork === KOVAN}>{KOVAN_STRING}</Button>
+        <Button onClick={this.getWeb3Object.bind(this, LOCALRPC)} disabled={this.state.selectedNetwork === LOCALRPC}>{LOCALRPC_STRING}</Button>
       </ButtonGroup>
     );
   }
@@ -117,7 +115,7 @@ class MetaMaskApp extends Component {
   /*
   * Returns the string value of the chosen network to display
   * */
-  currentNetwork() {
+  /*currentNetwork() {
     if (this.state.selectedNetwork !== null) {
       switch (this.state.selectedNetwork) {
         case MAINNET :
@@ -133,7 +131,7 @@ class MetaMaskApp extends Component {
       }
 
     }
-  }
+  }*/
 
 
   /*
@@ -148,6 +146,9 @@ class MetaMaskApp extends Component {
           break;
         case VerifyMetaMask.name:
           child = <VerifyMetaMask web3={this.state.web3}/>;
+          break;
+        case DepositPatent.name:
+          child = <DepositPatent web3={this.state.web3}/>;
           break;
         default:
           child = "";
@@ -164,30 +165,15 @@ class MetaMaskApp extends Component {
     );
   }
 
+
+
   /*
   * Rendering for the page
   * */
   render() {
-    let header;
-    if (this.state.childComponent === TimestampMetaMask.name) {
-      header =
-        <section className="header">
-          <div className="title">
-            Document time-stamping
-          </div>
-          <p className="paragraph">This page allows users that have an Ethereum account and are using it on the Metamask
-            extension for browsers,
-            to time-stamp and sign documents with their address. Time-stamping is much more accurate and faster using
-            this
-            service.
-            <br/><br/>You only need to unlock your Metamask extension and choose the document.
-            <br/>Note that we do not store any data regarding the documents you upload; Only the hashes are retrieved.
-          </p>
-        </section>
-    }
     return (
       <div className="app-container">
-        {header}
+        {this.state.header}
         {this.renderChild()}
       </div>
 

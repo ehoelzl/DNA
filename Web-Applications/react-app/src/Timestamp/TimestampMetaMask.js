@@ -172,6 +172,23 @@ class TimestampMetaMask extends Component {
     );
   }
 
+  static header(){
+    return (
+      <section className="header">
+        <div className="title">
+          Document time-stamping
+        </div>
+        <p className="paragraph">This page allows users that have an Ethereum account and are using it on the Metamask
+          extension for browsers,
+          to time-stamp and sign documents with their address. Time-stamping is much more accurate and faster using
+          this
+          service.
+          <br/><br/>You only need to unlock your Metamask extension and choose the document.
+          <br/>Note that we do not store any data regarding the documents you upload; Only the hashes are retrieved.
+        </p>
+      </section>
+    );
+  }
   render() {
     if (this.state.contractInstance === null) {
       return <ContractNotFound/>;

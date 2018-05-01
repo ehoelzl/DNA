@@ -44,7 +44,7 @@ body{
 
 .app-container{
     position : relative;
-    top : 0px;
+    top : 0;
 }
 @media (max-width: 992px){
     .heading{

@@ -6,5 +6,6 @@ module.exports = function(deployer) {
   deployer.deploy(AccessRestricted);
   //deployer.deploy(Patenting, this.web3.toWei(1,'ether'));
   deployer.deploy(TimeStamping, this.web3.toWei(1,'ether'));
+  deployer.deploy(Patenting, this.web3.toWei(1,'ether'));
 };
 

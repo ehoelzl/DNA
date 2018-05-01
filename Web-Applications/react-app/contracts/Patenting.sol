@@ -6,24 +6,27 @@ import './TimeStamping.sol';
 contract Patenting is AccessRestricted {
 
     uint public patentPrice;
-    uint patentCount;
+    uint public patentCount;
 
     struct Patent {
-        address patentOwner;
+        address owner;
         uint timestamp;
         string patentName;
-        string signature;
         uint price;
+        string ipfs;
         mapping(address => uint) authorized;
 
     }
 
-    mapping(string => Patent) patents;
+    event UnlockPatent(address _user, string _patentHash, uint duration);
+    event LockPatent(address _user, string _patentHash);
+
+    mapping(string => Patent) private patents;
 
     /* Constructor of the contract
     * {param} uint : The price for depositing a pattern in Wei
     */
-    function TimeStamping(uint _patentPrice) public {
+    function Patenting(uint _patentPrice) public {
         patentPrice = _patentPrice;
     }
 
@@ -31,25 +34,45 @@ contract Patenting is AccessRestricted {
     * {params} the patent parameters
     * {costs} the price of a patent
     */
-    function depositPatent(string _patentName, string _signature, string _patentHash, uint _price) public payable costs(patentPrice) {
-        require(patents[_patentHash].timestamp == 0 );
-        patents[_patentHash] = Patent(msg.sender, now, _patentName, _signature, _price);
+    function depositPatent(string _patentName, string _patentHash, uint _price, string _ipfs) public payable costs(patentPrice) {
+        require(patents[_patentHash].timestamp == 0);
+        patents[_patentHash] = Patent(msg.sender, now, _patentName,_price *1 ether, _ipfs);
         patentCount++;
     }
 
-
-    function getPatent(string _patentHash) public view returns (string){
-        Patent p = patents[_patentHash];
-        require(p.timestamp != 0);
-        uint deadline = p.authorized[msg.sender];
-        require(deadline != 0 && deadline > now);
-        return patents[_patentHash].signature;
+    function rentPatent(string _patentHash, uint _daysAfter) public payable returns (bool){
+        require(patents[_patentHash].authorized[msg.sender] == 0 && msg.value >= patents[_patentHash].price);
+        patents[_patentHash].authorized[msg.sender] = now + _daysAfter * 1 days;
+        patents[_patentHash].owner.transfer(msg.value);
+        return true;
     }
 
-    function authorizeUser(string _patentHash, uint _time) public payable {
-        require(patents[_patentHash].timestamp != 0);
-        require(patents[_patentHash].price*_time <= msg.value);
-        patents[_patentHash].authorized[msg.sender] = now + _time;
-        patents[_patentHash].patentOwner.transfer(msg.value);
+    /*-----------------------------------View functions that do not require transactions-----------------------------------*/
+
+
+    function getTimeStamp(string _patentHash) public view returns (uint){
+        return patents[_patentHash].timestamp;
     }
+
+    function getRemainingTime(string _patentHash, address _user) public view returns (uint){
+        return patents[_patentHash].authorized[_user] - now ;
+    }
+    function getPatentName(string _patentHash) public view returns (string){
+        return patents[_patentHash].patentName;
+    }
+
+    function getPatentOwner(string _patentHash) public view returns (address) {
+        return patents[_patentHash].owner;
+    }
+
+    function getRentalPrice(string _patentHash) public view returns (uint){
+        return patents[_patentHash].price;
+    }
+    function getPatentLocation(string _patentHash) public view returns (string) {
+        require(patents[_patentHash].authorized[msg.sender] > now);
+        return patents[_patentHash].ipfs;
+    }
+
+
+
 }

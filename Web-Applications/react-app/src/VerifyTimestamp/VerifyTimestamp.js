@@ -85,20 +85,12 @@ class VerifyTimestamp extends Component {
         <p className='paragraph'>
           This page allows user to verify the time-stamp of a document.
           <br/><br/>If the document was time-stamped using an Ethereum account, you will only need to upload the document.
-          Otherwise, you must include the signature we sent when the document was time-stamped.
+          Otherwise, you must include the signature we sent back when the document was time-stamped.
         </p>
       </section>
         {this.renderChild()}
       </div>
-      /*<div className="container">
-        <div className="pure-g">
-          <div className="pure-u-1-1">
-            <h1>Document time-stamp verification on the Ethereum Blockchain</h1>
-            <h2>Use this page to verify the signature of a document</h2>
-          </div>
-        </div>
-        {this.renderChild()}
-      </div>*/
+
     );
   }
 }

@@ -13,7 +13,7 @@ export default class NavigationBar extends Component {
       <Navbar inverse collapseOnSelect fixedTop fluid>
         <Navbar.Header>
           <Navbar.Brand>
-            <LinkContainer to="/"><a>DNA</a></LinkContainer>
+            <LinkContainer to="/"><a>Decentralized Notary Application</a></LinkContainer>
           </Navbar.Brand>
           <Navbar.Toggle />
         </Navbar.Header>
@@ -22,21 +22,27 @@ export default class NavigationBar extends Component {
             <LinkContainer to="/Product">
               <NavItem>Product</NavItem>
             </LinkContainer>
+
+            <NavDropdown title="Time-stamping" id="basic-nav-dropdown">
+              <LinkContainer to="/Timestamp"><MenuItem >Document timestamping (free)</MenuItem></LinkContainer>
+              <LinkContainer to="/PersonalTimestamp"><MenuItem >Document timestamping and signing</MenuItem></LinkContainer>
+              <MenuItem divider />
+              <LinkContainer to="/VerifyTimestamp"><MenuItem>Verify timestamp</MenuItem></LinkContainer>
+            </NavDropdown>
+            <NavDropdown title="Patenting" id="basic-nav-dropdown">
+              <LinkContainer to="/DepositPatent"><MenuItem >Deposit a new Patent</MenuItem></LinkContainer>
+              <LinkContainer to="/RentPatent"><MenuItem>Rent access</MenuItem></LinkContainer>
+            </NavDropdown>
             <LinkContainer to="/About">
               <NavItem>About</NavItem>
             </LinkContainer>
-            <NavDropdown eventKey={3} title="Services" id="basic-nav-dropdown">
-              <LinkContainer to="/Timestamp"><MenuItem eventKey={3.1}>Document timestamping (free)</MenuItem></LinkContainer>
-              <LinkContainer to="/PersonalTimestamp"><MenuItem eventKey={3.2}>Document timestamping and signing</MenuItem></LinkContainer>
-              <MenuItem divider />
-              <LinkContainer to="/VerifyTimestamp"><MenuItem eventKey={3.3}>Verify timestamp</MenuItem></LinkContainer>
-            </NavDropdown>
           </Nav>
+
           <Nav pullRight>
             <LinkContainer to="/API">
               <NavItem>API</NavItem>
             </LinkContainer>
-            <NavItem eventKey={2} href="#">
+            <NavItem href="#">
               Additional information
             </NavItem>
           </Nav>

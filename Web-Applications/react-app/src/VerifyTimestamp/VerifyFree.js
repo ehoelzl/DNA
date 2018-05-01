@@ -7,8 +7,9 @@ import {getFileHash, extractJson} from "../utils/stampUtil";
 import Constants from '../Constants';
 import axios from "axios/index";
 
-const SERVER_ADDRESS = Constants.SERVER_IP;
 const OPERATION = 'verify';
+const SERVER_ADDRESS = Constants.SERVER_IP + '/' + OPERATION;
+
 
 const SIGNATURE = 'signature';
 const FILE = 'file';
@@ -70,16 +71,14 @@ class VerifyFree extends Component {
     if (this.validateForm()) {
       this.setState({waitingServer: true});
 
-      let data = {
-        operation: OPERATION,
-        hash: this.state.hash,
-        signature: this.state.signature
-      };
+      let form = new FormData();
+      form.append('hash', this.state.hash);
+      form.append('signature', this.state.signature);
 
       axios({
         method: 'post',
         url: SERVER_ADDRESS,
-        data: JSON.stringify(data)
+        data: form//JSON.stringify(data)
       }).then(res => {
         let d = res.data;
         this.setState({timestamp: d.stamp, email : d.email, waitingServer: false});

@@ -1,7 +1,9 @@
 const http = require('http');
 const Timestamper = require('./Timestamper');
 const Verifier = require('./Verifier');
+const Patenting = require('./Patenting');
 
+const formidable = require('formidable');
 
 /*-------------------------------Imports for interaction with Smart Contract-------------------------------*/
 
@@ -17,25 +19,29 @@ const timeStamping = contract(TimeStamping_abi);
 
 
 const N_HASHES = 4;
-const MAX_TIME = 0.1; // in minutes
+const MAX_TIME = 3; // in minutes
 
-const VERIFY = 'verify';
-const TIMESTAMP = 'timestamp';
+const VERIFY = '/verify';
+const TIMESTAMP = '/timestamp';
+const DEPOSIT = '/deposit';
 
-const hash_regex= /\b[A-Fa-f0-9]{64}\b/;
-const email_regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+
+
+
+
 timeStamping.setProvider(provider);
-let timestamper, verifier;
+let timestamper, verifier, patenter;
 
 timeStamping.deployed().then(x => {
   timestamper = new Timestamper(x, provider.address, N_HASHES, MAX_TIME);
   verifier = new Verifier(x);
+  patenter = new Patenting('');
   console.log('Contract Loaded at '+ x.address)
 }).catch(e => console.log(e));
 
 
 
-//Helper function to get ip address
+
 function getIPAddress(local = false) {
   let address, ifaces = require('os').networkInterfaces();
   for (let dev in ifaces) {
@@ -44,78 +50,45 @@ function getIPAddress(local = false) {
   return address
 }
 
-/*Verifies that the given string matches the given regex*/
-function isRegex(str, regex){
-  return str.match(regex) !== null;
+function manageRequests(operation, fields, files){
+
 }
-
-/*Verifies that the given JSON file is a json*/
-function isSignature(json){
-  for (let i=0; i<json.length-1; i++){
-    let level = json[i];
-    if (level['left'] === undefined || level['right'] === undefined) return false;
-  }
-
-  return json[json.length - 1]['email'] !== undefined
-}
-
-/* Function that takes in the data as a string and tries to parse all the information from it depending on the operation
-* Verifies the correct format of the data
-* Returns : the json data parsed
-* Throws : An error if the data is not correct
-* */
-function getJson(data) {
-  let json, op;
-  try {
-    json = JSON.parse(data);
-    op = json['operation'];
-    let hash = json['hash'];
-    if (op === VERIFY) {
-      json['signature'] = JSON.parse(json['signature']);
-      if (!(isSignature(json['signature']) && isRegex(hash, hash_regex))) throw Error()
-    } else if (op === TIMESTAMP) {
-      let email = json['email'];
-      if (!(isRegex(email, email_regex) && isRegex(hash, hash_regex))) throw Error()
-    }
-    return json;
-  } catch (error) {
-    throw Error('Data is corrupted')
-  }
-}
-
 // Simple server to accumulate hashes
 var server = http.createServer(function (req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
+
   if (req.method === 'POST') {
     let response = [];
+    let op = req.url;
 
-    req.on('data', async function (data) {
-      let response;
+    let form = new formidable.IncomingForm(); //New way of parsing, easier to read
+
+    form.parse(req, async function (err, fields, files) {
       try {
-        let json = getJson(data);
-        let op = json['operation'];
-        if (op === VERIFY) {
-          console.log("=================== POST for verification =================== ");
-          let stamp_user = verifier.getTimestamp(json);
+        if (op === TIMESTAMP){
+          console.log("=================== POST for timestamping =================== ");
+          response = timestamper.addTimestamp(fields);
+        } else if (op === VERIFY){
+          console.log("===================  POST for verification =================== ");
+          let stamp_user = verifier.getTimestamp(fields);
           let stamp = await stamp_user[0];
           let email = stamp_user[1];
-          response = Verifier.getResponse(stamp.toNumber(), email) //Response is 200 if and only if a timestamp was found, otherwise 400
-        }
-        else if (op === TIMESTAMP) {
-          console.log("===================  POST for timestamping =================== ");
-          response = timestamper.addTimestamp(json);
+          response = Verifier.getResponse(stamp.toNumber(), email)
+        } else if (op === DEPOSIT){
+          console.log("===================  POST for Patenting =================== ");
+          let ipfs_location = await patenter.addFile(files['file']);
+          console.log(ipfs_location);
+          response = [200, ipfs_location[0].path];
         } else {
-          response = [400, 'Unknown Operation']
+
         }
-      }
-      catch (error) {
+      } catch (error) {
         response = [400, error.message]
       }
       res.writeHead(response[0], {'Content-Type': 'text/plain'});
       res.write(response[1]);
       res.end()
-    });
-
+    })
 
   }
 });

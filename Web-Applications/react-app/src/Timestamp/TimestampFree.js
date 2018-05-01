@@ -12,10 +12,10 @@ import Constants from '../Constants'
 *
 * Does not require Metamask or any Web3 object
 * */
-
-const SERVER_ADDRESS = Constants.SERVER_IP;
-
 const OPERATION = 'timestamp';
+const SERVER_ADDRESS = Constants.SERVER_IP + '/'+OPERATION;
+
+
 
 class TimestampFree extends Component {
 
@@ -76,24 +76,22 @@ class TimestampFree extends Component {
     e.preventDefault();
     if (this.validateForm()) {
 
-      let data = {
-        operation : OPERATION,
-        email: this.state.email_address,
-        hash: this.state.hash
-      };
+      let form = new FormData();
+      form.append('email' ,this.state.email_address);
+      form.append('hash' , this.state.hash);
 
       this.setState({waitingFeedback: true});
       axios({
         method: 'post',
         url: SERVER_ADDRESS,
-        data: JSON.stringify(data)
+        data: form
       }).then(res => {
         alert(res.data);
         this.resetState()
       }).catch(e => {
         TimestampFree.handleStampError(e);
         this.resetState();
-      })
+      });
 
     } else {
       alert('Please verify your information' + this.state.hash);
@@ -109,7 +107,8 @@ class TimestampFree extends Component {
     if (message === 'Network Error') {
       alert('There was a problem relaying the information, please try again');
     } else if (error.response) {
-      let statusMessage = error.response.statusText;
+      //console.log(error.response);
+      let statusMessage = error.response.data;
       alert('Error from server : ' + statusMessage)
     }
   }
@@ -172,11 +171,12 @@ class TimestampFree extends Component {
             <br/>The service provides less accuracy and only authenticity via the email.
             <br/>
             <br/>To time-stamp a document, please upload it and register your email. When the stamp is ready (10 to 30 minutes), you will
-            receive an e-mail with the signature.
+            receive an e-mail with the signature. Please do not tamper with the signature file, as we will not be able to retreive the time-stamp.
             <br/>
             <br/>
-            <div className='time-stamp-header'>Time-stamping contract at {TimeStamping.networks[3].address} (Ropsten Testnet)</div>
+
           </p>
+          <div className='time-stamp-header'>Time-stamping contract at {TimeStamping.networks[3].address} (Ropsten Testnet)</div>
         </section>
         {this.renderForm()}
       </div>

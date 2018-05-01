@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "dependencies": {
     "crypto": "^1.0.1",
+    "formidable": "^1.2.1",
     "http": "^0.0.0",
+    "ipfs": "^0.28.2",
     "merkle": "^0.6.0",
     "nodemailer": "^4.6.4",
     "os": "^0.1.1",

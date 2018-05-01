@@ -1,6 +1,8 @@
 const Merkle = require('merkle');
 const crypto = require('crypto');
 const mailer = require('./Mail-server');
+const constants = require('./utils');
+const utils = constants.utils;
 
 /*This class helps accumulate the timestamps, create the merkle tree and send the signatures to the users and the root to the contract*/
 class Timestamper {
@@ -26,11 +28,11 @@ class Timestamper {
         console.log('Successful timestamping ' + tx.tx);
         this.hashList = [];
         this.hashToMail = new Map();
+        this.timer = null;
       }).catch(e => console.log('Error while timestamping ' + e))
 
     }
   }
-
 
 
   /*Sends the root of the Merkle tree to the contract and returns a promise */
@@ -47,24 +49,27 @@ class Timestamper {
   */
   addTimestamp(json) {
     let email, hash, response;
+
     email = json['email'];
     hash = json['hash'];
 
+    if (!(utils.isEmail(email) && utils.isHash(hash))) throw Error(constants.CORRUPTED);
+
     if (!this.hashList.includes(hash)) {
-      this.hashList.push(hash+email);
-      this.hashToMail.set(hash+email, email);
+      this.hashList.push(hash);
+      this.hashToMail.set(hash, email);
       response = [200, 'Hash successfully submitted'];
       console.log('Hash ' + hash + ' submitted for user ' + email)
     } else if (this.hashToMail.get(hash) === email) {
-      response = [400, 'Hash already submitted by user'] //TODO : change status codes
+      response = [401, 'Hash already submitted by user'] //TODO : change status codes
     } else {
-      response = [400, 'Hash already submitted by another user']
+      response = [401, 'Hash already submitted by another user']
     }
 
     if (this.hashList.length === this.hashLimit) {
       clearTimeout(this.timer); //Clear the timer if we attain hash limit
       this.reset()
-    } else if (this.hashList.length === this.minHashLimit) {
+    } else if (this.hashList.length === this.minHashLimit && this.timer === null) { // Verify that the timer was not set
       this.timer = setTimeout(() => this.reset(), this.timeLimit*60000) //Set a timer when we get the min number of hashes, to avoid people waiting hours
     }
 
@@ -77,6 +82,10 @@ class Timestamper {
     let n_hashes = this.hashList.length;
 
     let completeTree = [];
+    for (let i = 0; i < n_hashes; i++){
+      let hash = this.hashList[i];
+      completeTree.push(hash + this.hashToMail[hash]);
+    }
     for (let i = n_hashes; i < this.hashLimit; i++) {
       completeTree.push(crypto.randomBytes(32).toString('hex'));
     }
