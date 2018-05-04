@@ -13,8 +13,13 @@ const TimeStamping_abi = require('./build/contracts/TimeStamping.json');
 
 /*-------------------------------Constants for storage and Blockchain interaction-------------------------------*/
 
-const mnemonic = "response exit whisper shuffle energy obey upon bean system derive educate make"; //TODO : encrypt this
-const provider = new HDWalletProvider(mnemonic, "https://ropsten.infura.io/");
+const ropsten_mnemonic = "response exit whisper shuffle energy obey upon bean system derive educate make"; //TODO : encrypt this
+const rpc_mnemonic = 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat';
+
+const ropsten_node = "https://ropsten.infura.io/";
+const local_rpc = "http://127.0.0.1:7545";
+
+const provider = new HDWalletProvider(process.argv[2] === 'true' ? rpc_mnemonic: ropsten_mnemonic, process.argv[2] === 'true' ? local_rpc : ropsten_node );
 const timeStamping = contract(TimeStamping_abi);
 
 
@@ -36,7 +41,7 @@ timeStamping.deployed().then(x => {
   timestamper = new Timestamper(x, provider.address, N_HASHES, MAX_TIME);
   verifier = new Verifier(x);
   patenter = new Patenting('');
-  console.log('Contract Loaded at '+ x.address)
+  console.log('Timestamping contract Loaded at '+ x.address)
 }).catch(e => console.log(e));
 
 

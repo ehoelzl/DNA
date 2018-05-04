@@ -5,7 +5,7 @@ import React, {Component} from 'react'
 import TimeStamping from '../../build/contracts/TimeStamping'
 import {getFileHash, toEther} from '../utils/stampUtil';
 import {FieldGroup, SubmitButton, ContractNotFound, validateEmail} from '../utils/htmlElements';
-
+import Constants from '../Constants'
 
 /*Class that handles the submission of a Timestamp by directly communicating with the contract itself
 *
@@ -13,7 +13,7 @@ import {FieldGroup, SubmitButton, ContractNotFound, validateEmail} from '../util
 * */
 
 
-const GAS_LIMIT = 500000;
+
 
 class TimestampMetaMask extends Component {
 
@@ -89,7 +89,7 @@ class TimestampMetaMask extends Component {
       this.state.contractInstance.stamp(this.state.hash, {
         from: this.state.web3.eth.coinbase,
         value: this.state.weiStampPrice,
-        gas: GAS_LIMIT
+        gas: Constants.GAS_LIMIT
       })
         .then(tx => {
           alert("Timestamping successful, tx : " + tx.tx);
