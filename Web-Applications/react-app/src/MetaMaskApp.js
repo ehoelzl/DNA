@@ -5,6 +5,7 @@ import {ButtonGroup, Button} from 'react-bootstrap';
 import TimestampMetaMask from './Timestamp/TimestampMetaMask';
 import VerifyMetaMask from './VerifyTimestamp/VerifyMetaMask';
 import DepositPatent from './Patenting/DepositPatent';
+import RentPatent from './Patenting/RentPatent';
 import getWeb3 from './utils/getWeb3'
 
 
@@ -149,6 +150,9 @@ class MetaMaskApp extends Component {
           break;
         case DepositPatent.name:
           child = <DepositPatent web3={this.state.web3}/>;
+          break;
+        case RentPatent.name:
+          child = <RentPatent web3={this.state.web3}/>;
           break;
         default:
           child = "";

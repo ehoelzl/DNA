@@ -43,11 +43,15 @@ class ContractNotFound extends Component {
   }
 }
 
+const stampToDate = function(timestamp){
+  let date = new Date(timestamp * 1000);
+  return date.toDateString() + " at " + date.toTimeString();
+};
 
 const stampContainer = function(timestamp, user){
 
     if (timestamp !== 0 && user !== 0){
-      let date = new Date(timestamp*1000);
+      let date = stampToDate(timestamp);
       return (<div className="stamp-result">
                 <Well bsSize="large">Document timestamped on {date.toDateString()} at {date.toTimeString()}
                   <br/> By {user}
@@ -73,5 +77,6 @@ module.exports = {
   SubmitButton,
   ContractNotFound,
   validateEmail,
-  stampContainer
+  stampContainer,
+  stampToDate
 };

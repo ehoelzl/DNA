@@ -35,7 +35,7 @@ contract Patenting is AccessRestricted {
     */
     function depositPatent(string _patentName, string _patentHash, uint _price, string _ipfs) public payable costs(patentPrice) {
         require(patents[_patentName].timestamp == 0);
-        patents[_patentName] = Patent(msg.sender, now, _patentHash,_price *1 ether, _ipfs);
+        patents[_patentName] = Patent(msg.sender, now, _patentHash, _price, _ipfs);
         patentNames.push(_patentName);
         patentCount++;
     }

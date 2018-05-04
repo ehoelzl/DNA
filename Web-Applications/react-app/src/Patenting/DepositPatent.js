@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import axios from 'axios'
 import {FieldGroup, SubmitButton, ContractNotFound} from '../utils/htmlElements';
-import {getFileHash, toEther} from '../utils/stampUtil';
+import {getFileHash, toEther, fromEther} from '../utils/stampUtil';
 import Patenting from '../../build/contracts/Patenting';
 
 import Constants from '../Constants'
@@ -115,16 +115,16 @@ class DepositPatent extends Component {
     form.append('file', this.state.file);
 
     if (this.validateName() === 'success' && this.validatePrice() && this.validateFile()){
-      this.seetState({waitingTransaction: true});
+      this.setState({waitingTransaction: true});
       axios({
         method : 'post',
         url : SERVER_ADDRESS,
         data : form
       }).then(res => {
         this.setState({ipfsLocation : res.data});
-        this.state.contractInstance.depositPatent(this.state.patentName, this.state.hash, this.state.rentalPrice, res.data, {
+        this.state.contractInstance.depositPatent(this.state.patentName, this.state.hash, fromEther(this.state.rentalPrice, this.state.web3), res.data, {
           from: this.state.web3.eth.coinbase,
-          value : this.state.web3.toWei(this.state.patentPrice, 'ether'),
+          value : fromEther(this.state.patentPrice, this.state.web3),
           gas : Constants.GAS_LIMIT
         }).then(tx => {
           alert('Successful, tx : ' + tx.tx + ', IPFS hash : '+ this.state.ipfsLocation);
@@ -152,7 +152,7 @@ class DepositPatent extends Component {
           <FieldGroup name="patentName" id="formsControlsName" label="Patent Name" type="text"
                       value={this.state.patentName} placeholder="Enter the Patent name" help="Max 100 chars"
                       onChange={this.handleChange} validation={this.validateName()}/>
-          <FieldGroup name="rentalPrice" id="formsControlsName" label="Rental price in ETH" type="number"
+          <FieldGroup name="rentalPrice" id="formsControlsName" label="Rental price in ETH" type="text"
                       value={this.state.rentalPrice}  help="Max 1 ETH"
                       onChange={this.handleChange} />
           <FieldGroup name="file" id="formsControlsFile" label="File" type="file" placeholder=""

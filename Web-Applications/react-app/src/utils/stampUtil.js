@@ -65,11 +65,18 @@ const toEther = function (priceInWei, web3) {
   }
 };
 
+const fromEther = function (priceInEth, web3){
+  if (web3 !== null){
+    return web3.toWei(priceInEth, 'ether');
+  }
+};
+
 
 module.exports = {
   getFileHash,
   extractJson,
   toEther,
+  fromEther
 };
 
 
