@@ -6,11 +6,12 @@ class Patenting{
   constructor(cypher){
     this.node = new IPFS();
     this.cypher = cypher;
-    this.node.on('ready', () => console.log('IPFS node ready'));
+    //this.node.on('ready', () => console.log('IPFS node ready'));
   }
 
   addFile(file){
-    return this.node.files.add(fs.createReadStream(file.path))
+    //fs.readFile(file.path, )
+    return this.node.files.add(fs.createReadStream(file.path), {onlyHash : true})//, {onlyHash : true})
   }
 
 

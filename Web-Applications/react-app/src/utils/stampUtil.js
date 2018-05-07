@@ -28,6 +28,32 @@ const getFileHash = function (file, window) {
   })
 };
 
+/*Function used to return the Byte content of a file*/
+const getFileBuffer = function (file, window){
+  return new Promise(function (resolve, reject) {
+    let f = file;
+    if (typeof window.FileReader !== 'function') {
+      reject('Browser does not support FileReader');
+    }
+
+    if (!f) {
+      reject("Please select a file");
+    } else {
+      let fr = new window.FileReader();
+      fr.onload = getBuffer;
+      fr.readAsArrayBuffer(f);
+    }
+
+    function getBuffer(data){
+      let buffer = data.target.result;
+      resolve(Buffer.from(buffer))
+    }
+
+
+  })
+};
+
+
 /*Utility function that extracts the json from a file and returns a promise that resolves into the json object,
 * or is rejected if the parsing could not occur*/
 const extractJson = function (file, window) {
@@ -74,6 +100,7 @@ const fromEther = function (priceInEth, web3){
 
 module.exports = {
   getFileHash,
+  getFileBuffer,
   extractJson,
   toEther,
   fromEther

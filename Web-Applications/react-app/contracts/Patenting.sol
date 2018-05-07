@@ -14,6 +14,7 @@ contract Patenting is AccessRestricted {
         string patentHash;
         uint price;
         string ipfs;
+        string email;
         mapping(address => uint) authorized;
 
     }
@@ -21,6 +22,13 @@ contract Patenting is AccessRestricted {
 
     string[] public patentNames;
     mapping(string => Patent) private patents; //PatentName to struct
+
+    event NewRental(
+        string _ownerMail,
+        string _patentName,
+        address _rentee,
+        uint _numDays
+    );
 
     /* Constructor of the contract
     * {param} uint : The price for depositing a pattern in Wei
@@ -33,18 +41,24 @@ contract Patenting is AccessRestricted {
     * {params} the patent parameters
     * {costs} the price of a patent
     */
-    function depositPatent(string _patentName, string _patentHash, uint _price, string _ipfs) public payable costs(patentPrice) {
+    function depositPatent(string _patentName, string _patentHash, uint _price, string _ipfs, string _email) public payable costs(patentPrice) {
         require(patents[_patentName].timestamp == 0);
-        patents[_patentName] = Patent(msg.sender, now, _patentHash, _price, _ipfs);
+        patents[_patentName] = Patent(msg.sender, now, _patentHash, _price, _ipfs, _email);
         patentNames.push(_patentName);
         patentCount++;
     }
 
     function rentPatent(string _patentName, uint _daysAfter) public payable returns (bool){
-        require(patents[_patentName].authorized[msg.sender] == 0 && msg.value >= patents[_patentName].price);
+        require(patents[_patentName].authorized[msg.sender] == 0 && msg.value >= patents[_patentName].price); //TODO : change this verification
         patents[_patentName].authorized[msg.sender] = now + _daysAfter * 1 days;
-        patents[_patentName].owner.transfer(msg.value);
+        patents[_patentName].owner.transfer(patents[_patentName].price);
+        NewRental(patents[_patentName].email, _patentName, msg.sender, _daysAfter);
         return true;
+    }
+
+    /*Allows the owner to withdraw the remaining funds*/
+    function withdrawFunds() public onlyOwner {
+        owner.transfer(address(this).balance);
     }
 
     /*-----------------------------------View functions that do not require transactions-----------------------------------*/

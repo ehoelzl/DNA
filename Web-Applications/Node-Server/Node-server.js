@@ -1,7 +1,6 @@
 const http = require('http');
 const Timestamper = require('./Timestamper');
 const Verifier = require('./Verifier');
-const Patenting = require('./Patenting');
 
 const formidable = require('formidable');
 
@@ -28,22 +27,6 @@ const MAX_TIME = 3; // in minutes
 
 const VERIFY = '/verify';
 const TIMESTAMP = '/timestamp';
-const DEPOSIT = '/deposit';
-
-
-
-
-
-timeStamping.setProvider(provider);
-let timestamper, verifier, patenter;
-
-timeStamping.deployed().then(x => {
-  timestamper = new Timestamper(x, provider.address, N_HASHES, MAX_TIME);
-  verifier = new Verifier(x);
-  patenter = new Patenting('');
-  console.log('Timestamping contract Loaded at '+ x.address)
-}).catch(e => console.log(e));
-
 
 
 
@@ -55,9 +38,7 @@ function getIPAddress(local = false) {
   return address
 }
 
-function manageRequests(operation, fields, files){
 
-}
 // Simple server to accumulate hashes
 var server = http.createServer(function (req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -79,13 +60,8 @@ var server = http.createServer(function (req, res) {
           let stamp = await stamp_user[0];
           let email = stamp_user[1];
           response = Verifier.getResponse(stamp.toNumber(), email)
-        } else if (op === DEPOSIT){
-          console.log("===================  POST for Patenting =================== ");
-          let ipfs_location = await patenter.addFile(files['file']);
-          console.log(ipfs_location);
-          response = [200, ipfs_location[0].path];
         } else {
-
+          response = [404, "Operation not permitted"]
         }
       } catch (error) {
         response = [400, error.message]
@@ -97,6 +73,16 @@ var server = http.createServer(function (req, res) {
 
   }
 });
+
+/*Load contract and create objects to interact with it*/
+timeStamping.setProvider(provider);
+let timestamper, verifier;
+
+timeStamping.deployed().then(x => {
+  timestamper = new Timestamper(x, provider.address, N_HASHES, MAX_TIME);
+  verifier = new Verifier(x);
+  console.log('Timestamping contract Loaded at '+ x.address)
+}).catch(e => console.log(e));
 
 
 var port = 4000;
