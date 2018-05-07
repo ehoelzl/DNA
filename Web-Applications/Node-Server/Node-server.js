@@ -24,7 +24,6 @@ const provider = new HDWalletProvider(process.argv[2] === 'true' ? rpc_mnemonic:
 const timeStamping = contract(TimeStamping_abi);
 
 const patenting = contract(Patenting_abi);
-var rentEvent = patenting.NewRental();
 
 const N_HASHES = 4;
 const MAX_TIME = 0.1; // in minutes
@@ -88,13 +87,22 @@ timeStamping.deployed().then(x => {
   console.log('Timestamping contract Loaded at '+ x.address)
 }).catch(e => console.log(e));
 
-rentEvent.watch(function(err, res) {
+let patentingInstance, rentEvent;
+patenting.setProvider(provider);
+patenting.deployed().then(x => {
+  patentingInstance = x;
+  rentEvent = x.NewRental();
+  rentEvent.watch(function(err, res) {
     if (err)
-        console.log(err);
+      console.log(err);
     else {
-        mailer.sendRental(res._ownerMail, res._patentName, res._rentee, res._numDays);
+      console.log(res.args);
+      //mailer.sendRental(res._ownerMail, res._patentName, res._rentee, res._numDays);
     }
-})
+  })
+});
+
+
 
 var port = 4000;
 var host = getIPAddress(process.argv[2] === 'true');
