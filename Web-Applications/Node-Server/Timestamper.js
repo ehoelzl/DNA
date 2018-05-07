@@ -48,19 +48,20 @@ class Timestamper {
   * Returns : The response message to send back to the client
   */
   addTimestamp(json) {
-    let email, hash, response;
+    let email, hash, filename, response;
 
     email = json['email'];
     hash = json['hash'];
+    filename = json['name'];
 
     if (!(utils.isEmail(email) && utils.isHash(hash))) throw Error(constants.CORRUPTED);
 
     if (!this.hashList.includes(hash)) {
       this.hashList.push(hash);
-      this.hashToMail.set(hash, email);
+      this.hashToMail.set(hash, [email, filename]);
       response = [200, 'Hash successfully submitted'];
       console.log('Hash ' + hash + ' submitted for user ' + email)
-    } else if (this.hashToMail.get(hash) === email) {
+    } else if (this.hashToMail.get(hash)[0] === email) {
       response = [401, 'Hash already submitted by user'] //TODO : change status codes
     } else {
       response = [401, 'Hash already submitted by another user']
@@ -84,13 +85,13 @@ class Timestamper {
     let completeTree = [];
     for (let i = 0; i < n_hashes; i++){
       let hash = this.hashList[i];
-      completeTree.push(hash + this.hashToMail[hash]);
+      completeTree.push(hash + this.hashToMail.get(hash)[0]);
     }
     for (let i = n_hashes; i < this.hashLimit; i++) {
       completeTree.push(crypto.randomBytes(32).toString('hex'));
     }
 
-    let merkleTree = Merkle('sha256', false).sync(this.hashList.concat(completeTree));
+    let merkleTree = Merkle('sha256', false).sync(completeTree);
     console.log("Merkle Tree created with root:", merkleTree.root());
 
     return merkleTree
@@ -104,8 +105,8 @@ class Timestamper {
 
     for (let i = 0; i < n_hashes; i++) {
       let h = this.hashList[i];
-      mailer.send(h, merkleTree.getProofPath(i, true), this.hashToMail.get(h));
-      console.log('Send signature to ', this.hashToMail.get(h))
+      mailer.sendStamp(this.hashToMail.get(h)[1], h, merkleTree.getProofPath(i, true), this.hashToMail.get(h)[0]);
+      console.log('Send signature to ', this.hashToMail.get(h)[0])
     }
     return merkleTree.root()
   }

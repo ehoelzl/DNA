@@ -1,14 +1,16 @@
 const http = require('http');
 const Timestamper = require('./Timestamper');
 const Verifier = require('./Verifier');
+const mailer = require('./Mail-server');
 
 const formidable = require('formidable');
 
-/*-------------------------------Imports for interaction with Smart Contract-------------------------------*/
+/*-------------------------------Imports for interaction with Smart Contracts-------------------------------*/
 
 const HDWalletProvider = require('truffle-hdwallet-provider');
 const contract = require('truffle-contract');
 const TimeStamping_abi = require('./build/contracts/TimeStamping.json');
+const Patenting_abi = require('./build/contracts/Patenting.json');
 
 /*-------------------------------Constants for storage and Blockchain interaction-------------------------------*/
 
@@ -21,9 +23,11 @@ const local_rpc = "http://127.0.0.1:7545";
 const provider = new HDWalletProvider(process.argv[2] === 'true' ? rpc_mnemonic: ropsten_mnemonic, process.argv[2] === 'true' ? local_rpc : ropsten_node );
 const timeStamping = contract(TimeStamping_abi);
 
+const patenting = contract(Patenting_abi);
+var rentEvent = patenting.NewRental();
 
 const N_HASHES = 4;
-const MAX_TIME = 3; // in minutes
+const MAX_TIME = 0.1; // in minutes
 
 const VERIFY = '/verify';
 const TIMESTAMP = '/timestamp';
@@ -84,6 +88,13 @@ timeStamping.deployed().then(x => {
   console.log('Timestamping contract Loaded at '+ x.address)
 }).catch(e => console.log(e));
 
+rentEvent.watch(function(err, res) {
+    if (err)
+        console.log(err);
+    else {
+        mailer.sendRental(res._ownerMail, res._patentName, res._rentee, res._numDays);
+    }
+})
 
 var port = 4000;
 var host = getIPAddress(process.argv[2] === 'true');
