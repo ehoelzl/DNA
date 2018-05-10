@@ -19,15 +19,15 @@ class utils {
     let signature;
     try {
       signature = JSON.parse(json);
+      for (let i=0; i<signature.length-1; i++){
+        let level = signature[i];
+        if (level['left'] === undefined || level['right'] === undefined) return false;
+      }
+
+      return this.isEmail(signature[signature.length - 1]['email'])
     } catch (error){
       return false;
     }
-    for (let i=0; i<signature.length-1; i++){
-      let level = signature[i];
-      if (level['left'] === undefined || level['right'] === undefined) return false;
-    }
-
-    return this.isEmail(signature[signature.length - 1]['email'])
   }
 
 }
