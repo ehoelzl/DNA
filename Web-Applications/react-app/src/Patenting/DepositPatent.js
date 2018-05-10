@@ -1,9 +1,8 @@
-/*
 import React, {Component} from 'react';
 import {FieldGroup, SubmitButton, ContractNotFound} from '../utils/htmlElements';
 import {getFileHash, toEther, fromEther} from '../utils/stampUtil';
 import Patenting from '../../build/contracts/Patenting';
-import Bundle from '../utils/ipfsBundle'
+//import Bundle from '../utils/ipfsBundle'
 import Constants from '../Constants'
 import {validateEmail} from '../utils/htmlElements'
 
@@ -128,7 +127,7 @@ class DepositPatent extends Component {
   submitPatent(e) {
     e.preventDefault();
 
-    if (this.validateForm()) {
+    /*if (this.validateForm()) {
       this.setState({waitingTransaction: true});
       this.state.contractInstance.depositPatent(this.state.patentName, this.state.hash, fromEther(this.state.rentalPrice, this.state.web3), this.state.ipfsLocation, this.state.email_address, {
         from: this.state.web3.eth.coinbase,
@@ -147,7 +146,7 @@ class DepositPatent extends Component {
     } else {
       alert('Please verify your information');
       this.resetForm()
-    }
+    }*/
 
   }
 
@@ -189,4 +188,4 @@ class DepositPatent extends Component {
   }
 }
 
-export default DepositPatent;*/
+export default DepositPatent;
