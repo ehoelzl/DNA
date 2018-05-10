@@ -1,3 +1,4 @@
+/*
 import React, {Component} from 'react';
 import {FieldGroup, SubmitButton, ContractNotFound} from '../utils/htmlElements';
 import {getFileHash, toEther, fromEther} from '../utils/stampUtil';
@@ -188,4 +189,4 @@ class DepositPatent extends Component {
   }
 }
 
-export default DepositPatent;
+export default DepositPatent;*/

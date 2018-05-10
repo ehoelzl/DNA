@@ -65,7 +65,7 @@ class VerifyTimestamp extends Component {
     if (this.state.loadChild) {
       switch (this.state.selectedService) {
         case METAMASK:
-          child = <MetaMaskApp component={VerifyMetaMask.name}/>;
+          child = <MetaMaskApp component={VerifyMetaMask.name} header={null}/>;
           break;
         case SERVER:
           child = <VerifyFree/>;

@@ -1,3 +1,4 @@
+/*
 import React, {Component} from 'react';
 import axios from 'axios'
 import {Table} from 'react-bootstrap';
@@ -7,8 +8,8 @@ import Patenting from '../../build/contracts/Patenting';
 
 import Constants from '../Constants'
 
-/*const OPERATION = 'deposit';
-const SERVER_ADDRESS = Constants.SERVER_IP + '/' + OPERATION;*/
+/!*const OPERATION = 'deposit';
+const SERVER_ADDRESS = Constants.SERVER_IP + '/' + OPERATION;*!/
 
 class RentPatent extends Component {
 
@@ -128,4 +129,4 @@ class RentPatent extends Component {
   }
 }
 
-export default RentPatent
+export default RentPatent*/
