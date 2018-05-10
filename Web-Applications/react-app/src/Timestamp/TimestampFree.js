@@ -1,5 +1,4 @@
 import '../css/Pages.css'
-
 import axios from 'axios'
 import React, {Component} from 'react'
 import TimeStamping from '../../build/contracts/TimeStamping'
@@ -7,16 +6,16 @@ import {getFileHash} from '../utils/stampUtil';
 import {FieldGroup, SubmitButton, validateEmail} from '../utils/htmlElements';
 import Constants from '../Constants'
 
+import {serverError, INVALID_FORM, LARGE_FILE} from '../utils/ErrorHandler'
 
-/*Class that handles the submission of a Timestamp by relaying the data to the server
-*
+const OPERATION = 'timestamp';
+const SERVER_ADDRESS = Constants.SERVER_IP + '/' + OPERATION;
+
+
+/* DONE */
+/*Component that handles the submission of a Timestamp by relaying the data to the server
 * Does not require Metamask or any Web3 object
 * */
-const OPERATION = 'timestamp';
-const SERVER_ADDRESS = Constants.SERVER_IP + '/'+OPERATION;
-
-
-
 class TimestampFree extends Component {
 
   /*
@@ -28,13 +27,14 @@ class TimestampFree extends Component {
       hash: "",
       email_address: "",
       repeat_email: "",
+      fileName: "",
       waitingFeedback: false
     };
 
     //Bindings for helper methods
     this.submitTimestamp = this.submitTimestamp.bind(this);
     this.handleChange = this.handleChange.bind(this);
-    this.resetState = this.resetState.bind(this);
+    this.resetForm = this.resetForm.bind(this);
   }
 
 
@@ -42,8 +42,8 @@ class TimestampFree extends Component {
 
   /* Helper method that resets the form fields
   */
-  resetState() {
-    this.setState({email_address: "", repeat_email: "", hash: "", waitingFeedback: false});
+  resetForm() {
+    this.setState({email_address: "", repeat_email: "", hash: "", fileName: "", waitingFeedback: false});
   }
 
 
@@ -51,17 +51,9 @@ class TimestampFree extends Component {
   * Returns true if the form fields are correctly filled
   * */
   validateForm() {
-    return (!(validateEmail(this.state.email_address, this.state.repeat_email) !== 'success' || this.state.hash === ""));
+    return (!(validateEmail(this.state.email_address, this.state.repeat_email) !== 'success' || this.state.hash === "" || this.state.fileName === ""));
   }
 
-  /*
-  * Verifies that the server has the correct data
-  * */
-  verifyServerResponse(response) {
-    let email = response.data.email;
-    let hash = response.data.hash;
-    return email === this.state.email_address && hash === this.state.hash
-  }
 
   /*--------------------------------- EVENT HANDLERS ---------------------------------*/
 
@@ -69,49 +61,33 @@ class TimestampFree extends Component {
   /* Method is called when the submit button is pressed.
   * It expects to find all the form fields in the page state and relays the information to the server
   * Alerts the user in case the process did not complete and resets the form fields
-  *
-  * TODO : Coordinate on server response
   * */
   submitTimestamp(e) {
     e.preventDefault();
     if (this.validateForm()) {
-
       let form = new FormData();
-      form.append('email' ,this.state.email_address);
-      form.append('hash' , this.state.hash);
-
+      form.append(Constants.EMAIL, this.state.email_address);
+      form.append(Constants.HASH, this.state.hash);
+      form.append(Constants.NAME, this.state.fileName);
       this.setState({waitingFeedback: true});
       axios({
-        method: 'post',
+        method: Constants.POST,
         url: SERVER_ADDRESS,
         data: form
-      }).then(res => {
+      }).then(res => { //If response code is 200 OK
         alert(res.data);
-        this.resetState()
-      }).catch(e => {
-        TimestampFree.handleStampError(e);
-        this.resetState();
+        this.resetForm()
+      }).catch(e => { //If response code is else than 200 OK
+        serverError(e);
+        this.resetForm();
       });
 
     } else {
-      alert('Please verify your information' + this.state.hash);
-      this.resetState();
+      alert(INVALID_FORM);
+      this.resetForm();
     }
   }
 
-  /*
-  * Error handling when submitting a Timestamp
-  * */
-  static handleStampError(error) {
-    let message = error.message;
-    if (message === 'Network Error') {
-      alert('There was a problem relaying the information, please try again');
-    } else if (error.response) {
-      //console.log(error.response);
-      let statusMessage = error.response.data;
-      alert('Error from server : ' + statusMessage)
-    }
-  }
 
   /*
   * Method that sets the state whenever a form field is changed
@@ -119,14 +95,18 @@ class TimestampFree extends Component {
   * Uses getFileHash method from the utils to get the hash of the uploaded file.
   *
   * The hash of the file only is stored
-  *
-  * TODO : Change the error handling
   * */
   handleChange(e) {
     e.preventDefault();
     let state = this.state;
-    if (e.target.name === 'file') {
-      getFileHash(e.target.files[0], window).then(res => this.setState({hash: res})).catch(err => alert(err.message))
+    if (e.target.name === Constants.FILE) {
+      let file = e.target.files[0];
+      if (file.size < Constants.MAX_FILE_SIZE){
+        getFileHash(file, window).then(res => this.setState({hash: res, fileName: file.name})).catch(err => alert(err))
+      } else {
+        alert(LARGE_FILE)
+      }
+
     } else {
       state[e.target.name] = e.target.value;
       this.setState(state);
@@ -148,7 +128,7 @@ class TimestampFree extends Component {
                     value={this.state.repeat_email} placeholder="john@doe.com" help=""
                     onChange={this.handleChange}
                     validation={validateEmail(this.state.email_address, this.state.repeat_email)}/>
-        <FieldGroup name="file" id="formsControlsFile" label="File" type="file" placeholder=""
+        <FieldGroup name={Constants.FILE} id="formsControlsFile" label="File" type="file" placeholder=""
                     help="File you wish to timestamp" onChange={this.handleChange}/>
         <SubmitButton running={this.state.waitingFeedback}/>
       </form>
@@ -170,13 +150,17 @@ class TimestampFree extends Component {
             given format in a secure and reliable way.
             <br/>The service provides less accuracy and only authenticity via the email.
             <br/>
-            <br/>To time-stamp a document, please upload it and register your email. When the stamp is ready (10 to 30 minutes), you will
-            receive an e-mail with the signature. Please do not tamper with the signature file, as we will not be able to retreive the time-stamp.
+            <br/>To time-stamp a document, please upload it and register your email. When the stamp is ready (10 to 30
+            minutes), you will
+            receive an e-mail with the signature. Please do not tamper with the signature file, as we will not be able
+            to retrieve the time-stamp.
             <br/>
             <br/>
 
           </p>
-          <div className='time-stamp-header'>Time-stamping contract at {TimeStamping.networks[3].address} (Ropsten Testnet)</div>
+          <div className='time-stamp-header'>Time-stamping contract at {TimeStamping.networks[3].address} (Ropsten
+            Testnet)
+          </div>
         </section>
         {this.renderForm()}
       </div>

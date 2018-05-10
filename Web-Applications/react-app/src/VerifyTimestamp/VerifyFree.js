@@ -1,25 +1,23 @@
 import '../css/Pages.css'
+import React, {Component} from 'react'
+import axios from "axios/index";
 import TimeStamping from '../../build/contracts/TimeStamping'
 import {FieldGroup, stampContainer, SubmitButton} from '../utils/htmlElements';
-
-import React, {Component} from 'react'
 import {getFileHash, extractJson} from "../utils/stampUtil";
 import Constants from '../Constants';
-import axios from "axios/index";
+
+import {serverError, INVALID_FORM, LARGE_FILE} from '../utils/ErrorHandler'
 
 const OPERATION = 'verify';
 const SERVER_ADDRESS = Constants.SERVER_IP + '/' + OPERATION;
 
+/*---------------------------------------------------------------------------------- DONE ----------------------------------------------------------------------------------*/
 
-const SIGNATURE = 'signature';
-const FILE = 'file';
 
 /*
 * Component that serves to verify a timestamp of a document that has been done on the free platform
-*
 * The user is required to upload the document that has been signed and the signature which is a .json file
-*
-* It does not require a Web3 injection
+* It does not require a Web3 injection, but communicates with the server
 * */
 class VerifyFree extends Component {
 
@@ -31,37 +29,49 @@ class VerifyFree extends Component {
       hash: "",
       signature: "",
       timestamp: 0,
-      email : "",
-      waitingServer: false
+      email: "",
+      waitingServer: false,
+      displayResult : false,
     };
 
-    this.resetState = this.resetState.bind(this);
+    this.resetForm = this.resetForm.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.validateForm = this.validateForm.bind(this);
     this.submitVerification = this.submitVerification.bind(this);
-    this.fileSubmissionError = this.fileSubmissionError.bind(this);
   }
+
+  /*--------------------------------- HELPER METHODS AND VALIDATION ---------------------------------*/
 
   /* Resets the state of the component
   * */
-  resetState() {
-    this.setState({hash: "", signature: "", timestamp: 0,email : "", waitingServer: false});
+  resetForm() {
+    this.setState({hash: "", signature: "", timestamp: 0, email: "", waitingServer: false, displayResult : false});
   }
 
-  /*Error handling during file submission and parsing*/
-  fileSubmissionError(err) {
-    alert(err);
-    this.resetState();
+  /* Validates the documents and verifies that the signature is a non corrupted json string
+  * */
+  validateForm() {
+    return this.state.signature !== "" && this.state.hash !== ""
   }
+
+
+  /*--------------------------------- EVENT HANDLERS ---------------------------------*/
 
 
   /* Handles the changes in the form elements (two documents to upload) */
   handleChange(e) {
     e.preventDefault();
-    if (e.target.name === FILE) {
-      getFileHash(e.target.files[0], window).then(res => this.setState({hash: res})).catch(this.fileSubmissionError)
-    } else if (e.target.name === SIGNATURE) {
-      extractJson(e.target.files[0], window).then(res => this.setState({signature: res})).catch(this.fileSubmissionError)
+    if ([Constants.FILE, Constants.SIGNATURE].includes(e.target.name)) {
+      let file = e.target.files[0];
+      if (file.size < Constants.MAX_FILE_SIZE){
+        if (e.target.name === Constants.FILE){
+          getFileHash(file, window).then(res => this.setState({hash: res})).catch(err => alert(err))
+        } else if(e.target.name === Constants.SIGNATURE) {
+          extractJson(file, window).then(res => this.setState({signature: res})).catch(err => alert(err))
+        }
+      } else {
+        alert(LARGE_FILE)
+      }
     }
   }
 
@@ -72,33 +82,34 @@ class VerifyFree extends Component {
       this.setState({waitingServer: true});
 
       let form = new FormData();
-      form.append('hash', this.state.hash);
-      form.append('signature', this.state.signature);
+      form.append(Constants.HASH, this.state.hash);
+      form.append(Constants.SIGNATURE, this.state.signature);
 
       axios({
-        method: 'post',
+        method: Constants.POST,
         url: SERVER_ADDRESS,
-        data: form//JSON.stringify(data)
+        data: form
       }).then(res => {
         let d = res.data;
-        this.setState({timestamp: d.stamp, email : d.email, waitingServer: false});
+        this.setState({timestamp: d.stamp, email: d.email, waitingServer: false, displayResult : true});
       }).catch(e => {
-        alert(e.response.data);
-        this.resetState()
+        serverError(e);
+        this.resetForm()
       })
     } else {
-      this.resetState()
+      alert(INVALID_FORM);
+      this.resetForm()
     }
   }
 
-  /* Validates the documents and verifies that the signature is a non corrupted json string
-  * */
-  validateForm() {
-    if (this.state.signature === "" || this.state.hash === "") {
-      alert("Please verify the files");
-    }
-    return this.state.signature !== "" && this.state.hash !== ""
+  /*--------------------------------- USER INTERFACE COMPONENTS ---------------------------------*/
 
+
+  /*Render results if displayResult = True*/
+  searchResults(){
+    if (this.state.displayResult){
+      return stampContainer(this.state.timestamp, this.state.email)
+    }
   }
 
   /* The rendering method
@@ -106,15 +117,18 @@ class VerifyFree extends Component {
   render() {
     return (
       <div className="time-stamp-container">
-        <div className='time-stamp-header'>TimeStamping contract at {TimeStamping.networks[3].address} (Ropsten Testnet)</div>
+        <div className='time-stamp-header'>TimeStamping contract at {TimeStamping.networks[3].address} (Ropsten
+          Testnet)
+        </div>
         <form className="form" onSubmit={this.submitVerification}>
-          <FieldGroup name={FILE} id="formsControlsFile" label="File" type="file" placeholder="" help="File to verify"
+          <FieldGroup name={Constants.FILE} id="formsControlsFile" label="File" type="file" placeholder=""
+                      help="File to verify"
                       onChange={this.handleChange}/>
-          <FieldGroup name={SIGNATURE} id="formsControlsFile" label="Signature" type="file" placeholder=""
+          <FieldGroup name={Constants.SIGNATURE} id="formsControlsFile" label="Signature" type="file" placeholder=""
                       help="Signature of the file (.json file)" onChange={this.handleChange}/>
           <SubmitButton running={this.state.waitingServer}/>
         </form>
-        {stampContainer(this.state.timestamp, this.state.email)}
+        {this.searchResults()}
       </div>
     )
 
