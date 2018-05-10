@@ -2,7 +2,6 @@ const sha256 = require('sha256');
 const constants = require('./utils');
 const utils = constants.utils;
 
-
 const contract = require('truffle-contract');
 const TimeStamping_abi = require('./build/contracts/TimeStamping.json');
 const timeStamping = contract(TimeStamping_abi);
@@ -68,7 +67,6 @@ class Verifier {
       let data = {'email' : email, 'stamp' : stamp.toString()};
       response = [200, JSON.stringify(data)];
     }
-
     return response;
   }
 

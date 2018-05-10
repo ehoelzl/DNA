@@ -1,5 +1,3 @@
-// TODO: rajouter le nom du doc dans le mail
-
 var nodemailer = require('nodemailer');
 
 const SERVER_EMAIL = 'eth.notary@gmail.com';

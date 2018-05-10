@@ -19,12 +19,8 @@ const local_rpc = "http://127.0.0.1:7545";
 
 const provider = new HDWalletProvider(process.argv[2] === 'true' ? rpc_mnemonic: ropsten_mnemonic, process.argv[2] === 'true' ? local_rpc : ropsten_node );
 
-const N_HASHES = 4;
-const MAX_TIME = 0.1; // in minutes
-
 const VERIFY = '/verify';
 const TIMESTAMP = '/timestamp';
-
 
 
 function getIPAddress(local = false) {
@@ -35,7 +31,7 @@ function getIPAddress(local = false) {
   return address
 }
 
-let timestamper = new Timestamper(provider, N_HASHES, MAX_TIME);
+let timestamper = new Timestamper(provider);
 let verifier = new Verifier(provider);
 let patenter = new Patenter(provider);
 
@@ -74,10 +70,8 @@ var server = http.createServer(function (req, res) {
   }
 });
 
-
 var port = 4000;
 var host = getIPAddress(process.argv[2] === 'true');
 server.listen(port, host);
-
 console.log('Listening at http://' + host + ':' + port);
 
