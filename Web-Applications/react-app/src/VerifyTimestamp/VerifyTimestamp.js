@@ -1,7 +1,6 @@
 import '../css/Pages.css'
 import React, {Component} from 'react'
 import {ButtonGroup, Button} from 'react-bootstrap'
-import MetaMaskApp from '../MetaMaskApp';
 import VerifyMetaMask from "./VerifyMetaMask";
 import VerifyFree from "./VerifyFree";
 
@@ -65,7 +64,7 @@ class VerifyTimestamp extends Component {
     if (this.state.loadChild) {
       switch (this.state.selectedService) {
         case METAMASK:
-          child = <MetaMaskApp component={VerifyMetaMask.name} header={null}/>;
+          child = <VerifyMetaMask/>;
           break;
         case SERVER:
           child = <VerifyFree/>;
