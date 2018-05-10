@@ -20,7 +20,7 @@ const local_rpc = "http://127.0.0.1:7545";
 const provider = new HDWalletProvider(process.argv[2] === 'true' ? rpc_mnemonic: ropsten_mnemonic, process.argv[2] === 'true' ? local_rpc : ropsten_node );
 
 const N_HASHES = 4;
-const MAX_TIME = 0.1; // in minutes
+const MAX_TIME = 2; // in minutes
 
 const VERIFY = '/verify';
 const TIMESTAMP = '/timestamp';
