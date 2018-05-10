@@ -1,16 +1,13 @@
 const http = require('http');
 const Timestamper = require('./Timestamper');
 const Verifier = require('./Verifier');
-const mailer = require('./Mail-server');
-
+const Patenter = require('./Patenting');
 const formidable = require('formidable');
 
 /*-------------------------------Imports for interaction with Smart Contracts-------------------------------*/
 
 const HDWalletProvider = require('truffle-hdwallet-provider');
-const contract = require('truffle-contract');
-const TimeStamping_abi = require('./build/contracts/TimeStamping.json');
-const Patenting_abi = require('./build/contracts/Patenting.json');
+
 
 /*-------------------------------Constants for storage and Blockchain interaction-------------------------------*/
 
@@ -21,9 +18,6 @@ const ropsten_node = "https://ropsten.infura.io/";
 const local_rpc = "http://127.0.0.1:7545";
 
 const provider = new HDWalletProvider(process.argv[2] === 'true' ? rpc_mnemonic: ropsten_mnemonic, process.argv[2] === 'true' ? local_rpc : ropsten_node );
-const timeStamping = contract(TimeStamping_abi);
-
-const patenting = contract(Patenting_abi);
 
 const N_HASHES = 4;
 const MAX_TIME = 0.1; // in minutes
@@ -41,6 +35,9 @@ function getIPAddress(local = false) {
   return address
 }
 
+let timestamper = new Timestamper(provider, N_HASHES, MAX_TIME);
+let verifier = new Verifier(provider);
+let patenter = new Patenter(provider);
 
 // Simple server to accumulate hashes
 var server = http.createServer(function (req, res) {
@@ -76,32 +73,6 @@ var server = http.createServer(function (req, res) {
 
   }
 });
-
-/*Load contract and create objects to interact with it*/
-timeStamping.setProvider(provider);
-let timestamper, verifier;
-
-timeStamping.deployed().then(x => {
-  timestamper = new Timestamper(x, provider.address, N_HASHES, MAX_TIME);
-  verifier = new Verifier(x);
-  console.log('Timestamping contract Loaded at '+ x.address)
-}).catch(e => console.log(e));
-
-let patentingInstance, rentEvent;
-patenting.setProvider(provider);
-patenting.deployed().then(x => {
-  patentingInstance = x;
-  rentEvent = x.NewRental();
-  rentEvent.watch(function(err, res) {
-    if (err)
-      console.log(err);
-    else {
-      console.log(res.args);
-      //mailer.sendRental(res._ownerMail, res._patentName, res._rentee, res._numDays);
-    }
-  })
-});
-
 
 
 var port = 4000;

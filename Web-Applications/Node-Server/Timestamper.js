@@ -4,14 +4,21 @@ const mailer = require('./Mail-server');
 const constants = require('./utils');
 const utils = constants.utils;
 
+const contract = require('truffle-contract');
+const TimeStamping_abi = require('./build/contracts/TimeStamping.json');
+const timeStamping = contract(TimeStamping_abi);
+
 /*This class helps accumulate the timestamps, create the merkle tree and send the signatures to the users and the root to the contract*/
 class Timestamper {
 
-  constructor(contractInstance_, address_, hashLimit_, timeLimit_, minHashLimit_ = 1) {
-    this.contractInstance = contractInstance_;
+  constructor(provider_, hashLimit_, timeLimit_, minHashLimit_ = 1) {
+    timeStamping.setProvider(provider_);
+    timeStamping.deployed().then(instance => {
+      this.contractInstance = instance
+    });
     this.hashLimit = hashLimit_;
     this.timeLimit = timeLimit_;
-    this.address = address_;
+    this.address = provider_.address;
     this.minHashLimit = minHashLimit_;
     this.hashList = [];
     this.timer = null;

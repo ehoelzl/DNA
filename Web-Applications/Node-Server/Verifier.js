@@ -3,13 +3,17 @@ const constants = require('./utils');
 const utils = constants.utils;
 
 
-
+const contract = require('truffle-contract');
+const TimeStamping_abi = require('./build/contracts/TimeStamping.json');
+const timeStamping = contract(TimeStamping_abi);
 
 
 /*This class Helps verify the signature of a document and get the timestamp from the smart contract*/
 class Verifier {
-  constructor(contractInstance_) {
-    this.contractInstance = contractInstance_;
+  constructor(provider_) {
+    timeStamping.setProvider(provider_);
+    timeStamping.deployed().then(instance => this.contractInstance = instance)
+    //this.contractInstance = contractInstance_;
   }
 
   /* Function that takes in a hash and returns the root of the tree generated with the given proof path

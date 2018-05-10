@@ -1,18 +1,27 @@
-const IPFS = require('ipfs');
-const fs = require('fs');
+const mailer = require('./Mail-server');
+const contract = require('truffle-contract');
+const Patenting_abi = require('./build/contracts/Patenting.json');
+const patenting = contract(Patenting_abi);
 
 class Patenting{
 
-  constructor(cypher){
-    this.node = new IPFS();
-    this.cypher = cypher;
-    //this.node.on('ready', () => console.log('IPFS node ready'));
+  constructor(provider_){
+    this.event = null;
+    patenting.setProvider(provider_);
+    patenting.deployed().then(instance => {
+      this.contractInstance = instance;
+      this.event = instance.NewRental();
+      this.event.watch(function(err, res) {
+        if (err)
+          console.log(err);
+        else {
+          let rent = res.args;
+          mailer.sendRental(rent._ownerMail, rent._patentName, rent._rentee, rent._numDays);
+        }
+      })
+    })
   }
 
-  addFile(file){
-    //fs.readFile(file.path, )
-    return this.node.files.add(fs.createReadStream(file.path), {onlyHash : true})//, {onlyHash : true})
-  }
 
 
 }

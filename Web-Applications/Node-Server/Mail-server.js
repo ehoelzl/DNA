@@ -34,12 +34,27 @@ module.exports = {
                 console.log(error);
             }
             else {
-                console.log('Email sent: ' + info.response);
+                console.log('Email sent for TimeStamping: ' + info.response);
             }
         });
     },
 
     sendRental: function(ownerMail, patentName, rentee, numDays){
-        console.log(ownerMail, patentName, rentee, numDays);
+      var mailOptions = {
+        from: '"DNA" <eth.notary@gmail.com>',
+        to: ownerMail,
+        subject: 'New Rental',
+        text: "Dear user, \n\n This email is a notification regarding your deposited patent " +patentName+ ".\n " +
+                    "User with address " + rentee + " has requested access. The funds have been transfered to your Ethereum address.\n\n"+
+        "           \"This is an automatic email, please do not answer. \\n\\n The DNA team \\n\\n",
+      };
+      transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+          console.log(error);
+        }
+        else {
+          console.log('Email sent for Rent: ' + info.response);
+        }
+      });
     }
-}
+};
