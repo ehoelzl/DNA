@@ -1,5 +1,4 @@
 import sha256 from "sha256";
-
 /*
 * Utility function to get the hash of a file
 *
@@ -8,6 +7,7 @@ import sha256 from "sha256";
 const getFileHash = function (file, window) {
   return new Promise(function (resolve, reject) {
     let f = file;
+
     if (typeof window.FileReader !== 'function') {
       reject('Browser does not support FileReader');
     }
@@ -52,7 +52,6 @@ const getFileBuffer = function (file, window){
 
   })
 };
-
 
 /*Utility function that extracts the json from a file and returns a promise that resolves into the json object,
 * or is rejected if the parsing could not occur*/

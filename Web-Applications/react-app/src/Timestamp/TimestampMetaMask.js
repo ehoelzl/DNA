@@ -1,24 +1,22 @@
 import '../css/Pages.css'
-
 import React, {Component} from 'react'
-
 import TimeStamping from '../../build/contracts/TimeStamping'
-import {getFileHash, toEther} from '../utils/stampUtil';
-import {FieldGroup, SubmitButton, ContractNotFound, validateEmail} from '../utils/htmlElements';
+import {getFileHash, toEther, fromEther} from '../utils/stampUtil';
+import {FieldGroup, SubmitButton, ContractNotFound} from '../utils/htmlElements';
 import Constants from '../Constants'
 
-/*Class that handles the submission of a Timestamp by directly communicating with the contract itself
+import {INVALID_FORM, LARGE_FILE, contractError} from '../utils/ErrorHandler'
+
+/*---------------------------------------------------------------------------------- DONE ----------------------------------------------------------------------------------*/
+
+/*Component that handles the submission of a Timestamp by directly communicating with the contract itself
+* Requires a Web3 object to be passed in as a Props
 *
-* Requires Metamask of any other plugin that injects a Web3 object into the page
+* Page at "/PersonalTimestamp"
 * */
-
-
-
-
 class TimestampMetaMask extends Component {
 
-  /*
-  * Constructor for the Timestamping form on /PersonalTimestamp
+  /* Constructor for the Timestamping form
   * */
   constructor(props) {
     super(props);
@@ -27,10 +25,7 @@ class TimestampMetaMask extends Component {
       waitingTransaction: false,
       contractInstance: null,
       contractAddress: 0,
-      weiStampPrice: 0,
-      etherStampPrice: 0,
-      email_address: "",
-      repeat_email: "",
+      stampPrice: 0,
       hash: ""
     };
 
@@ -41,10 +36,8 @@ class TimestampMetaMask extends Component {
   }
 
 
-  /*
-  * Override : Save the contract instance in the page state using the injected Web3 object (Metamask)
-  * Saves the contract instance, its address and the Stamp price in Ether and Wei
-  * TODO : ERROR hndling
+  /*Override : Save the contract instance in the page state using the injected Web3 object (Metamask)
+  * Saves the contract instance, its address and the Stamp price in Ether
   * */
   componentWillMount() {
     const contract = require('truffle-contract');
@@ -54,8 +47,8 @@ class TimestampMetaMask extends Component {
       this.setState({contractInstance: instance});
       this.setState({contractAddress: instance.address});
       return instance.price.call()
-    }).then(price => this.setState({weiStampPrice: price.toNumber(), etherStampPrice: toEther(price, this.state.web3)}))
-      .catch(error => console.log(error));
+    }).then(price => this.setState({stampPrice: toEther(price, this.state.web3)}))
+      .catch(error => console.log(error)); //TODO : change this error handler
   }
 
 
@@ -64,7 +57,7 @@ class TimestampMetaMask extends Component {
   /* Helper method that resets the form fields
   */
   resetForm() {
-    this.setState({email_address: "", repeat_email: "", hash: "", waitingTransaction: false});
+    this.setState({hash: "", waitingTransaction: false});
   }
 
 
@@ -88,62 +81,36 @@ class TimestampMetaMask extends Component {
       this.setState({waitingTransaction: true});
       this.state.contractInstance.stamp(this.state.hash, {
         from: this.state.web3.eth.coinbase,
-        value: this.state.weiStampPrice,
+        value: fromEther(this.state.stampPrice, this.state.web3),
         gas: Constants.GAS_LIMIT
-      })
-        .then(tx => {
-          alert("Timestamping successful, tx : " + tx.tx);
-          this.resetForm();
-        })
-        .catch(err => {
-          let msg = err.message.split('\n')[0];
-          TimestampMetaMask.handleStampError(msg);
-          this.resetForm();
-        });
+      }).then(tx => {
+        alert("Timestamping successful, tx : " + tx.tx);
+        this.resetForm();
+      }).catch(err => {
+        contractError(err);
+        this.resetForm();
+      });
     } else {
-      alert('Please check your data before submitting');
+      alert(INVALID_FORM);
       this.resetForm();
     }
   }
 
   /*
-  * Error handling when submitting a Timestamp
-  * */
-  static handleStampError(message) {
-    if (message === 'invalid address') {
-      alert('Please check your MetaMask Client');
-    } else {
-      let tmp = message.split(' ');
-      if (tmp.length > 0){
-        let status_code = tmp[tmp.length - 1][0];
-        if (status_code === '0') {
-          alert('Error from Contract')
-        } else {
-          alert('An Unknown error occurred')
-        }
-      }
-    }
-  }
-
-  /*
   * Method that sets the state whenever a form field is changed
-  *
   * Uses getFileHash method from the utils to get the hash of the uploaded file.
-  *
   * The hash of the file only is stored
-  *
-  * TODO : Change the error handling
   * */
   handleChange(e) {
     e.preventDefault();
-    let state = this.state;
-    if (e.target.name === 'file') {
-      getFileHash(e.target.files[0], window).then(res => this.setState({hash: res})).catch(err => console.log(err))
-    } else {
-      state[e.target.name] = e.target.value;
-      this.setState(state);
+    if (e.target.name === Constants.FILE) {
+      let file = e.target.files[0];
+      if (file.size < Constants.MAX_FILE_SIZE) {
+        getFileHash(file, window).then(res => this.setState({hash: res})).catch(err => alert(err))
+      } else {
+        alert(LARGE_FILE)
+      }
     }
-
   }
 
 
@@ -155,16 +122,11 @@ class TimestampMetaMask extends Component {
   renderForm() {
     return (
       <div className="time-stamp-container">
-        <div className='time-stamp-header'>TimeStamping contract at {this.state.contractAddress} <br/> Stamp price at {this.state.etherStampPrice} ETH</div>
+        <div className='time-stamp-header'>TimeStamping contract at {this.state.contractAddress} <br/> Stamp price
+          at {this.state.stampPrice} ETH <br/> Using address {this.state.web3.eth.coinbase}
+        </div>
         <form className="form" onSubmit={this.submitTimestamp}>
-          <FieldGroup name="email_address" id="formsControlsEmail" label="Email address" type="email"
-                      value={this.state.email_address} placeholder="Enter your email" help=""
-                      onChange={this.handleChange}/>
-          <FieldGroup name="repeat_email" id="formsControlsEmail" label="Email address" type="email"
-                      value={this.state.repeat_email} placeholder="Re-enter your email" help=""
-                      onChange={this.handleChange}
-                      validation={validateEmail(this.state.email_address, this.state.repeat_email)}/>
-          <FieldGroup name="file" id="formsControlsFile" label="File" type="file" placeholder=""
+          <FieldGroup name={Constants.FILE} id="formsControlsFile" label="File" type="file" placeholder=""
                       help="File you wish to timestamp" onChange={this.handleChange}/>
           <SubmitButton running={this.state.waitingTransaction}/>
         </form>
@@ -172,7 +134,7 @@ class TimestampMetaMask extends Component {
     );
   }
 
-  static header(){
+  static header() {
     return (
       <section className="header">
         <div className="title">
@@ -183,12 +145,13 @@ class TimestampMetaMask extends Component {
           to time-stamp and sign documents with their address. Time-stamping is much more accurate and faster using
           this
           service.
-          <br/><br/>You only need to unlock your Metamask extension and choose the document.
+          <br/><br/>You only need to <b>unlock your Metamask extension</b> and choose the document.
           <br/>Note that we do not store any data regarding the documents you upload; Only the hashes are retrieved.
         </p>
       </section>
     );
   }
+
   render() {
     if (this.state.contractInstance === null) {
       return <ContractNotFound/>;

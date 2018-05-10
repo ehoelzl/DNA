@@ -8,6 +8,7 @@ import DepositPatent from './Patenting/DepositPatent';
 import RentPatent from './Patenting/RentPatent';
 import getWeb3 from './utils/getWeb3'
 
+import {WEB3_ERROR, INVALID_NETWORK} from './utils/ErrorHandler'
 
 const MAINNET = 1;
 const ROPSTEN = 3;
@@ -19,13 +20,13 @@ const ROPSTEN_STRING = "Ropsten Test Net";
 const KOVAN_STRING = "Kovan Test Net";
 const LOCALRPC_STRING = "Local RPC";
 
+/*---------------------------------------------------------------------------------- DONE ----------------------------------------------------------------------------------*/
 
 /*
 * This Web component communicates with the Web3 object injected by Metamask and handles the choice of Network
-*
 * This page requires a Web3 object injected into the web page
 *
-* The component passed to the constructor as a props is the Child component (Submit or verify timestamp)
+* The component passed to the constructor as a props is the Child component (TimestampMetamask, VerifyMetamask, DepositPatent or RentPatent)
 * */
 class MetaMaskApp extends Component {
 
@@ -39,7 +40,7 @@ class MetaMaskApp extends Component {
       selectedNetwork: null,
       loadChild: false,
       childComponent: props.component,
-      header : props.header
+      header: props.header
     };
     this.resetState = this.resetState.bind(this);
 
@@ -61,7 +62,7 @@ class MetaMaskApp extends Component {
       this.setState({web3: result.web3});
       this.setNetwork(networkId);
     }).catch(e => {
-      alert('Web3 not found ');
+      alert(WEB3_ERROR);
     });
   }
 
@@ -71,7 +72,7 @@ class MetaMaskApp extends Component {
     this.state.web3.version.getNetwork((err, id) => {
       id = parseInt(id, 10);
       if (id !== networkId) {
-        alert("Please choose the network that corresponds to your current Metamask account");
+        alert(INVALID_NETWORK);
         this.resetState();
       } else {
         switch (id) {
@@ -104,35 +105,17 @@ class MetaMaskApp extends Component {
   buttons() {
     return (
       <ButtonGroup bsSize="large">
-        <Button onClick={this.getWeb3Object.bind(this, MAINNET)} disabled={this.state.selectedNetwork === MAINNET}>{MAINNET_STRING}</Button>
-        <Button onClick={this.getWeb3Object.bind(this, ROPSTEN)} disabled={this.state.selectedNetwork === ROPSTEN}>{ROPSTEN_STRING}</Button>
-        <Button onClick={this.getWeb3Object.bind(this, KOVAN)} disabled={this.state.selectedNetwork === KOVAN}>{KOVAN_STRING}</Button>
-        <Button onClick={this.getWeb3Object.bind(this, LOCALRPC)} disabled={this.state.selectedNetwork === LOCALRPC}>{LOCALRPC_STRING}</Button>
+        <Button onClick={this.getWeb3Object.bind(this, MAINNET)}
+                disabled={this.state.selectedNetwork === MAINNET}>{MAINNET_STRING}</Button>
+        <Button onClick={this.getWeb3Object.bind(this, ROPSTEN)}
+                disabled={this.state.selectedNetwork === ROPSTEN}>{ROPSTEN_STRING}</Button>
+        <Button onClick={this.getWeb3Object.bind(this, KOVAN)}
+                disabled={this.state.selectedNetwork === KOVAN}>{KOVAN_STRING}</Button>
+        <Button onClick={this.getWeb3Object.bind(this, LOCALRPC)}
+                disabled={this.state.selectedNetwork === LOCALRPC}>{LOCALRPC_STRING}</Button>
       </ButtonGroup>
     );
   }
-
-
-  /*
-  * Returns the string value of the chosen network to display
-  * */
-  /*currentNetwork() {
-    if (this.state.selectedNetwork !== null) {
-      switch (this.state.selectedNetwork) {
-        case MAINNET :
-          return <a>Current network {MAINNET_STRING}</a>;
-        case ROPSTEN :
-          return <a>Current network {ROPSTEN_STRING}</a>;
-        case KOVAN :
-          return <a>Current network {KOVAN_STRING}</a>;
-        case LOCALRPC :
-          return <a>Current network {LOCALRPC_STRING}</a>;
-        default:
-          break;
-      }
-
-    }
-  }*/
 
 
   /*
@@ -168,7 +151,6 @@ class MetaMaskApp extends Component {
       </div>
     );
   }
-
 
 
   /*

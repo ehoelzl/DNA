@@ -134,7 +134,7 @@ class DepositPatent extends Component {
         value: fromEther(this.state.patentPrice, this.state.web3),
         gas: Constants.GAS_LIMIT
       }).then(tx => {
-        return this.bundle.addFile(this.state.file, window)
+        return this.bundle.addFile(this.state.file, window) //TODO : encrypt the file
       }).then(filesAdded => {
         alert("Patent has been added, IPFS link : ipfs.io/ipfs/" + filesAdded[0].path);
         this.resetForm();
