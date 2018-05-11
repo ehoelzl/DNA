@@ -1,7 +1,8 @@
+/*
 import Constants from '../Constants'
 import {getFileBuffer} from './stampUtil'
 
-const IPFS = require('ipfs-api');
+import IPFS from 'ipfs'
 
 class Bundle {
 
@@ -19,4 +20,4 @@ class Bundle {
 
 }
 
-export default Bundle;
+export default Bundle;*/

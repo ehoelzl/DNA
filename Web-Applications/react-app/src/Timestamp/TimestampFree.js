@@ -12,7 +12,9 @@ const OPERATION = 'timestamp';
 const SERVER_ADDRESS = Constants.SERVER_IP + '/' + OPERATION;
 
 
-/* DONE */
+/*---------------------------------------------------------------------------------- DONE ----------------------------------------------------------------------------------*/
+
+
 /*Component that handles the submission of a Timestamp by relaying the data to the server
 * Does not require Metamask or any Web3 object
 * */

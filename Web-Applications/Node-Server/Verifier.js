@@ -60,13 +60,8 @@ class Verifier {
 
   /*Static function that returns the response depending on the resulting timestamp*/
   static getResponse(stamp, email) {
-    let response;
-    if (stamp === 0) {
-      response = [401, constants.NOT_FOUND]
-    } else {
-      let data = {'email' : email, 'stamp' : stamp.toString()};
-      response = [200, JSON.stringify(data)];
-    }
+    let data = {'email' : email, 'stamp' : stamp};
+    let response = [200, JSON.stringify(data)];
     return response;
   }
 

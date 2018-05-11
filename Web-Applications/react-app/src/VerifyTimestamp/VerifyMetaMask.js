@@ -6,13 +6,14 @@ import {FieldGroup, SubmitButton, ContractNotFound, stampContainer} from '../uti
 import TimeStamping from '../../build/contracts/TimeStamping'
 import Constants from '../Constants'
 import {contractError, INVALID_FORM, LARGE_FILE} from '../utils/ErrorHandler'
+import wrapWithMetamask from "../MetaMaskWrapper";
 
 /*---------------------------------------------------------------------------------- DONE ----------------------------------------------------------------------------------*/
 
 /*Component for Timestamp and Signature Verification by directly communicating with the contract
 * Uses the injected Web3 object to communicate with the contract
 * */
-class VerifyMetaMask extends Component {
+class VerifyMetaMask_class extends Component {
 
   /*Constructor for the class*/
   constructor(props) {
@@ -121,5 +122,5 @@ class VerifyMetaMask extends Component {
     }
   }
 }
-
+const VerifyMetaMask = wrapWithMetamask(VerifyMetaMask_class, "");
 export default VerifyMetaMask

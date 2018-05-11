@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 
-import {FormControl, FormGroup, ControlLabel, HelpBlock, Well, Alert} from 'react-bootstrap'
+import {FormControl, FormGroup, ControlLabel, HelpBlock, Alert} from 'react-bootstrap'
 import Button from 'react-bootstrap-button-loader'
 import '../css/Pages.css'
 

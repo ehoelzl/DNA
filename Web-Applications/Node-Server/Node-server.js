@@ -22,7 +22,6 @@ const provider = new HDWalletProvider(process.argv[2] === 'true' ? rpc_mnemonic:
 const VERIFY = '/verify';
 const TIMESTAMP = '/timestamp';
 
-
 function getIPAddress(local = false) {
   let address, ifaces = require('os').networkInterfaces();
   for (let dev in ifaces) {

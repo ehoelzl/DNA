@@ -6,6 +6,7 @@ import {FieldGroup, SubmitButton, ContractNotFound} from '../utils/htmlElements'
 import Constants from '../Constants'
 
 import {INVALID_FORM, LARGE_FILE, contractError} from '../utils/ErrorHandler'
+import wrapWithMetamask from "../MetaMaskWrapper";
 
 /*---------------------------------------------------------------------------------- DONE ----------------------------------------------------------------------------------*/
 
@@ -14,7 +15,7 @@ import {INVALID_FORM, LARGE_FILE, contractError} from '../utils/ErrorHandler'
 *
 * Page at "/PersonalTimestamp"
 * */
-class TimestampMetaMask extends Component {
+class TimestampMetaMask_class extends Component {
 
   /* Constructor for the Timestamping form
   * */
@@ -161,4 +162,5 @@ class TimestampMetaMask extends Component {
   }
 }
 
+const TimestampMetaMask =  wrapWithMetamask(TimestampMetaMask_class, TimestampMetaMask_class.header());
 export default TimestampMetaMask;
