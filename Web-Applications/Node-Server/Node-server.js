@@ -1,13 +1,11 @@
 const http = require('http');
 const Timestamper = require('./Timestamper');
 const Verifier = require('./Verifier');
-const Patenter = require('./Patenting');
 const formidable = require('formidable');
 
 /*-------------------------------Imports for interaction with Smart Contracts-------------------------------*/
 
 const HDWalletProvider = require('truffle-hdwallet-provider');
-
 
 /*-------------------------------Constants for storage and Blockchain interaction-------------------------------*/
 
@@ -32,7 +30,6 @@ function getIPAddress(local = false) {
 
 let timestamper = new Timestamper(provider);
 let verifier = new Verifier(provider);
-let patenter = new Patenter(provider);
 
 // Simple server to accumulate hashes
 var server = http.createServer(function (req, res) {
