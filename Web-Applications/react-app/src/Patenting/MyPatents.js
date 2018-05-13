@@ -2,15 +2,14 @@ import '../css/Pages.css'
 import React, {Component} from 'react';
 import {Table, Grid, Row} from 'react-bootstrap';
 import {stampToDate, ContractNotFound} from '../utils/htmlElements';
-import {toEther} from '../utils/stampUtil';
 import Patenting from '../../build/contracts/Patenting';
-import wrapWithMetamask from '../MetaMaskWrapper'
+import wrapWithMetamask from '../MetaMaskWrapper';
 
-import Constants from '../Constants'
-import {ALREADY_AUTHORIZED, contractError} from '../utils/ErrorHandler'
 
-class BuyPatent_class extends Component {
+//import ViewerPDF from '../utils/ViewerPDF';
+import {contractError, NOT_AUTHORIZED} from '../utils/ErrorHandler'
 
+class MyPatents_class extends Component {
 
   /*Constructor Method, initializes the State*/
   constructor(props) {
@@ -18,12 +17,11 @@ class BuyPatent_class extends Component {
     this.state = {
       web3: props.web3,
       contractInstance: null,
-      selectedPatent: "",
       numPatents: 0,
       patents: []
     };
 
-    this.getPatents = this.getPatents.bind(this);
+    this.getMyPatents = this.getMyPatents.bind(this);
   }
 
   /*Method called before the component is mounted, initializes the contract and the page content*/
@@ -35,51 +33,55 @@ class BuyPatent_class extends Component {
       this.setState({contractInstance: instance});
       return instance.patentCount.call()
     }).then(count => {
-      this.setState({numPatents: count.toNumber()});
-      this.getPatents(count.toNumber());
+      this.getMyPatents(count.toNumber());
     }).catch(error => console.log('Error' + error)); //Todo : change this error handler
   }
 
-  /*Function that gets all patent information form the contract and stores them in the state*/
-  getPatents(numPatents) {
+  /*--------------------------------- HELPER METHODS AND VALIDATION ---------------------------------*/
+
+
+  /*Function that gets all authorized patent information form the contract and stores them in the state*/
+  getMyPatents(numPatents) {
     if (this.state.contractInstance !== null) {
       let instance = this.state.contractInstance;
       for (let i = 0; i < numPatents; i++) {
+        let patentName;
         let new_entry = {};
         instance.patentNames.call(i).then(name => {
-          new_entry['name'] = name;
-          return instance.getPatentOwner.call(name);
-        }).then(owner => {
-          new_entry['owner'] = owner;
-          return instance.getTimeStamp.call(new_entry['name'])
+          patentName = name;
+          return instance.isAuthorized(patentName, this.state.web3.eth.coinbase)
+        }).then(authorized => {
+          if (authorized) {
+            return instance.getTimeStamp.call(patentName)
+          } else {
+            throw Error(NOT_AUTHORIZED)
+          }
         }).then(timestamp => {
+          new_entry['name'] = patentName;
           new_entry['timestamp'] = timestamp.toNumber();
-          return instance.getPrice.call(new_entry['name'])
-        }).then(price => {
-          new_entry['price'] = price;
+          return instance.getPatentOwner.call(new_entry['name'])
+        }).then(owner => {
+          new_entry['owner'] = owner === this.state.web3.eth.coinbase ? 'You' : owner;
+          return this.state.contractInstance.getPatentLocation(patentName, {
+            from: this.state.web3.eth.coinbase
+          });
+        }).then(loc => {
+          new_entry['location'] = loc;
           let patents = this.state.patents;
           patents.push(new_entry);
-          this.setState({patents: patents});
+          this.setState({patents: patents, numPatents: this.state.numPatents + 1});
+        }).catch(e => {
+          if (e.message !== NOT_AUTHORIZED) { //Catch error if the patent is not authorized
+            contractError(e)
+          }
         })
       }
     }
   }
 
-  /*--------------------------------- EVENT HANDLERS ---------------------------------*/
-
-  /*Function that initiates the contract call*/
-  buyPatent(patent) {
-    this.state.contractInstance.isAuthorized.call(patent.name, this.state.web3.eth.coinbase).then(authorized => {
-      if (!authorized) {
-        this.state.contractInstance.buyPatent(patent.name, {
-          from: this.state.web3.eth.coinbase,
-          value: patent.price,
-          gas: Constants.GAS_LIMIT
-        }).then(tx => alert("Successful " + tx.tx)).catch(e => contractError(e))
-      } else {
-        alert(ALREADY_AUTHORIZED)
-      }
-    })
+  //TODO : CHange this to decrypt PDF
+  getPdf(ipfsLocation) {
+    window.open("https://ipfs.io/ipfs/" + ipfsLocation, "_blank");
   }
 
   /*--------------------------------- USER INTERFACE COMPONENTS ---------------------------------*/
@@ -88,26 +90,27 @@ class BuyPatent_class extends Component {
   static header() {
     return (
       <Grid>
-        <Row bsClass='title'>Patent Store</Row>
+        <Row bsClass='title'>My patents</Row>
         <Row bsClass='paragraph'>
-          <p>This page allows users that have an Ethereum account and are using it on the Metamask
-            extension for browsers, to buy access to Patents deposited by other users. <br/>
-
+          <p>This page allows users to view the Patents they have deposited, and the ones they have bought. <br/>
+            To reveal a patent IPFS location, please click on the corresponding row and you will be redirected<br/>
             <br/>You only need to <b>unlock your Metamask extension</b> and choose the document you want to access.
           </p>
         </Row>
       </Grid>
+
     );
   }
 
   /*Returns a table row for the given patent*/
   getRow(patent) {
     return (
-      <tr key={patent.name} onClick={this.buyPatent.bind(this, patent)}>
+      // onClick={this.revealIpfsLocation.bind(this, patent)}
+      <tr key={patent.name} onClick={this.getPdf.bind(this, patent.location)}>
         <td>{patent.name}</td>
         <td>{patent.owner}</td>
         <td>{stampToDate(patent.timestamp)}</td>
-        <td>{toEther(patent.price, this.state.web3)}</td>
+        {/*<td>{patent.location}</td>*/}
       </tr>
     )
   }
@@ -121,7 +124,7 @@ class BuyPatent_class extends Component {
           <th>Patent Name</th>
           <th>Owner's address</th>
           <th>Submission Date</th>
-          <th>Patent Price (ETH)</th>
+          {/*<th>Patent Location</th>*/}
         </tr>
       );
       return (
@@ -129,8 +132,6 @@ class BuyPatent_class extends Component {
           <thead>{header}</thead>
           <tbody>{table}</tbody>
         </Table>)
-    } else {
-      return <div className='not-found'><h3>There are no deposited patents on this Network</h3></div>
     }
   }
 
@@ -146,10 +147,10 @@ class BuyPatent_class extends Component {
             <br/> Current account {this.state.web3.eth.accounts[0]} (From Metamask)
           </Row>
           <Row>{this.renderTable()}</Row>
-        </Grid>);
+        </Grid>)
     }
   }
 }
 
-const BuyPatent = wrapWithMetamask(BuyPatent_class, BuyPatent_class.header());
-export default BuyPatent
+const MyPatents = wrapWithMetamask(MyPatents_class, MyPatents_class.header());
+export default MyPatents

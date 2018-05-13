@@ -1,6 +1,6 @@
 import '../css/Pages.css'
 import React, {Component} from 'react'
-import {ButtonGroup, Button} from 'react-bootstrap'
+import {ButtonGroup, Button, Grid, Row} from 'react-bootstrap'
 import VerifyMetaMask from "./VerifyMetaMask";
 import VerifyFree from "./VerifyFree";
 
@@ -74,30 +74,25 @@ class VerifyTimestamp extends Component {
           break;
       }
     }
-    return (
-      <div className="metamask-container">
-        <div className='buttons-container'>{this.buttons()}</div>
-        {child}
-      </div>
-    );
+    return child;
   }
 
   /*Rendering method of the Component*/
   render() {
     return (
-      <div className='app-container'>
-        <section className='header'>
-          <div className='title'>Time-stamp verification</div>
-          <p className='paragraph'>
+      <Grid>
+        <Row bsClass="title">Time-stamp verification</Row>
+        <Row bsClass="paragraph">
+          <p>
             This page allows user to verify the time-stamp of a document.
             <br/><br/>If the document was time-stamped using an Ethereum account, you will only need to upload the
             document.
             Otherwise, you must include the signature we sent back when the document was time-stamped.
           </p>
-        </section>
-        {this.renderChild()}
-      </div>
-
+        </Row>
+        <Row bsClass="buttons-container">{this.buttons()}</Row>
+        <Row>{this.renderChild()}</Row>
+      </Grid>
     );
   }
 }

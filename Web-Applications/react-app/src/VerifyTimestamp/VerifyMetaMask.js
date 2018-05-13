@@ -3,6 +3,7 @@ import '../css/Pages.css'
 import React, {Component} from 'react'
 import {getFileHash} from '../utils/stampUtil';
 import {FieldGroup, SubmitButton, ContractNotFound, stampContainer} from '../utils/htmlElements';
+import {Grid, Row, Col} from 'react-bootstrap'
 import TimeStamping from '../../build/contracts/TimeStamping'
 import Constants from '../Constants'
 import {contractError, INVALID_FORM, LARGE_FILE} from '../utils/ErrorHandler'
@@ -25,7 +26,7 @@ class VerifyMetaMask_class extends Component {
       hash: "",
       timestamp: 0,
       user: 0,
-      displayResult : false
+      displayResult: false
     };
 
     this.submitFile = this.submitFile.bind(this);
@@ -51,7 +52,7 @@ class VerifyMetaMask_class extends Component {
 
   /*Helper method to reset the form*/
   resetForm() {
-    this.setState({hash: "", timestamp: 0, user: 0, displayResult : false});
+    this.setState({hash: "", timestamp: 0, user: 0, displayResult: false});
   }
 
   /*--------------------------------- EVENT HANDLERS ---------------------------------*/
@@ -76,7 +77,7 @@ class VerifyMetaMask_class extends Component {
       this.state.contractInstance.getTimestamp.call(this.state.hash).then(res => {
         this.setState({timestamp: res.toNumber()});
         return this.state.contractInstance.getUser.call(this.state.hash);
-      }).then(res => this.setState({user: res, displayResult : true}))
+      }).then(res => this.setState({user: res, displayResult: true}))
         .catch(error => {
           contractError(error);
           this.resetForm();
@@ -90,8 +91,8 @@ class VerifyMetaMask_class extends Component {
   /*--------------------------------- USER INTERFACE COMPONENTS ---------------------------------*/
 
   /*Render results if displayResult = True*/
-  searchResults(){
-    if (this.state.displayResult){
+  searchResults() {
+    if (this.state.displayResult) {
       return stampContainer(this.state.timestamp, this.state.user)
     }
   }
@@ -99,17 +100,12 @@ class VerifyMetaMask_class extends Component {
   /*Form Rendering*/
   renderForm() {
     return (
-      <div className="time-stamp-container">
-        <div className='time-stamp-header'>TimeStamping contract at {this.state.contractAddress}</div>
-        <form className="form" onSubmit={this.submitFile}>
-          <FieldGroup name={Constants.FILE} id="formsControlsFile" label="File" type="file" placeholder=""
-                      help="File to verify"
-                      onChange={this.handleChange}/>
-          <SubmitButton running={this.state.waitingTransaction}/>
-        </form>
-        {this.searchResults()}
-      </div>
-
+      <form onSubmit={this.submitFile}>
+        <FieldGroup name={Constants.FILE} id="formsControlsFile" label="File" type="file" placeholder=""
+                    help="File to verify"
+                    onChange={this.handleChange}/>
+        <SubmitButton running={this.state.waitingTransaction}/>
+      </form>
     );
   }
 
@@ -118,9 +114,17 @@ class VerifyMetaMask_class extends Component {
     if (this.state.contractInstance === null) {
       return <ContractNotFound/>;
     } else {
-      return this.renderForm();
+      return (
+        <Grid>
+          <Row bsClass="contract-address">TimeStamping contract at {this.state.contractAddress}</Row>
+          <Row><Col sm={3} md={2} mdOffset={4}>
+            {this.renderForm()}
+          </Col></Row>
+          <Row>{this.searchResults()}</Row>
+        </Grid>)
     }
   }
 }
+
 const VerifyMetaMask = wrapWithMetamask(VerifyMetaMask_class, "");
 export default VerifyMetaMask

@@ -4,6 +4,7 @@ import TimeStamping from '../../build/contracts/TimeStamping'
 import {getFileHash, toEther, fromEther} from '../utils/stampUtil';
 import {FieldGroup, SubmitButton, ContractNotFound} from '../utils/htmlElements';
 import Constants from '../Constants'
+import {Grid, Row, Col} from 'react-bootstrap'
 
 import {INVALID_FORM, LARGE_FILE, contractError} from '../utils/ErrorHandler'
 import wrapWithMetamask from "../MetaMaskWrapper";
@@ -122,34 +123,29 @@ class TimestampMetaMask_class extends Component {
   * */
   renderForm() {
     return (
-      <div className="time-stamp-container">
-        <div className='time-stamp-header'>TimeStamping contract at {this.state.contractAddress} <br/> Stamp price
-          at {this.state.stampPrice} ETH <br/> Using address {this.state.web3.eth.coinbase}
-        </div>
-        <form className="form" onSubmit={this.submitTimestamp}>
-          <FieldGroup name={Constants.FILE} id="formsControlsFile" label="File" type="file" placeholder=""
-                      help="File you wish to timestamp" onChange={this.handleChange}/>
-          <SubmitButton running={this.state.waitingTransaction}/>
-        </form>
-      </div>
+      <form onSubmit={this.submitTimestamp}>
+        <FieldGroup name={Constants.FILE} id="formsControlsFile" label="File"
+                    type="file" placeholder=""
+                    help="File you wish to timestamp"
+                    onChange={this.handleChange}/>
+        <SubmitButton running={this.state.waitingTransaction}/></form>
     );
   }
 
   static header() {
     return (
-      <section className="header">
-        <div className="title">
-          Document time-stamping
-        </div>
-        <p className="paragraph">This page allows users that have an Ethereum account and are using it on the Metamask
+      <Grid>
+        <Row bsClass="title">Document time-stamping</Row>
+        <Row bsClass="paragraph"><p>This page allows users that have an Ethereum account and are using it on the
+          Metamask
           extension for browsers,
           to time-stamp and sign documents with their address. Time-stamping is much more accurate and faster using
           this
           service.
           <br/><br/>You only need to <b>unlock your Metamask extension</b> and choose the document.
           <br/>Note that we do not store any data regarding the documents you upload; Only the hashes are retrieved.
-        </p>
-      </section>
+        </p></Row>
+      </Grid>
     );
   }
 
@@ -157,10 +153,17 @@ class TimestampMetaMask_class extends Component {
     if (this.state.contractInstance === null) {
       return <ContractNotFound/>;
     } else {
-      return this.renderForm();
+      return (
+        <Grid>
+          <Row bsClass="contract-address">TimeStamping contract at {this.state.contractAddress} <br/> Stamp price
+            at {this.state.stampPrice} ETH <br/> Using address {this.state.web3.eth.coinbase}</Row>
+          <Row><Col sm={3} md={2} mdOffset={4}>
+            {this.renderForm()}
+          </Col></Row>
+        </Grid>);
     }
   }
 }
 
-const TimestampMetaMask =  wrapWithMetamask(TimestampMetaMask_class, TimestampMetaMask_class.header());
+const TimestampMetaMask = wrapWithMetamask(TimestampMetaMask_class, TimestampMetaMask_class.header());
 export default TimestampMetaMask;

@@ -44,7 +44,7 @@ module.exports = {
         subject: 'New Rental',
         text: "Dear user, \n\n This email is a notification regarding your deposited patent " +patentName+ ".\n " +
                     "User with address " + rentee + " has requested access. The funds have been transfered to your Ethereum address.\n\n"+
-        "           \"This is an automatic email, please do not answer. \\n\\n The DNA team \\n\\n",
+        "           \"This is an automatic email, please do not answer. \n\n The DNA team \n\n",
       };
       transporter.sendMail(mailOptions, function (error, info) {
         if (error) {

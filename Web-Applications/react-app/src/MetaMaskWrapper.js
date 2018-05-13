@@ -1,11 +1,11 @@
 import './css/Pages.css'
 
 import React, {Component} from 'react';
-import {ButtonGroup, Button} from 'react-bootstrap';
+import {ButtonGroup, Button, Grid, Row} from 'react-bootstrap';
 import getWeb3 from './utils/getWeb3'
-
 import {METAMASK_NOTFOUND, INVALID_NETWORK, UNLOCK_METAMASK} from './utils/ErrorHandler'
 
+/*Constants for rendering and network selection*/
 const MAINNET = 1;
 const ROPSTEN = 3;
 const KOVAN = 4;
@@ -112,35 +112,17 @@ function wrapWithMetamask(Wrapped, header) {
       );
     }
 
-    /*
-      * Conditional rendering for the child component (either timestamping or verifying the timestamp)
-      * */
-    renderChild() {
-      let child = "";
-      if (this.state.loadChild) {
-        child = <Wrapped web3={this.state.web3}/>
-      }
-      return (
-        <div className='metamask-container'>
-          <div className='buttons-container'>
-            {this.buttons()}
-          </div>
-          {child}
-        </div>
-      );
-    }
-
 
     /*
     * Rendering for the page
     * */
     render() {
       return (
-        <div className="app-container">
-          {header}
-          {this.renderChild()}
-        </div>
-
+        <Grid>
+          <Row>{header}</Row>
+          <Row bsClass="buttons-container">{this.buttons()}</Row>
+          <Row>{this.state.loadChild ? <Wrapped web3={this.state.web3}/> : ""}</Row>
+        </Grid>
       );
     }
   }

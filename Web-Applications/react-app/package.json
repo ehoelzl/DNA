@@ -46,6 +46,7 @@
     "react-file-reader-input": "^1.1.4",
     "react-router-bootstrap": "^0.24.4",
     "react-bootstrap-button-loader": "^1.0.11",
+    "react-pdf": "^3.0.5",
     "react-router-dom": "^4.2.2",
     "react-spinkit": "^3.0.0",
     "recursive-readdir": "2.1.0",

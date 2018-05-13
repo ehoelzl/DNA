@@ -29,7 +29,7 @@ const getFileHash = function (file, window) {
 };
 
 /*Function used to return the Byte content of a file*/
-const getFileBuffer = function (file, window){
+const getFileBuffer = function (file, window) {
   return new Promise(function (resolve, reject) {
     let f = file;
     if (typeof window.FileReader !== 'function') {
@@ -44,7 +44,7 @@ const getFileBuffer = function (file, window){
       fr.readAsArrayBuffer(f);
     }
 
-    function getBuffer(data){
+    function getBuffer(data) {
       let buffer = data.target.result;
       resolve(Buffer.from(buffer))
     }
@@ -90,8 +90,8 @@ const toEther = function (priceInWei, web3) {
   }
 };
 
-const fromEther = function (priceInEth, web3){
-  if (web3 !== null){
+const fromEther = function (priceInEth, web3) {
+  if (web3 !== null) {
     return web3.toWei(priceInEth, 'ether');
   }
 };

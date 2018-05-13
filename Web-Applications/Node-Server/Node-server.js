@@ -32,8 +32,31 @@ function getIPAddress(local = false) {
 
 let timestamper = new Timestamper(provider);
 let verifier = new Verifier(provider);
-let patenter = new Patenter(provider);
-patenter.watch();
+
+
+
+//Patenter(provider);
+//patenter.watch();
+const contract = require('truffle-contract')
+const Patenting_abi = require('./build/contracts/Patenting.json');
+const patenting = contract(Patenting_abi);
+const mailer = require('./Mail-server')
+patenting.setProvider(provider);
+let event;
+patenting.deployed().then(instance => {
+  event = instance.NewRental();
+  event.watch(function (err, res) {
+    if (err)
+      console.log(err);
+    else {
+      let rent = res.args;
+      mailer.sendRental(rent._ownerMail, rent._patentName, rent._rentee);
+    }
+  });
+  console.log('Patenting at ' + instance.address)
+})
+
+
 
 // Simple server to accumulate hashes
 var server = http.createServer(function (req, res) {

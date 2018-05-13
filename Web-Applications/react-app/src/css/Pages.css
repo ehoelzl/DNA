@@ -1,90 +1,57 @@
 * {
     box-sizing: border-box;
 }
-.form{
-    border-top-left-radius:3px;
-    border-top-right-radius:3px;
-    border-bottom-right-radius:3px;
-    border-bottom-left-radius:3px;
-    padding-top:25px;
-    padding-right:15px;
-    padding-bottom:10px;
-    padding-left:15px;
-    width:30%;
-    float:none;
-    position:relative;
-    left:35%;
+
+.form {
+    padding-left: 80px;
+    padding-bottom: 50px;
 }
 
-.metamask-container{
-    position : relative;
-    top : 20px;
-    width : 100%;
-}
-
-.time-stamp-header{
-    position : relative;
+.contract-address {
     font-size: 25px;
     text-align: center;
-}
-.time-stamp-container{
-    position : relative;
-    width : 100%;
-    top : 20px;
+    padding-bottom: 30px;
 }
 
-.not-found{
-    position : relative;
+.not-found {
+    position: relative;
     text-align: center
 }
 
-.stamp-result{
-    top : 25px;
-    position : relative;
-    width : 50%;
-    height : 150px;
-    text-align: center;
-    left : 25%;
-}
-
-.buttons-container{
+.stamp-result {
+    top: 25px;
     position: relative;
+    width: 50%;
+    height: 150px;
     text-align: center;
+    left: 25%;
 }
 
-.paragraph{
-    padding-top:10px;
-    padding-right:10px;
-    padding-bottom:10px;
-    padding-left:10px;
-}
-.header{
-    padding-top:100px;
-    padding-bottom:100px;
-    opacity:1;
-    background-color:rgba(0,0,0,0);
-    display:inline;
-    position:static;
-}
-.title{
-    padding:10px 0 20px;
-    line-height:28px;
-    font-size:40px;
-    text-align:center;
+.buttons-container {
+    text-align: center;
+    padding-bottom: 20px;
 }
 
-.patent-table{
-    width :50%;
-    position: relative;
-    top : 40px;
-    left : 25%;
+.paragraph {
+    font-size: 18px;
+    padding-bottom: 20px;
 }
 
-.patent-table td{
-    cursor : pointer;
+.title {
+    font-size: 35px;
+    text-align: center;
+    padding-bottom: 20px;
 }
-@media (max-width: 992px){
-    .paragraph{
-        float:none;
+
+.patent-table {
+}
+
+.patent-table td {
+    cursor: pointer;
+}
+
+@media (max-width: 992px) {
+    .paragraph {
+        float: none;
     }
 }

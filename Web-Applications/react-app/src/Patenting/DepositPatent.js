@@ -1,3 +1,5 @@
+import '../css/Pages.css'
+
 import React, {Component} from 'react';
 import {FieldGroup, SubmitButton, ContractNotFound} from '../utils/htmlElements';
 import {getFileHash, toEther, fromEther} from '../utils/stampUtil';
@@ -7,6 +9,7 @@ import Bundle from '../utils/ipfsBundle'
 import Constants from '../Constants'
 import {validateEmail, validatePDF} from '../utils/htmlElements'
 
+import {Grid, Row, Col} from 'react-bootstrap'
 import {INVALID_FORM, contractError} from '../utils/ErrorHandler'
 
 /*Component for Patent Deposit*/
@@ -102,8 +105,10 @@ class DepositPatent_class extends Component {
     if (e.target.name === 'file') {
       let file = e.target.files[0];
       if (validatePDF(file)) { //Verifies that the file is in PDF and less than 10MB
-        this.setState({file: file});
-        this.bundle.addFile(file, window, true).then(files => this.setState({ipfsLocation: files[0].path})).catch(err => alert(err.message)); //Only get the hash of IPFS
+        this.setState({file: file, waitingTransaction: true});
+        this.bundle.addFile(file, window, true)
+          .then(files => this.setState({ipfsLocation: files[0].path, waitingTransaction: false}))
+          .catch(err => alert(err.message)); //Only get the hash of IPFS
         getFileHash(file, window).then(res => this.setState({hash: res, file: file})).catch(err => alert(err.message)); // Here we get the sha256 hash of the doc
       }
     } else {
@@ -127,7 +132,6 @@ class DepositPatent_class extends Component {
         alert("Patent has been added, IPFS link : ipfs.io/ipfs/" + filesAdded[0].path); //TODO : change strings to constants
         this.resetForm();
       }).catch(error => {
-        console.log(error)
         contractError(error); //Handles the error
         this.resetForm();
       });
@@ -143,51 +147,45 @@ class DepositPatent_class extends Component {
   /*The header to be displayed*/
   static header() {
     return (
-      <section className="header">
-        <div className="title">
-          Patent Registration
-        </div>
-        <p className="paragraph">This page allows users that have an Ethereum account and are using it on the Metamask
-          extension for browsers, to register PDF documents and allow other users to access the document for a small
-          fee. <br/> Whenever another user rents access to the document you uploaded, the funds will be transfered to
-          you,
-          and you will receive an email.
-
-          <br/><br/>You only need to unlock your Metamask extension and choose the document.
-          <br/>Note that we do not store any data regarding the documents you upload; Only the hashes are retrieved. The
-          document will be stored in an encrypted format on
-          the IPFS network
-        </p>
-      </section>
+      <Grid>
+        <Row bsClass='title'>Patent Registration</Row>
+        <Row bsClass='paragraph'>
+          <p>This page allows users that have an Ethereum account and are using it on the Metamask
+            extension for browsers, to register PDF documents and allow other users to access the document for a set
+            fee. <br/> Whenever another user rents access to the document you uploaded, the funds will be transferred to
+            you,
+            and you will receive an email.
+            <br/><br/>You only need to <b>unlock your Metamask extension</b> and choose the document.
+            <br/>Note that we do not store any data regarding the documents you upload; Only the hashes are retrieved.
+            The
+            document will be stored in an encrypted format on
+            the IPFS network
+          </p>
+        </Row>
+      </Grid>
     );
   }
 
   renderForm() {
     return (
-      <div className="time-stamp-container">
-        <div className='time-stamp-header'>Patenting contract at {this.state.contractInstance.address} <br/> Patent
-          price at {this.state.patentPrice} ETH
-          <br/> Current account {this.state.web3.eth.accounts[0]} (From Metamask)
-        </div>
-        <form className="form" onSubmit={this.submitPatent}>
-          <FieldGroup name="patentName" id="formsControlsName" label="Patent Name" type="text"
-                      value={this.state.patentName} placeholder="Enter the Patent name" help="Max 100 chars"
-                      onChange={this.handleChange} validation={this.validateName()}/>
-          <FieldGroup name="price" id="formsControlsName" label="Rental price in ETH" type="text"
-                      value={this.state.price} help="Max 1 ETH"
-                      onChange={this.handleChange} validation={this.validatePrice()}/>
-          <FieldGroup name="email_address" id="formsControlsEmail" label="Email address" type="email"
-                      value={this.state.email_address} placeholder="john@doe.com" help=""
-                      onChange={this.handleChange}/>
-          <FieldGroup name="repeat_email" id="formsControlsEmail" label="Repeat Email address" type="email"
-                      value={this.state.repeat_email} placeholder="john@doe.com" help=""
-                      onChange={this.handleChange}
-                      validation={validateEmail(this.state.email_address, this.state.repeat_email)}/>
-          <FieldGroup name="file" id="formsControlsFile" label="File" type="file" placeholder=""
-                      help="File of the patent (PDF only)" onChange={this.handleChange}/>
-          <SubmitButton running={this.state.waitingTransaction}/>
-        </form>
-      </div>
+      <form onSubmit={this.submitPatent}>
+        <FieldGroup name="patentName" id="formsControlsName" label="Patent Name" type="text"
+                    value={this.state.patentName} placeholder="Enter the Patent name" help="Max 100 chars"
+                    onChange={this.handleChange} validation={this.validateName()}/>
+        <FieldGroup name="price" id="formsControlsName" label="Rental price in ETH" type="text"
+                    value={this.state.price} help="Max 1 ETH"
+                    onChange={this.handleChange} validation={this.validatePrice()}/>
+        <FieldGroup name="email_address" id="formsControlsEmail" label="Email address" type="email"
+                    value={this.state.email_address} placeholder="john@doe.com" help=""
+                    onChange={this.handleChange}/>
+        <FieldGroup name="repeat_email" id="formsControlsEmail" label="Repeat Email address" type="email"
+                    value={this.state.repeat_email} placeholder="john@doe.com" help=""
+                    onChange={this.handleChange}
+                    validation={validateEmail(this.state.email_address, this.state.repeat_email)}/>
+        <FieldGroup name="file" id="formsControlsFile" label="File" type="file" placeholder=""
+                    help="File of the patent (PDF only)" onChange={this.handleChange}/>
+        <SubmitButton running={this.state.waitingTransaction}/>
+      </form>
     );
   }
 
@@ -195,7 +193,16 @@ class DepositPatent_class extends Component {
     if (this.state.contractInstance === null) {
       return <ContractNotFound/>;
     } else {
-      return this.renderForm()
+      return (
+        <Grid>
+          <Row bsClass="contract-address">
+            Patenting contract at {this.state.contractInstance.address} <br/>
+            Patent price at {this.state.patentPrice} ETH<br/>
+            Current account {this.state.web3.eth.accounts[0]} (From Metamask)
+          </Row>
+          <Row><Col sm={3} md={5} mdOffset={3} className="form">{this.renderForm()}</Col></Row>
+        </Grid>
+      )
     }
   }
 }

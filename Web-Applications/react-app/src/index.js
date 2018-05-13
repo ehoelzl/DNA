@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import {BrowserRouter, Route, browserHistory} from 'react-router-dom'
 import 'bootstrap/dist/css/bootstrap.css'
 
-import './css/Home.css'
+import './css/index.css'
 
 import NavigationBar from './NavigationBar'
 import Home from './Home';
@@ -12,7 +12,8 @@ import TimestampFree from './Timestamp/TimestampFree';
 import VerifyTimestamp from './VerifyTimestamp/VerifyTimestamp';
 import DepositPatent from './Patenting/DepositPatent';
 import BuyPatent from './Patenting/BuyPatent';
-import MyPatent from './Patenting/MyPatents';
+import MyPatents from './Patenting/MyPatents';
+
 
 //import About from './About';
 //import AdditionalInfo from './AdditionalInfo';
@@ -27,12 +28,9 @@ ReactDOM.render(
         <Route exact path='/Timestamp' component={TimestampFree}/>
         <Route exact path='/PersonalTimestamp' component={TimestampMetaMask}/>
         <Route exact path='/VerifyTimestamp' component={VerifyTimestamp}/>
-        <Route exact path='/DepositPatent' component={DepositPatent} />
+        <Route exact path='/DepositPatent' component={DepositPatent}/>
         <Route exact path='/RentPatent' component={BuyPatent}/>
-        <Route exact path='/MyPatents' component={MyPatent} />
-    {/*    <Route exact path='/AdditionalInfo' component={AdditionalInfo}/>
-        <Route exact path='/About' component={About}/>*/}
-
+        <Route exact path='/MyPatents' component={MyPatents}/>
       </switch>
     </div>
   </BrowserRouter>,

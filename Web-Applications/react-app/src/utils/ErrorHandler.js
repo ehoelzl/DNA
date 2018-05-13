@@ -9,9 +9,10 @@ const UNLOCK_METAMASK = "Please unlock your Metamask extension and try again";
 const INVALID_NETWORK = "Please choose the network that corresponds to your current Metamask account";
 const LARGE_FILE = "File is too large (exceeds 10MB)";
 const ALREADY_AUTHORIZED = "You already are authorized for this patent";
+const NOT_AUTHORIZED = "Not authorized";
 
 /*Handles serer error*/
-const serverError = function (error){
+const serverError = function (error) {
   let message = error.message;
   if (message === 'Network Error') {
     alert('There was a problem relaying the information, please try again');
@@ -47,6 +48,7 @@ module.exports = {
   INVALID_NETWORK,
   LARGE_FILE,
   ALREADY_AUTHORIZED,
+  NOT_AUTHORIZED,
   contractError,
   serverError
 };

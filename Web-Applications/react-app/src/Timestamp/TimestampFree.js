@@ -5,7 +5,7 @@ import TimeStamping from '../../build/contracts/TimeStamping'
 import {getFileHash} from '../utils/stampUtil';
 import {FieldGroup, SubmitButton, validateEmail} from '../utils/htmlElements';
 import Constants from '../Constants'
-
+import {Grid, Row, Col} from 'react-bootstrap'
 import {serverError, INVALID_FORM, LARGE_FILE} from '../utils/ErrorHandler'
 
 const OPERATION = 'timestamp';
@@ -83,7 +83,6 @@ class TimestampFree extends Component {
         serverError(e);
         this.resetForm();
       });
-
     } else {
       alert(INVALID_FORM);
       this.resetForm();
@@ -93,7 +92,6 @@ class TimestampFree extends Component {
 
   /*
   * Method that sets the state whenever a form field is changed
-  *
   * Uses getFileHash method from the utils to get the hash of the uploaded file.
   *
   * The hash of the file only is stored
@@ -103,26 +101,25 @@ class TimestampFree extends Component {
     let state = this.state;
     if (e.target.name === Constants.FILE) {
       let file = e.target.files[0];
-      if (file.size < Constants.MAX_FILE_SIZE){
+      if (file.size < Constants.MAX_FILE_SIZE) {
         getFileHash(file, window).then(res => this.setState({hash: res, fileName: file.name})).catch(err => alert(err))
       } else {
         alert(LARGE_FILE)
       }
-
     } else {
       state[e.target.name] = e.target.value;
       this.setState(state);
     }
-
   }
 
 
   /*--------------------------------- USER INTERFACE COMPONENTS ---------------------------------*/
 
 
+  /*Form component*/
   renderForm() {
     return (
-      <form className="form" onSubmit={this.submitTimestamp}>
+      <form onSubmit={this.submitTimestamp}>
         <FieldGroup name="email_address" id="formsControlsEmail" label="Email address" type="email"
                     value={this.state.email_address} placeholder="john@doe.com" help=""
                     onChange={this.handleChange}/>
@@ -137,18 +134,14 @@ class TimestampFree extends Component {
     );
   }
 
-  /*
-  * Form component
-  *
+  /* Component rendering method
   * */
   render() {
     return (
-      <div className="app-container">
-        <section className="header">
-          <div className="title">Free document time-stamping
-            <br/>
-          </div>
-          <p className="paragraph">This page allows any user with a valid email address to time-stamp a document of any
+      <Grid>
+        <Row bsClass="title">Free document time-stamping</Row>
+        <Row bsClass="paragraph">
+          <p>This page allows any user with a valid email address to time-stamp a document of any
             given format in a secure and reliable way.
             <br/>The service provides less accuracy and only authenticity via the email.
             <br/>
@@ -156,20 +149,15 @@ class TimestampFree extends Component {
             minutes), you will
             receive an e-mail with the signature. Please do not tamper with the signature file, as we will not be able
             to retrieve the time-stamp.
-            <br/>
-            <br/>
-
           </p>
-          <div className='time-stamp-header'>Time-stamping contract at {TimeStamping.networks[3].address} (Ropsten
-            Testnet)
-          </div>
-        </section>
-        {this.renderForm()}
-      </div>
-
+        </Row>
+        <Row bsClass="contract-address">
+          Time-stamping contract at {TimeStamping.networks[3].address} (Ropsten Testnet)
+        </Row>
+        <Row><Col sm={3} md={5} mdOffset={3} className="form">{this.renderForm()}</Col></Row>
+      </Grid>
     );
   }
-
 }
 
 export default TimestampFree;

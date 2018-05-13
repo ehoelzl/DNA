@@ -5,6 +5,7 @@ import TimeStamping from '../../build/contracts/TimeStamping'
 import {FieldGroup, stampContainer, SubmitButton} from '../utils/htmlElements';
 import {getFileHash, extractJson} from "../utils/stampUtil";
 import Constants from '../Constants';
+import {Grid, Row, Col} from 'react-bootstrap'
 
 import {serverError, INVALID_FORM, LARGE_FILE} from '../utils/ErrorHandler'
 
@@ -31,7 +32,7 @@ class VerifyFree extends Component {
       timestamp: 0,
       email: "",
       waitingServer: false,
-      displayResult : false,
+      displayResult: false,
     };
 
     this.resetForm = this.resetForm.bind(this);
@@ -45,7 +46,7 @@ class VerifyFree extends Component {
   /* Resets the state of the component
   * */
   resetForm() {
-    this.setState({hash: "", signature: "", timestamp: 0, email: "", waitingServer: false, displayResult : false});
+    this.setState({hash: "", signature: "", timestamp: 0, email: "", waitingServer: false, displayResult: false});
   }
 
   /* Validates the documents and verifies that the signature is a non corrupted json string
@@ -63,10 +64,10 @@ class VerifyFree extends Component {
     e.preventDefault();
     if ([Constants.FILE, Constants.SIGNATURE].includes(e.target.name)) {
       let file = e.target.files[0];
-      if (file.size < Constants.MAX_FILE_SIZE){
-        if (e.target.name === Constants.FILE){
+      if (file.size < Constants.MAX_FILE_SIZE) {
+        if (e.target.name === Constants.FILE) {
           getFileHash(file, window).then(res => this.setState({hash: res})).catch(err => alert(err))
-        } else if(e.target.name === Constants.SIGNATURE) {
+        } else if (e.target.name === Constants.SIGNATURE) {
           extractJson(file, window).then(res => this.setState({signature: res})).catch(err => alert(err))
         }
       } else {
@@ -91,7 +92,7 @@ class VerifyFree extends Component {
         data: form
       }).then(res => {
         let d = res.data;
-        this.setState({timestamp: d.stamp, email: d.email, waitingServer: false, displayResult : true});
+        this.setState({timestamp: d.stamp, email: d.email, waitingServer: false, displayResult: true});
       }).catch(e => {
         serverError(e);
         this.resetForm()
@@ -106,30 +107,39 @@ class VerifyFree extends Component {
 
 
   /*Render results if displayResult = True*/
-  searchResults(){
-    if (this.state.displayResult){
+  searchResults() {
+    if (this.state.displayResult) {
       return stampContainer(this.state.timestamp, this.state.email)
     }
   }
+
+  renderForm() {
+    return (
+      <form onSubmit={this.submitVerification}>
+        <FieldGroup name={Constants.FILE} id="formsControlsFile" label="File" type="file" placeholder=""
+                    help="File to verify"
+                    onChange={this.handleChange}/>
+        <FieldGroup name={Constants.SIGNATURE} id="formsControlsFile" label="Signature" type="file" placeholder=""
+                    help="Signature of the file (.json file)" onChange={this.handleChange}/>
+        <SubmitButton running={this.state.waitingServer}/>
+      </form>
+    );
+  }
+
 
   /* The rendering method
   * */
   render() {
     return (
-      <div className="time-stamp-container">
-        <div className='time-stamp-header'>TimeStamping contract at {TimeStamping.networks[3].address} (Ropsten
-          Testnet)
-        </div>
-        <form className="form" onSubmit={this.submitVerification}>
-          <FieldGroup name={Constants.FILE} id="formsControlsFile" label="File" type="file" placeholder=""
-                      help="File to verify"
-                      onChange={this.handleChange}/>
-          <FieldGroup name={Constants.SIGNATURE} id="formsControlsFile" label="Signature" type="file" placeholder=""
-                      help="Signature of the file (.json file)" onChange={this.handleChange}/>
-          <SubmitButton running={this.state.waitingServer}/>
-        </form>
-        {this.searchResults()}
-      </div>
+      <Grid>
+        <Row bsClass="contract-address">TimeStamping contract at {TimeStamping.networks[3].address} (Ropsten
+          Testnet)</Row>
+        <Row><Col sm={3} md={2} mdOffset={4}>
+          {this.renderForm()}
+        </Col></Row>
+        <Row>{this.searchResults()}</Row>
+      </Grid>
+
     )
 
   }

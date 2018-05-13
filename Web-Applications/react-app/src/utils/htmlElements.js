@@ -5,6 +5,7 @@ import Button from 'react-bootstrap-button-loader'
 import '../css/Pages.css'
 import Constants from '../Constants'
 import {LARGE_FILE} from '../utils/ErrorHandler'
+
 /*
 * React Component for a FieldGroup (Form field with additional useful features)
 * */
@@ -45,17 +46,15 @@ const stampToDate = function (timestamp) {
 };
 
 const stampContainer = function (timestamp, user) {
+  let container = "";
   if (timestamp !== 0) {
     let date = stampToDate(timestamp);
-    return (
-      <div className="stamp-result"><Alert bsStyle="success">Document timestamped on {date}
-        <br/> By {user}</Alert></div>)
-
+    container = <Alert bsStyle="success">Document timestamped on {date}<br/> By {user}</Alert>
   } else {
-    return (<div className="stamp-result">
-      <Alert bsStyle="danger">Document not found in Database</Alert>
-    </div>)
+    container = <Alert bsStyle="danger">Document not found in Database</Alert>
   }
+
+  return <div className="stamp-result">{container}</div>
 };
 
 const validateEmail = function (email, repeat) {
@@ -70,10 +69,10 @@ const validateEmail = function (email, repeat) {
   }
 };
 
-const validatePDF = function (file){
+const validatePDF = function (file) {
   if (file === "") {
     alert('Please select a file');
-  } else if (file.size > Constants.MAX_FILE_SIZE){
+  } else if (file.size > Constants.MAX_FILE_SIZE) {
     alert(LARGE_FILE)
   } else if (file.type !== 'application/pdf') {
     alert('File must be in PDF format');
