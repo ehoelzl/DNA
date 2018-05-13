@@ -31,10 +31,9 @@ export default class NavigationBar extends Component {
             </NavDropdown>
             <NavDropdown title="Patenting" id="basic-nav-dropdown">
               <LinkContainer to="/DepositPatent"><MenuItem >Deposit a new Patent</MenuItem></LinkContainer>
-              <LinkContainer to="/RentPatent"><MenuItem>Rent access</MenuItem></LinkContainer>
+              <LinkContainer to="/RentPatent"><MenuItem>Buy access</MenuItem></LinkContainer>
               <MenuItem divider />
-              <LinkContainer to="/MyPatents"><MenuItem>View your deposited patents</MenuItem></LinkContainer>
-              <LinkContainer to="/ViewPatents"><MenuItem>View accesses</MenuItem></LinkContainer>
+              <LinkContainer to="/MyPatents"><MenuItem>My Patents</MenuItem></LinkContainer>
             </NavDropdown>
             <LinkContainer to="/About">
               <NavItem>About</NavItem>

@@ -4,7 +4,7 @@ import React, {Component} from 'react';
 import {ButtonGroup, Button} from 'react-bootstrap';
 import getWeb3 from './utils/getWeb3'
 
-import {WEB3_ERROR, INVALID_NETWORK} from './utils/ErrorHandler'
+import {METAMASK_NOTFOUND, INVALID_NETWORK, UNLOCK_METAMASK} from './utils/ErrorHandler'
 
 const MAINNET = 1;
 const ROPSTEN = 3;
@@ -22,7 +22,7 @@ const LOCALRPC_STRING = "Local RPC";
 * The returned component communicates with the Web3 object injected by Metamask and handles the choice of Network
 * This page requires a Web3 object injected into the web page
 *
-* The component passed to the constructor as a props is the Child component (TimestampMetamask, VerifyMetamask, DepositPatent or RentPatent)
+* The component passed to the constructor as a props is the Child component (TimestampMetamask, VerifyMetamask, DepositPatent or BuyPatent)
 * */
 function wrapWithMetamask(Wrapped, header) {
   return class extends Component {
@@ -50,9 +50,16 @@ function wrapWithMetamask(Wrapped, header) {
     getWeb3Object(networkId) {
       getWeb3.then(result => {
         this.setState({web3: result.web3});
-        this.setNetwork(networkId);
+        result.web3.eth.getAccounts((err, accounts) => {
+          if (err || accounts.length === 0) {
+            alert(UNLOCK_METAMASK)
+          } else {
+            this.setNetwork(networkId);
+          }
+        })
+
       }).catch(e => {
-        alert(WEB3_ERROR);
+        alert(METAMASK_NOTFOUND);
       });
     }
 

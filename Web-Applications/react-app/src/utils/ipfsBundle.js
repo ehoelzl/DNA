@@ -1,13 +1,12 @@
-/*
 import Constants from '../Constants'
 import {getFileBuffer} from './stampUtil'
 
-import IPFS from 'ipfs'
+//const IpfsApi = require('ipfs-api')
 
 class Bundle {
 
   constructor() {
-    this.node = new IPFS(Constants.IPFS_NODE, 5001, {protocol: 'https'})
+    this.node = window.IpfsApi(Constants.IPFS_NODE, 5001, {protocol: 'https'})
   }
 
 
@@ -20,4 +19,4 @@ class Bundle {
 
 }
 
-export default Bundle;*/
+export default Bundle;

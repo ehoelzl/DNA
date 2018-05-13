@@ -1,10 +1,16 @@
+/*This helper class contains functions and constants used across the website to handle Errors
+*  TODO : Add error handler for contact instantiation
+* */
 
-
+/*Error Messages*/
 const INVALID_FORM = "The input information is incorrect, please try again";
-const WEB3_ERROR = "You need a Metamask extension";
+const METAMASK_NOTFOUND = "You need a Metamask extension";
+const UNLOCK_METAMASK = "Please unlock your Metamask extension and try again";
 const INVALID_NETWORK = "Please choose the network that corresponds to your current Metamask account";
 const LARGE_FILE = "File is too large (exceeds 10MB)";
+const ALREADY_AUTHORIZED = "You already are authorized for this patent";
 
+/*Handles serer error*/
 const serverError = function (error){
   let message = error.message;
   if (message === 'Network Error') {
@@ -15,6 +21,7 @@ const serverError = function (error){
   }
 };
 
+/*Handles contract call errors*/
 const contractError = function (error) {
   let message = error.message.split('\n')[0];
   if (message === 'invalid address') {
@@ -35,9 +42,11 @@ const contractError = function (error) {
 
 module.exports = {
   INVALID_FORM,
-  WEB3_ERROR,
+  METAMASK_NOTFOUND,
+  UNLOCK_METAMASK,
   INVALID_NETWORK,
   LARGE_FILE,
+  ALREADY_AUTHORIZED,
   contractError,
   serverError
 };

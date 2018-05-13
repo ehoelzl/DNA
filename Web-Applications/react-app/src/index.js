@@ -10,8 +10,9 @@ import Home from './Home';
 import TimestampMetaMask from "./Timestamp/TimestampMetaMask";
 import TimestampFree from './Timestamp/TimestampFree';
 import VerifyTimestamp from './VerifyTimestamp/VerifyTimestamp';
-//import DepositPatent from './Patenting/DepositPatent';
-//import RentPatent from './Patenting/RentPatent';
+import DepositPatent from './Patenting/DepositPatent';
+import BuyPatent from './Patenting/BuyPatent';
+import MyPatent from './Patenting/MyPatents';
 
 //import About from './About';
 //import AdditionalInfo from './AdditionalInfo';
@@ -19,14 +20,16 @@ import VerifyTimestamp from './VerifyTimestamp/VerifyTimestamp';
 ReactDOM.render(
   <BrowserRouter history={browserHistory}>
     <div>
+
       <NavigationBar/>
       <switch>
         <Route exact path='/' component={Home}/>
         <Route exact path='/Timestamp' component={TimestampFree}/>
         <Route exact path='/PersonalTimestamp' component={TimestampMetaMask}/>
         <Route exact path='/VerifyTimestamp' component={VerifyTimestamp}/>
-        {/*<Route exact path='/DepositPatent' component={wrapWithMetamask(DepositPatent, DepositPatent.header())}  />*/}
-        {/*<Route exact path='/RentPatent' component={wrapWithMetamask(RentPatent, RentPatent.hea)}*/}
+        <Route exact path='/DepositPatent' component={DepositPatent} />
+        <Route exact path='/RentPatent' component={BuyPatent}/>
+        <Route exact path='/MyPatents' component={MyPatent} />
     {/*    <Route exact path='/AdditionalInfo' component={AdditionalInfo}/>
         <Route exact path='/About' component={About}/>*/}
 

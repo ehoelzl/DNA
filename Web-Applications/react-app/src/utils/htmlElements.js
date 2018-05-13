@@ -3,7 +3,8 @@ import React, {Component} from 'react'
 import {FormControl, FormGroup, ControlLabel, HelpBlock, Alert} from 'react-bootstrap'
 import Button from 'react-bootstrap-button-loader'
 import '../css/Pages.css'
-
+import Constants from '../Constants'
+import {LARGE_FILE} from '../utils/ErrorHandler'
 /*
 * React Component for a FieldGroup (Form field with additional useful features)
 * */
@@ -69,11 +70,23 @@ const validateEmail = function (email, repeat) {
   }
 };
 
+const validatePDF = function (file){
+  if (file === "") {
+    alert('Please select a file');
+  } else if (file.size > Constants.MAX_FILE_SIZE){
+    alert(LARGE_FILE)
+  } else if (file.type !== 'application/pdf') {
+    alert('File must be in PDF format');
+  }
+  return file !== "" && file.type === 'application/pdf' && file.size < Constants.MAX_FILE_SIZE;
+};
+
 module.exports = {
   FieldGroup,
   SubmitButton,
   ContractNotFound,
   validateEmail,
   stampContainer,
-  stampToDate
+  stampToDate,
+  validatePDF
 };

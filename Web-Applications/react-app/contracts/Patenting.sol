@@ -15,7 +15,8 @@ contract Patenting is AccessRestricted {
         uint price;
         string ipfs;
         string email;
-        mapping(address => uint) authorized;
+        //string key; TODO : Potentially add key to secure the file on IPFS
+        mapping(address => bool) authorized;
 
     }
 
@@ -26,8 +27,7 @@ contract Patenting is AccessRestricted {
     event NewRental(
         string _ownerMail,
         string _patentName,
-        address _rentee,
-        uint _numDays
+        address _rentee
     );
 
     /* Constructor of the contract
@@ -48,12 +48,11 @@ contract Patenting is AccessRestricted {
         patentCount++;
     }
 
-    function rentPatent(string _patentName, uint _daysAfter) public payable returns (bool){
-        require(patents[_patentName].authorized[msg.sender] == 0 && msg.value >= patents[_patentName].price); //TODO : change this verification
-        patents[_patentName].authorized[msg.sender] = now + _daysAfter * 1 days;
-        patents[_patentName].owner.transfer(patents[_patentName].price);
-        NewRental(patents[_patentName].email, _patentName, msg.sender, _daysAfter);
-        return true;
+    function buyPatent(string _patentName) public payable {
+        require(!isAuthorized(_patentName, msg.sender) && msg.value >= patents[_patentName].price);
+        patents[_patentName].authorized[msg.sender] = true; //Authorize sender
+        patents[_patentName].owner.transfer(patents[_patentName].price); //Send funds to patent owner
+        NewRental(patents[_patentName].email, _patentName, msg.sender); //Emit new event for email
     }
 
     /*Allows the owner to withdraw the remaining funds*/
@@ -63,29 +62,38 @@ contract Patenting is AccessRestricted {
 
     /*-----------------------------------View functions that do not require transactions-----------------------------------*/
 
+    /*Verifies that the given address is authorized for the given patent*/
+    function isAuthorized(string _patentName, address _account) public view returns (bool){
+        return patents[_patentName].authorized[_account] || getPatentOwner(_patentName) == _account;
+    }
 
+    /*Returns time-stamp of the Patent*/
     function getTimeStamp(string _patentName) public view returns (uint){
         return patents[_patentName].timestamp;
     }
 
-    function getRemainingTime(string _patentName, address _user) public view returns (uint){
-        return patents[_patentName].authorized[_user] - now ;
-    }
+    /*Returns the sha256 hash of the patent*/
     function getPatentHash(string _patentName) public view returns (string){
         return patents[_patentName].patentHash;
     }
 
+    /*Returns patent's owner*/
     function getPatentOwner(string _patentName) public view returns (address) {
         return patents[_patentName].owner;
     }
 
-    function getRentalPrice(string _patentName) public view returns (uint){
+    /*Returns the price of a patent*/
+    function getPrice(string _patentName) public view returns (uint){
         return patents[_patentName].price;
     }
+
+    /*Returns the IPFS location of the patent*/
     function getPatentLocation(string _patentName) public view returns (string) {
-        require(patents[_patentName].authorized[msg.sender] > now || msg.sender == patents[_patentName].owner);
+        require(isAuthorized(_patentName, msg.sender));
         return patents[_patentName].ipfs;
     }
+
+
 
 
 

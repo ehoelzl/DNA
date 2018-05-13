@@ -1,24 +1,26 @@
-/*
 import React, {Component} from 'react';
 import {FieldGroup, SubmitButton, ContractNotFound} from '../utils/htmlElements';
 import {getFileHash, toEther, fromEther} from '../utils/stampUtil';
+import wrapWithMetamask from '../MetaMaskWrapper'
 import Patenting from '../../build/contracts/Patenting';
-//import Bundle from '../utils/ipfsBundle'
+import Bundle from '../utils/ipfsBundle'
 import Constants from '../Constants'
-import {validateEmail} from '../utils/htmlElements'
+import {validateEmail, validatePDF} from '../utils/htmlElements'
 
+import {INVALID_FORM, contractError} from '../utils/ErrorHandler'
 
-class DepositPatent extends Component {
+/*Component for Patent Deposit*/
+class DepositPatent_class extends Component {
 
-
+  /*Component Constructor*/
   constructor(props) {
     super(props);
-    //this.bundle = new Bundle();
+    this.bundle = new Bundle();
     this.state = {
       hash: "",
       ipfsLocation: "",
       patentName: "",
-      rentalPrice: 0,
+      price: "",
       file: "",
       email_address: "",
       repeat_email: "",
@@ -32,19 +34,8 @@ class DepositPatent extends Component {
     this.submitPatent = this.submitPatent.bind(this);
   }
 
-  resetForm() {
-    this.setState({
-      hash: "",
-      ipfsLocation: "",
-      patentName: "",
-      rentalPrice: 0,
-      file: "",
-      email_address: "",
-      repeat_email: "",
-      waitingTransaction: false
-    })
-  }
-
+  /*Called before the component is mounted
+  * Instantiates the contract and stores the price of a patent*/
   componentWillMount() {
     const contract = require('truffle-contract');
     const patenting = contract(Patenting);
@@ -53,9 +44,103 @@ class DepositPatent extends Component {
       this.setState({contractInstance: instance});
       return instance.patentPrice.call()
     }).then(price => this.setState({patentPrice: toEther(price, this.state.web3)}))
-      .catch(error => console.log(error.message));
+      .catch(error => console.log(error.message)); //TODO : change this error Handler
   }
 
+
+  /*--------------------------------- HELPER METHODS AND VALIDATION ---------------------------------*/
+
+  /*Resets the form*/
+  resetForm() {
+    this.setState({
+      hash: "",
+      ipfsLocation: "",
+      patentName: "",
+      price: "",
+      file: "",
+      email_address: "",
+      repeat_email: "",
+      waitingTransaction: false
+    })
+  }
+
+  /*Checks if Patent Name length is less than 100 */
+  validateName() {
+    let length = this.state.patentName.length;
+    if (length === 0) {
+      return null;
+    } else if (length <= 100) {
+      return "success"
+    } else {
+      return "error";
+    }
+  }
+
+  /*Checks that 0 <= price <= 1*/
+  validatePrice() {
+    if (this.state.price === "") {
+      return null
+    } else if (!isNaN(this.state.price)) {
+      let price = parseInt(this.state.price, 10);
+      return (price <= 1 && price >= 0 ? 'success' : 'warning');
+    } else {
+      return 'error'
+    }
+
+  }
+
+  /*Returns True if all form validation pass*/
+  validateForm() {
+    return (this.validatePrice() === 'success' && this.validateName() === 'success' && this.state.hash !== "" && this.state.ipfsLocation !== "")
+  }
+
+
+  /*Handles the change in a form component*/
+  handleChange(e) {
+    e.preventDefault();
+    let state = this.state;
+    if (e.target.name === 'file') {
+      let file = e.target.files[0];
+      if (validatePDF(file)) { //Verifies that the file is in PDF and less than 10MB
+        this.setState({file: file});
+        this.bundle.addFile(file, window, true).then(files => this.setState({ipfsLocation: files[0].path})).catch(err => alert(err.message)); //Only get the hash of IPFS
+        getFileHash(file, window).then(res => this.setState({hash: res, file: file})).catch(err => alert(err.message)); // Here we get the sha256 hash of the doc
+      }
+    } else {
+      state[e.target.name] = e.target.value;
+      this.setState(state);
+    }
+  }
+
+  /*Function that triggers the contract call to Deposit a patent*/
+  submitPatent(e) {
+    e.preventDefault();
+    if (this.validateForm()) {
+      this.setState({waitingTransaction: true});
+      this.state.contractInstance.depositPatent(this.state.patentName, this.state.hash, fromEther(this.state.price, this.state.web3), this.state.ipfsLocation, this.state.email_address, {
+        from: this.state.web3.eth.coinbase,
+        value: fromEther(this.state.patentPrice, this.state.web3),
+        gas: Constants.GAS_LIMIT
+      }).then(tx => {
+        return this.bundle.addFile(this.state.file, window) //TODO : encrypt the file
+      }).then(filesAdded => {
+        alert("Patent has been added, IPFS link : ipfs.io/ipfs/" + filesAdded[0].path); //TODO : change strings to constants
+        this.resetForm();
+      }).catch(error => {
+        console.log(error)
+        contractError(error); //Handles the error
+        this.resetForm();
+      });
+    } else {
+      alert(INVALID_FORM);
+      this.resetForm()
+    }
+
+  }
+
+  /*--------------------------------- USER INTERFACE COMPONENTS ---------------------------------*/
+
+  /*The header to be displayed*/
   static header() {
     return (
       <section className="header">
@@ -77,80 +162,6 @@ class DepositPatent extends Component {
     );
   }
 
-  validateName() {
-    let length = this.state.patentName.length;
-    if (length === 0) {
-      return null;
-    } else if (length <= 100) {
-      return "success"
-    } else {
-      return "error";
-    }
-  }
-
-  validatePrice() {
-    if (!isNaN(this.state.rentalPrice)) {
-      let price = parseInt(this.state.rentalPrice, 10);
-      return price <= 1 && price >= 0;
-    }
-    return false
-  }
-
-
-  validateFile() {
-    if (this.state.file.type === "") {
-      alert('Please select a file');
-    } else if (this.state.file.type !== 'application/pdf') {
-      alert('File must be in PDF format');
-    }
-    return this.state.file !== "" && this.state.file.type === 'application/pdf';
-  }
-
-  validateForm() {
-    return (this.validateFile() && this.validatePrice() && this.validateName() === 'success' && this.state.hash !== "" && this.state.ipfsLocation !== "")
-  }
-
-
-  handleChange(e) {
-    e.preventDefault();
-    let state = this.state;
-    if (e.target.name === 'file') {
-      let file = e.target.files[0];
-      this.setState({file: file});
-      this.bundle.addFile(file, window, true).then(files => this.setState({ipfsLocation: files[0].path})).catch(err => alert(err.message)); //Only get the hash of IPFS
-      getFileHash(file, window).then(res => this.setState({hash: res, file: file})).catch(err => alert(err.message)); // Here we get the sha256 hash of the doc
-    } else {
-      state[e.target.name] = e.target.value;
-      this.setState(state);
-    }
-  }
-
-  submitPatent(e) {
-    e.preventDefault();
-
-    /!*if (this.validateForm()) {
-      this.setState({waitingTransaction: true});
-      this.state.contractInstance.depositPatent(this.state.patentName, this.state.hash, fromEther(this.state.rentalPrice, this.state.web3), this.state.ipfsLocation, this.state.email_address, {
-        from: this.state.web3.eth.coinbase,
-        value: fromEther(this.state.patentPrice, this.state.web3),
-        gas: Constants.GAS_LIMIT
-      }).then(tx => {
-        return this.bundle.addFile(this.state.file, window) //TODO : encrypt the file
-      }).then(filesAdded => {
-        alert("Patent has been added, IPFS link : ipfs.io/ipfs/" + filesAdded[0].path);
-        this.resetForm();
-      }).catch(error => { //TODO : change error handling
-        console.log(error);
-        alert("There was a problem while depositing patent.");
-        this.resetForm();
-      });
-    } else {
-      alert('Please verify your information');
-      this.resetForm()
-    }*!/
-
-  }
-
   renderForm() {
     return (
       <div className="time-stamp-container">
@@ -162,9 +173,9 @@ class DepositPatent extends Component {
           <FieldGroup name="patentName" id="formsControlsName" label="Patent Name" type="text"
                       value={this.state.patentName} placeholder="Enter the Patent name" help="Max 100 chars"
                       onChange={this.handleChange} validation={this.validateName()}/>
-          <FieldGroup name="rentalPrice" id="formsControlsName" label="Rental price in ETH" type="text"
-                      value={this.state.rentalPrice} help="Max 1 ETH"
-                      onChange={this.handleChange}/>
+          <FieldGroup name="price" id="formsControlsName" label="Rental price in ETH" type="text"
+                      value={this.state.price} help="Max 1 ETH"
+                      onChange={this.handleChange} validation={this.validatePrice()}/>
           <FieldGroup name="email_address" id="formsControlsEmail" label="Email address" type="email"
                       value={this.state.email_address} placeholder="john@doe.com" help=""
                       onChange={this.handleChange}/>
@@ -189,5 +200,6 @@ class DepositPatent extends Component {
   }
 }
 
+const DepositPatent = wrapWithMetamask(DepositPatent_class, DepositPatent_class.header());
 export default DepositPatent;
-*/
+
