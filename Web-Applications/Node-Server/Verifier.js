@@ -9,6 +9,7 @@ const timeStamping = contract(TimeStamping_abi);
 
 /*This class Helps verify the signature of a document and get the timestamp from the smart contract*/
 class Verifier {
+
   constructor(provider_) {
     timeStamping.setProvider(provider_);
     timeStamping.deployed().then(instance => this.contractInstance = instance)

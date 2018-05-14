@@ -1,8 +1,8 @@
 const http = require('http');
+const formidable = require('formidable');
 const Timestamper = require('./Timestamper');
 const Verifier = require('./Verifier');
 const Patenter = require('./Patenting');
-const formidable = require('formidable');
 
 /*-------------------------------Imports for interaction with Smart Contracts-------------------------------*/
 
@@ -19,6 +19,10 @@ const local_rpc = "http://127.0.0.1:7545";
 
 const provider = new HDWalletProvider(process.argv[2] === 'true' ? rpc_mnemonic: ropsten_mnemonic, process.argv[2] === 'true' ? local_rpc : ropsten_node );
 
+let timestamper = new Timestamper(provider);
+let verifier = new Verifier(provider);
+let patenter = new Patenter(provider)
+
 const VERIFY = '/verify';
 const TIMESTAMP = '/timestamp';
 
@@ -29,31 +33,6 @@ function getIPAddress(local = false) {
   }
   return address
 }
-
-let timestamper = new Timestamper(provider);
-let verifier = new Verifier(provider);
-
-//Patenter(provider);
-//patenter.watch();
-const contract = require('truffle-contract')
-const Patenting_abi = require('./build/contracts/Patenting.json');
-const patenting = contract(Patenting_abi);
-const mailer = require('./Mail-server')
-patenting.setProvider(provider);
-let event;
-patenting.deployed().then(instance => {
-  event = instance.NewRental();
-  event.watch(function (err, res) {
-    if (err)
-      console.log(err);
-    else {
-      let rent = res.args;
-      mailer.sendPatent(rent._ownerMail, rent._patentName, rent._rentee);
-    }
-  });
-  console.log('Patenting at ' + instance.address)
-})
-
 
 // Simple server to accumulate hashes
 var server = http.createServer(function (req, res) {
@@ -93,5 +72,5 @@ var server = http.createServer(function (req, res) {
 var port = 4000;
 var host = getIPAddress(process.argv[2] === 'true');
 server.listen(port, host);
+patenter.listen()
 console.log('Listening at http://' + host + ':' + port);
-

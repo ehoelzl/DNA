@@ -1,13 +1,12 @@
-var nodemailer = require('nodemailer');
-
-const SERVER_EMAIL = 'eth.notary@gmail.com';
-const EMAIL_PASSWORD = 'GHS-pc7-ewM-8t9';
+const nodemailer = require('nodemailer');
+const dotenv = require('dotenv');
+dotenv.config()
 
 var transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: SERVER_EMAIL,
-        pass: EMAIL_PASSWORD
+        user: process.env.SERVER_EMAIL,
+        pass: process.env.EMAIL_PASSWORD
     }
 });
 
@@ -44,14 +43,14 @@ module.exports = {
         subject: 'New Rental',
         text: "Dear user, \n\n This email is a notification regarding your deposited patent " +patentName+ ".\n " +
                     "User with address " + rentee + " has requested access. The funds have been transfered to your Ethereum address.\n\n"+
-        "           \"This is an automatic email, please do not answer. \n\n The DNA team \n\n",
+                    "This is an automatic email, please do not answer. \n\n The DNA team \n\n",
       };
       transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
           console.log(error);
         }
         else {
-          console.log('Email sent for Rent: ' + info.response);
+          console.log('Email sent for patent buy: ' + info.response);
         }
       });
     }

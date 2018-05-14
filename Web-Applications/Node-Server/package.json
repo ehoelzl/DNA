@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "dependencies": {
     "crypto": "^1.0.1",
+    "dotenv": "^5.0.1",
     "formidable": "^1.2.1",
     "http": "^0.0.0",
     "merkle": "^0.6.0",

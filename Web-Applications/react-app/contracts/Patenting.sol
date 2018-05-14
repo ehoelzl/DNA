@@ -17,9 +17,7 @@ contract Patenting is AccessRestricted {
         string email;
         //string key; TODO : Potentially add key to secure the file on IPFS
         mapping(address => bool) authorized;
-
     }
-
 
     string[] public patentNames;
     mapping(string => Patent) private patents; //PatentName to struct
@@ -92,9 +90,4 @@ contract Patenting is AccessRestricted {
         require(isAuthorized(_patentName, msg.sender));
         return patents[_patentName].ipfs;
     }
-
-
-
-
-
 }
