@@ -111,7 +111,6 @@ class Timestamper {
   * */
   sendSignatures(merkleTree) {
     let n_hashes = this.hashList.length;
-
     for (let i = 0; i < n_hashes; i++) {
       let h = this.hashList[i];
       mailer.sendStamp(this.hashToMail.get(h)[1], h, merkleTree.getProofPath(i, true), this.hashToMail.get(h)[0]);

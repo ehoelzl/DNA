@@ -14,7 +14,7 @@ function Patenting(provider_) {
       else {
         let rent = res.args;
         console.log(res);
-        mailer.sendRental(rent._ownerMail, rent._patentName, rent._rentee);
+        mailer.sendPatent(rent._ownerMail, rent._patentName, rent._rentee);
       }
     });
     console.log('Patenting at ' + instance.address)
