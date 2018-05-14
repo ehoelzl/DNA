@@ -42,19 +42,18 @@ class Verifier {
   * Returns : A promise that resolves into the timestamp
   */
   getTimestamp(json) {
-    let email;
+
+    if (!(utils.isSignature(json['signature']) && utils.isHash(json['hash'])))
+      throw Error(constants.CORRUPTED);
+
     let hash = json['hash'];
-    let signature = json['signature'];
-    if (!(utils.isSignature(json['signature']) && utils.isHash(hash))) throw Error(constants.CORRUPTED);
+    let signature = JSON.parse(json['signature']);
+    let email = signature.pop()['email'];
 
-    signature = JSON.parse(json['signature']);
-
-    email = signature.pop()['email'];
-    console.log(signature, email);
     console.log("verifying hash " + hash);
+    let root = Verifier.getRootFromProof(hash, email, signature);
+    console.log('Found root: ' + root);
 
-    let root = Verifier.getRootFromProof(hash,email, signature);
-    console.log('Found root ' + root);
     return [this.contractInstance.getTimestamp.call(root), email];
   }
 

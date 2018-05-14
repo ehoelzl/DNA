@@ -37,7 +37,7 @@ module.exports = {
         });
     },
 
-    sendRental: function(ownerMail, patentName, rentee){
+    sendPatent: function(ownerMail, patentName, rentee){
       var mailOptions = {
         from: '"DNA" <eth.notary@gmail.com>',
         to: ownerMail,
