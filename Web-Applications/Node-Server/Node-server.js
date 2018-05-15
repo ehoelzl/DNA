@@ -4,6 +4,8 @@ const Timestamper = require('./Timestamper');
 const Verifier = require('./Verifier');
 const Patenter = require('./Patenting');
 
+require('dotenv').config();
+
 /*-------------------------------Imports for interaction with Smart Contracts-------------------------------*/
 
 const HDWalletProvider = require('truffle-hdwallet-provider');
@@ -11,17 +13,15 @@ const HDWalletProvider = require('truffle-hdwallet-provider');
 
 /*-------------------------------Constants for storage and Blockchain interaction-------------------------------*/
 
-const ropsten_mnemonic = "response exit whisper shuffle energy obey upon bean system derive educate make"; //TODO : encrypt this
-const rpc_mnemonic = 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat';
-
 const ropsten_node = "https://ropsten.infura.io/";
 const local_rpc = "http://127.0.0.1:7545";
 
-const provider = new HDWalletProvider(process.argv[2] === 'true' ? rpc_mnemonic: ropsten_mnemonic, process.argv[2] === 'true' ? local_rpc : ropsten_node );
+const provider = new HDWalletProvider(process.argv[2] === 'true' ? process.env.RPC_MNEMONIC: process.env.ROPSTEN_MNEMONIC,
+                                      process.argv[2] === 'true' ? local_rpc : ropsten_node );
 
 let timestamper = new Timestamper(provider);
 let verifier = new Verifier(provider);
-let patenter = new Patenter(provider)
+let patenter = new Patenter(provider);
 
 const VERIFY = '/verify';
 const TIMESTAMP = '/timestamp';
@@ -72,5 +72,4 @@ var server = http.createServer(function (req, res) {
 var port = 4000;
 var host = getIPAddress(process.argv[2] === 'true');
 server.listen(port, host);
-patenter.listen()
 console.log('Listening at http://' + host + ':' + port);

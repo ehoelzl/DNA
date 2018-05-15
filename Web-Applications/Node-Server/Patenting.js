@@ -11,17 +11,14 @@ class Patenting{
         patenting.deployed().then(instance => {
             this.contractInstance = instance;
             this.event = instance.NewRental();
-        })
-    }
-
-    listen() {
-        this.event.watch(function(err, res) {
-            if (err)
-                console.log(err);
-            else {
-                let rent = res.args;
-                mailer.sendPatent(rent._ownerMail, rent._patentName, rent._rentee);
-            }
+            this.event.watch(function(err, res) {
+                if (err)
+                    console.log(err);
+                else {
+                    let rent = res.args;
+                    mailer.sendPatent(rent._ownerMail, rent._patentName, rent._rentee);
+                }
+            })
         })
     }
 }
