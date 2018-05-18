@@ -4,9 +4,12 @@ import {ButtonGroup, Button, Grid, Row} from 'react-bootstrap'
 import VerifyMetaMask from "./VerifyMetaMask";
 import VerifyFree from "./VerifyFree";
 
-const METAMASK = 1;
-const SERVER = 2;
 
+
+const Service = {
+  METAMASK : 1,
+  SERVER : 2
+};
 /*---------------------------------------------------------------------------------- DONE ----------------------------------------------------------------------------------*/
 
 /* Component that encapsulates both Timestamp Verification pages.
@@ -39,7 +42,7 @@ class VerifyTimestamp extends Component {
 
   /*Sets the selected service and checks if it is valid*/
   setService(service) {
-    if (service === METAMASK || service === SERVER) {
+    if (service === Service.METAMASK || service === Service.SERVER) {
       this.setState({selectedService: service, loadChild: true});
     }
   }
@@ -50,10 +53,10 @@ class VerifyTimestamp extends Component {
   buttons() {
     return (
       <ButtonGroup bsSize="large">
-        <Button onClick={this.setService.bind(this, METAMASK)} disabled={this.state.selectedService === METAMASK}>Metamask
+        <Button onClick={this.setService.bind(this, Service.METAMASK)} disabled={this.state.selectedService === Service.METAMASK}>Metamask
           Client</Button>
-        <Button onClick={this.setService.bind(this, SERVER)}
-                disabled={this.state.selectedService === SERVER}>Server</Button>
+        <Button onClick={this.setService.bind(this, Service.SERVER)}
+                disabled={this.state.selectedService === Service.SERVER}>Server</Button>
       </ButtonGroup>
     )
   }
@@ -63,10 +66,10 @@ class VerifyTimestamp extends Component {
     let child;
     if (this.state.loadChild) {
       switch (this.state.selectedService) {
-        case METAMASK:
+        case Service.METAMASK:
           child = <VerifyMetaMask/>;
           break;
-        case SERVER:
+        case Service.SERVER:
           child = <VerifyFree/>;
           break;
         default :

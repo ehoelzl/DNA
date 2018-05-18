@@ -1,7 +1,7 @@
 import '../css/Pages.css'
 import React, {Component} from 'react';
 import {Table, Grid, Row} from 'react-bootstrap';
-import {stampToDate, ContractNotFound} from '../utils/htmlElements';
+import {stampToDate, ContractNotFound} from '../utils/HtmlElements';
 import Patenting from '../../build/contracts/Patenting';
 import wrapWithMetamask from '../MetaMaskWrapper';
 

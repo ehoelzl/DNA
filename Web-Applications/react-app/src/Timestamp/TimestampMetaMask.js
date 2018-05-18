@@ -1,8 +1,8 @@
 import '../css/Pages.css'
 import React, {Component} from 'react'
 import TimeStamping from '../../build/contracts/TimeStamping'
-import {getFileHash, toEther, fromEther} from '../utils/stampUtil';
-import {FieldGroup, SubmitButton, ContractNotFound} from '../utils/htmlElements';
+import {getFileHash, toEther, fromEther} from '../utils/UtilityFunctions';
+import {FieldGroup, SubmitButton, ContractNotFound} from '../utils/HtmlElements';
 import Constants from '../Constants'
 import {Grid, Row, Col} from 'react-bootstrap'
 
@@ -84,10 +84,10 @@ class TimestampMetaMask_class extends Component {
       this.state.contractInstance.stamp(this.state.hash, {
         from: this.state.web3.eth.coinbase,
         value: fromEther(this.state.stampPrice, this.state.web3),
-        gas: Constants.GAS_LIMIT
+        gas: process.env.REACT_APP_GAS_LIMIT
       }).then(tx => {
-        alert("Timestamping successful, tx : " + tx.tx);
         this.resetForm();
+        alert("Timestamping successful, tx : " + tx.tx); // TODO : constants for strings
       }).catch(err => {
         contractError(err);
         this.resetForm();
@@ -155,9 +155,9 @@ class TimestampMetaMask_class extends Component {
     } else {
       return (
         <Grid>
-          <Row bsClass="contract-address">TimeStamping contract at {this.state.contractAddress} <br/> Stamp price
-            at {this.state.stampPrice} ETH <br/> Using address {this.state.web3.eth.coinbase}</Row>
-          <Row><Col sm={3} md={2} mdOffset={4}>
+          <Row bsClass="contract-address"><Col xsHidden>TimeStamping contract at {this.state.contractAddress} <br/> Stamp price
+            at {this.state.stampPrice} ETH <br/> Using address {this.state.web3.eth.coinbase}</Col></Row>
+          <Row><Col sm={12} md={2} mdOffset={4}>
             {this.renderForm()}
           </Col></Row>
         </Grid>);

@@ -1,20 +1,34 @@
 import Constants from '../Constants'
-import {getFileBuffer} from './stampUtil'
+import {getEncryptedFileBuffer} from './UtilityFunctions'
 
 
 /*Simple bundle to upload files to IPFS*/
 class Bundle {
 
   constructor() {
-    this.node = window.IpfsApi(Constants.IPFS_NODE, 5001, {protocol: 'https'})
+    this.node = window.IpfsApi(process.env.REACT_APP_IPFS, 5001, {protocol: 'https'});
+    this.encryptedFile = null;
   }
 
-  getHash = (file, window) => this.addFile(file, window, true);
+  reset(){
+    this.encryptedFile = null;
+  }
 
-  addFile(file, window, onlyHash = false) {
-    return getFileBuffer(file, window).then(res => {
-      return this.node.files.add(res, {onlyHash: onlyHash})
+  /*Function that encrypts the file and stores it*/
+  encryptFile(file, key) {
+    return getEncryptedFileBuffer(file, window, key).then(res => {
+      this.encryptedFile = res;
+      return new Promise((resolve, reject) => resolve("file encrypted"))
     })
+  }
+
+  /*Gets the IPFS hash of the stored encrypted file*/
+  getHash = () => this.addFile(true);
+
+  addFile(onlyHash = false) {
+    if (this.encryptedFile !== null) {
+      return this.node.files.add(this.encryptedFile, {onlyHash: onlyHash})
+    }
   }
 
 

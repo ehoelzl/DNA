@@ -1,8 +1,8 @@
 import '../css/Pages.css'
 
 import React, {Component} from 'react'
-import {getFileHash} from '../utils/stampUtil';
-import {FieldGroup, SubmitButton, ContractNotFound, stampContainer} from '../utils/htmlElements';
+import {getFileHash} from '../utils/UtilityFunctions';
+import {FieldGroup, SubmitButton, ContractNotFound, stampContainer} from '../utils/HtmlElements';
 import {Grid, Row, Col} from 'react-bootstrap'
 import TimeStamping from '../../build/contracts/TimeStamping'
 import Constants from '../Constants'
@@ -90,13 +90,6 @@ class VerifyMetaMask_class extends Component {
 
   /*--------------------------------- USER INTERFACE COMPONENTS ---------------------------------*/
 
-  /*Render results if displayResult = True*/
-  searchResults() {
-    if (this.state.displayResult) {
-      return stampContainer(this.state.timestamp, this.state.user)
-    }
-  }
-
   /*Form Rendering*/
   renderForm() {
     return (
@@ -116,11 +109,11 @@ class VerifyMetaMask_class extends Component {
     } else {
       return (
         <Grid>
-          <Row bsClass="contract-address">TimeStamping contract at {this.state.contractAddress}</Row>
-          <Row><Col sm={3} md={2} mdOffset={4}>
+          <Row bsClass="contract-address"><Col xsHidden>TimeStamping contract at {this.state.contractAddress}</Col></Row>
+          <Row><Col sm={12} md={2} mdOffset={4}>
             {this.renderForm()}
           </Col></Row>
-          <Row>{this.searchResults()}</Row>
+          <Row>{this.state.displayResult ? stampContainer(this.state.timestamp, this.state.user) : ""}</Row>
         </Grid>)
     }
   }

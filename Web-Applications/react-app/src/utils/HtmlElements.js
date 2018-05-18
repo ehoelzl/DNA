@@ -26,7 +26,6 @@ class FieldGroup extends Component {
 
 /*Submit button Component with loading state */
 class SubmitButton extends Component {
-
   render() {
     return (<Button type='submit' loading={this.props.running} spinColor="#000">Submit</Button>);
   }

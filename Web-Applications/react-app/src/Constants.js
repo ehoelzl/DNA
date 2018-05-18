@@ -1,7 +1,4 @@
 const Constants = {
-  SERVER_IP: 'http://18.216.113.88:4000',//'http://18.191.41.195:4000',//'http://18.218.245.140:4000',//'http://18.216.43.226:4000'
-  GAS_LIMIT: 500000,
-  IPFS_NODE: 'ipfs.infura.io',
   EMAIL: 'email',
   HASH: 'hash',
   NAME: 'name',

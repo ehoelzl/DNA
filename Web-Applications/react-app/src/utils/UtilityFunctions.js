@@ -1,6 +1,7 @@
 import sha256 from "sha256";
+import AES from 'crypto-js/aes'
 /*
-* Utility function to get the hash of a file
+* Utility function to get the sha256 hash of a file
 *
 * Returns a Promise containing the hash of the file hashed as a byte array using SHA256
 * */
@@ -28,8 +29,10 @@ const getFileHash = function (file, window) {
   })
 };
 
-/*Function used to return the Byte content of a file*/
-const getFileBuffer = function (file, window) {
+/*Function used to return the encrypted Byte content of a file
+* Uses AES encryption with the given key
+* */
+const getEncryptedFileBuffer = function (file, window, key) {
   return new Promise(function (resolve, reject) {
     let f = file;
     if (typeof window.FileReader !== 'function') {
@@ -38,6 +41,8 @@ const getFileBuffer = function (file, window) {
 
     if (!f) {
       reject("Please select a file");
+    } else if (!key) {
+      reject("Please select a key");
     } else {
       let fr = new window.FileReader();
       fr.onload = getBuffer;
@@ -45,8 +50,9 @@ const getFileBuffer = function (file, window) {
     }
 
     function getBuffer(data) {
-      let buffer = data.target.result;
-      resolve(Buffer.from(buffer))
+      let buffer = Buffer.from(data.target.result);
+      let encrypted = Buffer.from(AES.encrypt(JSON.stringify(buffer), key).toString());
+      resolve(encrypted)
     }
 
 
@@ -90,6 +96,7 @@ const toEther = function (priceInWei, web3) {
   }
 };
 
+/*Helper function that converts Ether to Wei*/
 const fromEther = function (priceInEth, web3) {
   if (web3 !== null) {
     return web3.toWei(priceInEth, 'ether');
@@ -99,7 +106,7 @@ const fromEther = function (priceInEth, web3) {
 
 module.exports = {
   getFileHash,
-  getFileBuffer,
+  getEncryptedFileBuffer,
   extractJson,
   toEther,
   fromEther

@@ -2,15 +2,15 @@ import '../css/Pages.css'
 import React, {Component} from 'react'
 import axios from "axios/index";
 import TimeStamping from '../../build/contracts/TimeStamping'
-import {FieldGroup, stampContainer, SubmitButton} from '../utils/htmlElements';
-import {getFileHash, extractJson} from "../utils/stampUtil";
+import {FieldGroup, stampContainer, SubmitButton} from '../utils/HtmlElements';
+import {getFileHash, extractJson} from "../utils/UtilityFunctions";
 import Constants from '../Constants';
 import {Grid, Row, Col} from 'react-bootstrap'
 
 import {serverError, INVALID_FORM, LARGE_FILE} from '../utils/ErrorHandler'
 
 const OPERATION = 'verify';
-const SERVER_ADDRESS = Constants.SERVER_IP + '/' + OPERATION;
+const SERVER_ADDRESS = process.env.REACT_APP_SERVER + '/' + OPERATION;
 
 /*---------------------------------------------------------------------------------- DONE ----------------------------------------------------------------------------------*/
 
@@ -132,9 +132,10 @@ class VerifyFree extends Component {
   render() {
     return (
       <Grid>
-        <Row bsClass="contract-address">TimeStamping contract at {TimeStamping.networks[3].address} (Ropsten
-          Testnet)</Row>
-        <Row><Col sm={3} md={2} mdOffset={4}>
+        <Row bsClass="contract-address"><Col xsHidden>TimeStamping contract
+          at {TimeStamping.networks[3].address} (Ropsten
+          Testnet)</Col></Row>
+        <Row><Col sm={12} md={2} mdOffset={4}>
           {this.renderForm()}
         </Col></Row>
         <Row>{this.searchResults()}</Row>

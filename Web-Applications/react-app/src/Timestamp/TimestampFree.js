@@ -2,14 +2,14 @@ import '../css/Pages.css'
 import axios from 'axios'
 import React, {Component} from 'react'
 import TimeStamping from '../../build/contracts/TimeStamping'
-import {getFileHash} from '../utils/stampUtil';
-import {FieldGroup, SubmitButton, validateEmail} from '../utils/htmlElements';
+import {getFileHash} from '../utils/UtilityFunctions';
+import {FieldGroup, SubmitButton, validateEmail} from '../utils/HtmlElements';
 import Constants from '../Constants'
 import {Grid, Row, Col} from 'react-bootstrap'
 import {serverError, INVALID_FORM, LARGE_FILE} from '../utils/ErrorHandler'
 
 const OPERATION = 'timestamp';
-const SERVER_ADDRESS = Constants.SERVER_IP + '/' + OPERATION;
+const SERVER_ADDRESS = process.env.REACT_APP_SERVER + '/' + OPERATION;
 
 
 /*---------------------------------------------------------------------------------- DONE ----------------------------------------------------------------------------------*/
@@ -151,10 +151,10 @@ class TimestampFree extends Component {
             to retrieve the time-stamp.
           </p>
         </Row>
-        <Row bsClass="contract-address">
-          Time-stamping contract at {TimeStamping.networks[3].address} (Ropsten Testnet)
+        <Row bsClass="contract-address"> <Col xsHidden>
+          Time-stamping contract at {TimeStamping.networks[3].address} (Ropsten Testnet)</Col>
         </Row>
-        <Row><Col sm={3} md={5} mdOffset={3} className="form">{this.renderForm()}</Col></Row>
+        <Row><Col sm={12} md={5} mdOffset={3} className="form">{this.renderForm()}</Col></Row>
       </Grid>
     );
   }

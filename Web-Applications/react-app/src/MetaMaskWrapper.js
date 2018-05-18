@@ -6,15 +6,21 @@ import getWeb3 from './utils/getWeb3'
 import {METAMASK_NOTFOUND, INVALID_NETWORK, UNLOCK_METAMASK} from './utils/ErrorHandler'
 
 /*Constants for rendering and network selection*/
-const MAINNET = 1;
-const ROPSTEN = 3;
-const KOVAN = 4;
-const LOCALRPC = 5777;
 
-const MAINNET_STRING = "Ethereum Main Net";
-const ROPSTEN_STRING = "Ropsten Test Net";
-const KOVAN_STRING = "Kovan Test Net";
-const LOCALRPC_STRING = "Local RPC";
+const Networks = {
+  MAINNET : 1,
+  ROPSTEN : 3,
+  KOVAN : 4,
+  LOCALRPC : 5777
+};
+
+const NetworkStrings = {
+  MAINNET : "Ethereum Main Net",
+  ROPSTEN : "Ropsten Test Net",
+  KOVAN : "Kovan Test Net",
+  LOCALRPC : "Local RPC"
+};
+
 
 /*---------------------------------------------------------------------------------- DONE ----------------------------------------------------------------------------------*/
 
@@ -57,7 +63,6 @@ function wrapWithMetamask(Wrapped, header) {
             this.setNetwork(networkId);
           }
         })
-
       }).catch(e => {
         alert(METAMASK_NOTFOUND);
       });
@@ -73,17 +78,17 @@ function wrapWithMetamask(Wrapped, header) {
           this.resetState();
         } else {
           switch (id) {
-            case MAINNET:
-              this.setState({selectedNetwork: MAINNET, loadChild: true});
+            case Networks.MAINNET:
+              this.setState({selectedNetwork: Networks.MAINNET, loadChild: true});
               break;
-            case ROPSTEN:
-              this.setState({selectedNetwork: ROPSTEN, loadChild: true});
+            case Networks.ROPSTEN:
+              this.setState({selectedNetwork: Networks.ROPSTEN, loadChild: true});
               break;
-            case KOVAN:
-              this.setState({selectedNetwork: KOVAN, loadChild: true});
+            case Networks.KOVAN:
+              this.setState({selectedNetwork: Networks.KOVAN, loadChild: true});
               break;
-            case LOCALRPC:
-              this.setState({selectedNetwork: LOCALRPC, loadChild: true});
+            case Networks.LOCALRPC:
+              this.setState({selectedNetwork: Networks.LOCALRPC, loadChild: true});
               break;
             default :
               this.setState({selectedNetwork: "Unknown Network", loadChild: false});
@@ -100,14 +105,14 @@ function wrapWithMetamask(Wrapped, header) {
     buttons() {
       return (
         <ButtonGroup bsSize="large">
-          <Button onClick={this.getWeb3Object.bind(this, MAINNET)}
-                  disabled={this.state.selectedNetwork === MAINNET}>{MAINNET_STRING}</Button>
-          <Button onClick={this.getWeb3Object.bind(this, ROPSTEN)}
-                  disabled={this.state.selectedNetwork === ROPSTEN}>{ROPSTEN_STRING}</Button>
-          <Button onClick={this.getWeb3Object.bind(this, KOVAN)}
-                  disabled={this.state.selectedNetwork === KOVAN}>{KOVAN_STRING}</Button>
-          <Button onClick={this.getWeb3Object.bind(this, LOCALRPC)}
-                  disabled={this.state.selectedNetwork === LOCALRPC}>{LOCALRPC_STRING}</Button>
+          <Button onClick={this.getWeb3Object.bind(this, Networks.MAINNET)}
+                  disabled={this.state.selectedNetwork === Networks.MAINNET}>{NetworkStrings.MAINNET}</Button>
+          <Button onClick={this.getWeb3Object.bind(this, Networks.ROPSTEN)}
+                  disabled={this.state.selectedNetwork === Networks.ROPSTEN}>{NetworkStrings.ROPSTEN}</Button>
+          <Button onClick={this.getWeb3Object.bind(this, Networks.KOVAN)}
+                  disabled={this.state.selectedNetwork === Networks.KOVAN}>{NetworkStrings.KOVAN}</Button>
+          <Button onClick={this.getWeb3Object.bind(this, Networks.LOCALRPC)}
+                  disabled={this.state.selectedNetwork === Networks.LOCALRPC}>{NetworkStrings.LOCALRPC}</Button>
         </ButtonGroup>
       );
     }

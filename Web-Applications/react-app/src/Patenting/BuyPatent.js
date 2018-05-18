@@ -1,8 +1,8 @@
 import '../css/Pages.css'
 import React, {Component} from 'react';
 import {Table, Grid, Row} from 'react-bootstrap';
-import {stampToDate, ContractNotFound} from '../utils/htmlElements';
-import {toEther} from '../utils/stampUtil';
+import {stampToDate, ContractNotFound} from '../utils/HtmlElements';
+import {toEther} from '../utils/UtilityFunctions';
 import Patenting from '../../build/contracts/Patenting';
 import wrapWithMetamask from '../MetaMaskWrapper'
 
