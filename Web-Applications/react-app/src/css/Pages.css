@@ -4,7 +4,8 @@
 
 .form {
     padding-left: 80px;
-    padding-bottom: 50px;
+    padding-bottom: 100px;
+
 }
 
 .contract-address {
@@ -44,11 +45,34 @@
 }
 
 .patent-table {
+    margin-bottom: 50px;
 }
 
 .patent-table td {
     cursor: pointer;
 }
+
+.requests-container{
+    width : 60%;
+    margin-left : 20%;
+    margin-bottom: 50px;
+}
+
+.request-list{
+    margin-top: 15px;
+    margin-bottom: 100px;
+}
+
+.request-title{
+    font-size: 17px;
+    text-align: center;
+}
+
+.download-button{
+    background-color: #e5e5e5;
+}
+
+
 
 @media (max-width: 992px) {
     .paragraph {

@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import {BrowserRouter, Route, Switch, browserHistory} from 'react-router-dom'
+import {BrowserRouter, Route, Switch} from 'react-router-dom'
 import 'bootstrap/dist/css/bootstrap.css'
 
 import './css/index.css'
@@ -11,8 +11,9 @@ import TimestampMetaMask from "./Timestamp/TimestampMetaMask";
 import TimestampFree from './Timestamp/TimestampFree';
 import VerifyTimestamp from './VerifyTimestamp/VerifyTimestamp';
 import DepositPatent from './Patenting/DepositPatent';
-import BuyPatent from './Patenting/BuyPatent';
+import RequestAccess from './Patenting/RequestAccess';
 import MyPatents from './Patenting/MyPatents';
+import MyRequests from './Patenting/MyRequests'
 import dotenv from 'dotenv';
 
 
@@ -21,9 +22,9 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 ReactDOM.render(
-  <BrowserRouter history={browserHistory}>
+  <BrowserRouter>
+    {/*<BrowserRouter history={browserHistory}>*/}
     <div>
-
       <NavigationBar/>
       <Switch>
         <Route exact path='/' component={Home}/>
@@ -31,8 +32,9 @@ ReactDOM.render(
         <Route exact path='/PersonalTimestamp' component={TimestampMetaMask}/>
         <Route exact path='/VerifyTimestamp' component={VerifyTimestamp}/>
         <Route exact path='/DepositPatent' component={DepositPatent}/>
-        <Route exact path='/RentPatent' component={BuyPatent}/>
+        <Route exact path='/RequestAccess' component={RequestAccess}/>
         <Route exact path='/MyPatents' component={MyPatents}/>
+        <Route exact path='/MyRequests' component={MyRequests}/>
       </Switch>
     </div>
   </BrowserRouter>,

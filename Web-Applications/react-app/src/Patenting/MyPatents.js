@@ -1,14 +1,15 @@
 import '../css/Pages.css'
 import React, {Component} from 'react';
-import {Table, Grid, Row} from 'react-bootstrap';
+import {Table, Grid, Row, Button, ButtonGroup, Glyphicon} from 'react-bootstrap';
 import {stampToDate, ContractNotFound} from '../utils/HtmlElements';
 import Patenting from '../../build/contracts/Patenting';
 import wrapWithMetamask from '../MetaMaskWrapper';
 
+import PatentRequests from './PatentRequests'
 
-//import ViewerPDF from '../utils/ViewerPDF';
-import {contractError, NOT_AUTHORIZED} from '../utils/ErrorHandler'
+import {contractError, NOT_OWNER} from '../utils/ErrorHandler'
 
+/*Component to view User's deposited patents*/
 class MyPatents_class extends Component {
 
   /*Constructor Method, initializes the State*/
@@ -18,14 +19,18 @@ class MyPatents_class extends Component {
       web3: props.web3,
       contractInstance: null,
       numPatents: 0,
-      patents: []
+      patents: [],
+      displayDetails: false,
+      selectedPatent: null,
     };
 
     this.getMyPatents = this.getMyPatents.bind(this);
+    this.nextPatent = this.nextPatent.bind(this);
+    this.prevPatent = this.prevPatent.bind(this);
   }
 
   /*Method called before the component is mounted, initializes the contract and the page content*/
-  componentWillMount() {
+  componentDidMount() {
     const contract = require('truffle-contract');
     const patenting = contract(Patenting);
     patenting.setProvider(this.state.web3.currentProvider);
@@ -34,13 +39,13 @@ class MyPatents_class extends Component {
       return instance.patentCount.call()
     }).then(count => {
       this.getMyPatents(count.toNumber());
-    }).catch(error => console.log('Error' + error)); //Todo : change this error handler
+    }).catch(error => this.setState({contractInstance: null}));
   }
 
   /*--------------------------------- HELPER METHODS AND VALIDATION ---------------------------------*/
 
 
-  /*Function that gets all authorized patent information form the contract and stores them in the state*/
+  /*Function that gets all owned patent information form the contract and stores them in the state*/
   getMyPatents(numPatents) {
     if (this.state.contractInstance !== null) {
       let instance = this.state.contractInstance;
@@ -49,29 +54,31 @@ class MyPatents_class extends Component {
         let new_entry = {};
         instance.patentNames.call(i).then(name => {
           patentName = name;
-          return instance.isAuthorized(patentName, this.state.web3.eth.coinbase)
-        }).then(authorized => {
-          if (authorized) {
+          return instance.isOwner.call(patentName, this.state.web3.eth.coinbase)
+        }).then(isOwner => {
+          if (isOwner) {
             return instance.getTimeStamp.call(patentName)
           } else {
-            throw Error(NOT_AUTHORIZED)
+            throw Error(NOT_OWNER)
           }
         }).then(timestamp => {
           new_entry['name'] = patentName;
           new_entry['timestamp'] = timestamp.toNumber();
-          return instance.getPatentOwner.call(new_entry['name'])
-        }).then(owner => {
-          new_entry['owner'] = owner === this.state.web3.eth.coinbase ? 'You' : owner;
-          return this.state.contractInstance.getPatentLocation(patentName, {
-            from: this.state.web3.eth.coinbase
-          });
+          return instance.getNumRequests.call(patentName);
+        }).then(num => {
+          new_entry['numRequests'] = num.toNumber();
+          return instance.getPatentHash.call(patentName);
+        }).then(hash => {
+          new_entry['hash'] = hash;
+          return instance.getPatentLocation.call(patentName);
         }).then(loc => {
-          new_entry['location'] = loc;
+          new_entry['ipfsLocation'] = loc;
+          new_entry['index'] = this.state.numPatents;
           let patents = this.state.patents;
           patents.push(new_entry);
           this.setState({patents: patents, numPatents: this.state.numPatents + 1});
         }).catch(e => {
-          if (e.message !== NOT_AUTHORIZED) { //Catch error if the patent is not authorized
+          if (e.message !== NOT_OWNER) { //Catch error if the patent is not authorized
             contractError(e)
           }
         })
@@ -79,12 +86,53 @@ class MyPatents_class extends Component {
     }
   }
 
-  //TODO : CHange this to decrypt PDF
-  getPdf(ipfsLocation) {
-    window.open("https://ipfs.io/ipfs/" + ipfsLocation, "_blank");
+  /*--------------------------------- EVENT HANDLERS ---------------------------------*/
+
+
+  openDetails(patent) {
+    this.setState({displayDetails: true, selectedPatent: patent});
+  }
+
+  nextPatent() {
+    if (this.state.displayDetails && this.state.selectedPatent !== null && this.state.selectedPatent.index < this.state.numPatents - 1) {
+      this.setState({selectedPatent: this.state.patents[this.state.selectedPatent.index + 1]})
+    }
+  }
+
+  prevPatent() {
+    if (this.state.displayDetails && this.state.selectedPatent !== null && this.state.selectedPatent.index > 0) {
+      this.setState({selectedPatent: this.state.patents[this.state.selectedPatent.index - 1]})
+    }
   }
 
   /*--------------------------------- USER INTERFACE COMPONENTS ---------------------------------*/
+
+  buttonToolbar() {
+    return (
+      <ButtonGroup justified>
+        <ButtonGroup>
+          <Button onClick={() => this.setState({displayDetails: false, selectedPatent: null})}> <Glyphicon
+            glyph="triangle-top"/>Hide Details</Button>
+        </ButtonGroup>
+        <ButtonGroup>
+          <Button onClick={this.prevPatent}> <Glyphicon glyph="menu-left"/>Prev Patent</Button>
+        </ButtonGroup>
+        <ButtonGroup>
+          <Button onClick={this.nextPatent}><Glyphicon glyph="menu-right"/>Next Patent</Button>
+        </ButtonGroup>
+      </ButtonGroup>);
+  }
+
+
+  renderDetails() {
+    return (
+      <div className="requests-container">
+        {this.buttonToolbar()}
+        <PatentRequests web3={this.state.web3} contractInstance={this.state.contractInstance}
+                        patent={this.state.selectedPatent}/>
+      </div>
+    )
+  }
 
   /*Header for the Component, For the Metamask wrapper*/
   static header() {
@@ -92,9 +140,10 @@ class MyPatents_class extends Component {
       <Grid>
         <Row bsClass='title'>My patents</Row>
         <Row bsClass='paragraph'>
-          <p>This page allows users to view the Patents they have deposited, and the ones they have bought. <br/>
-            To reveal a patent IPFS location, please click on the corresponding row and you will be redirected<br/>
-            <br/>You only need to <b>unlock your Metamask extension</b> and choose the document you want to access.
+          <p>This page allows users to view the Patents they have deposited, and accept requests for these
+            Patents. <br/>
+            To see the requests, please click on the corresponding patent and you will be redirected<br/>
+            <br/>You only need to <b>unlock your Metamask extension</b>.
           </p>
         </Row>
       </Grid>
@@ -105,12 +154,11 @@ class MyPatents_class extends Component {
   /*Returns a table row for the given patent*/
   getRow(patent) {
     return (
-      // onClick={this.revealIpfsLocation.bind(this, patent)}
-      <tr key={patent.name} onClick={this.getPdf.bind(this, patent.location)}>
+      <tr key={patent.name} onClick={this.openDetails.bind(this, patent)}>
         <td>{patent.name}</td>
-        <td>{patent.owner}</td>
         <td>{stampToDate(patent.timestamp)}</td>
-        {/*<td>{patent.location}</td>*/}
+        <td>{patent.hash}</td>
+        <td>{patent.numRequests}</td>
       </tr>
     )
   }
@@ -122,9 +170,9 @@ class MyPatents_class extends Component {
       let header = (
         <tr>
           <th>Patent Name</th>
-          <th>Owner's address</th>
           <th>Submission Date</th>
-          {/*<th>Patent Location</th>*/}
+          <th>Document Hash</th>
+          <th>Number of requests</th>
         </tr>
       );
       return (
@@ -132,6 +180,8 @@ class MyPatents_class extends Component {
           <thead>{header}</thead>
           <tbody>{table}</tbody>
         </Table>)
+    } else {
+      return <div className='not-found'><h3>You do not have any deposited patents on this network</h3></div>
     }
   }
 
@@ -146,7 +196,7 @@ class MyPatents_class extends Component {
             Patenting contract at {this.state.contractInstance.address} <br/>
             <br/> Current account {this.state.web3.eth.accounts[0]} (From Metamask)
           </Row>
-          <Row>{this.renderTable()}</Row>
+          <Row>{this.state.displayDetails ? this.renderDetails() : this.renderTable()}</Row>
         </Grid>)
     }
   }

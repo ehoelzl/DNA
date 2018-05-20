@@ -1,31 +1,34 @@
 import EthUtil from 'ethereumjs-util'
-
+import {KEY_GENERATION_ERROR} from './ErrorHandler'
 
 /*Generates a cryptographic key to encrypt the files on IPFS
 *
-* Key = Elliptic Curve Digital Signature Algo(hash(file)) => depends on user + file and is not reproducable by anyone else
+* Key = Elliptic Curve Digital Signature Algo(sha3(sha256(file)) => depends on user + file and is not reproducable by anyone else
 * */
-const generateKey = function (web3, fileHash) {
+const generatePrivateKey = function (web3, fileHash) {
   let toSign = web3.sha3(fileHash); // Hash the address
   return new Promise((resolve, reject) => {
     web3.eth.sign(web3.eth.coinbase, toSign, (err, res) => {
       if (!err) {
         resolve(res.substr(2, 64));
       } else {
-        reject("Could not generate a key")
+        reject(KEY_GENERATION_ERROR)
       }
     })
   })
 };
 
-const generateAddressFromKey = function (key) {
-  if (key !== null) {
-    let address = EthUtil.privateToAddress(this.key).toString('hex');
-    console.log(key, address);
+/*Returns the public key associated to a given private key*/
+const generatePublicKey = function (privateKey) {
+  if (privateKey !== null) {
+    return EthUtil.privateToPublic(Buffer.from(privateKey, 'hex')).toString('hex');
+  } else {
+    return null
   }
 };
 
 
 module.exports = {
-  generateKey
+  generatePrivateKey,
+  generatePublicKey
 };

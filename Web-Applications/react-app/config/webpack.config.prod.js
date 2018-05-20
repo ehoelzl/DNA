@@ -110,7 +110,7 @@ module.exports = {
       // "file" loader makes sure those assets end up in the `build` folder.
       // When you `import` an asset, you get its filename.
       // "url" loader works just like "file" loader but it also embeds
-      // assets smaller than specified size as data URLs to avoid requests.
+      // assets smaller than specified size as data URLs to avoid pendingRequests.
       {
         exclude: [
           /\.html$/,

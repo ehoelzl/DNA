@@ -1,9 +1,10 @@
 import '../css/Pages.css'
 
 import React, {Component} from 'react'
+import {Grid, Row, Col} from 'react-bootstrap'
+
 import {getFileHash} from '../utils/UtilityFunctions';
 import {FieldGroup, SubmitButton, ContractNotFound, stampContainer} from '../utils/HtmlElements';
-import {Grid, Row, Col} from 'react-bootstrap'
 import TimeStamping from '../../build/contracts/TimeStamping'
 import Constants from '../Constants'
 import {contractError, INVALID_FORM, LARGE_FILE} from '../utils/ErrorHandler'
@@ -26,7 +27,8 @@ class VerifyMetaMask_class extends Component {
       hash: "",
       timestamp: 0,
       user: 0,
-      displayResult: false
+      displayResult: false,
+      waitingTransaction : false
     };
 
     this.submitFile = this.submitFile.bind(this);
@@ -38,21 +40,20 @@ class VerifyMetaMask_class extends Component {
   /*Override : Save the contract instance in the page state using the injected Web3 object (Metamask)
   * Saves the contract instance and its address
   * */
-  componentWillMount() {
+  componentDidMount() {
     const contract = require('truffle-contract');
     const timeStamping = contract(TimeStamping);
     timeStamping.setProvider(this.state.web3.currentProvider);
     timeStamping.deployed().then(instance => {
-      this.setState({contractInstance: instance});
-      this.setState({contractAddress: instance.address});
-    }).catch(error => console.log(error)) // TODO : change this handler
+      this.setState({contractInstance: instance, contractAddress : instance.address});
+    }).catch(error => this.setState({contractInstance : null, contractAddress : 0}))
   }
 
   /*--------------------------------- HELPER METHODS AND VALIDATION ---------------------------------*/
 
   /*Helper method to reset the form*/
   resetForm() {
-    this.setState({hash: "", timestamp: 0, user: 0, displayResult: false});
+    this.setState({hash: "", timestamp: 0, user: 0, displayResult: false, waitingTransaction : false});
   }
 
   /*--------------------------------- EVENT HANDLERS ---------------------------------*/
@@ -74,17 +75,18 @@ class VerifyMetaMask_class extends Component {
   submitFile(e) {
     e.preventDefault();
     if (this.state.hash !== "") {
+      this.setState({waitingTransaction : true});
       this.state.contractInstance.getTimestamp.call(this.state.hash).then(res => {
         this.setState({timestamp: res.toNumber()});
         return this.state.contractInstance.getUser.call(this.state.hash);
-      }).then(res => this.setState({user: res, displayResult: true}))
+      }).then(res => this.setState({user: res, displayResult: true, waitingTransaction : false}))
         .catch(error => {
-          contractError(error);
           this.resetForm();
+          contractError(error);
         });
     } else {
-      alert(INVALID_FORM);
       this.resetForm();
+      alert(INVALID_FORM);
     }
   }
 
