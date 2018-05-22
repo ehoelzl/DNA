@@ -1,4 +1,5 @@
-const http = require('http');
+const https = require('https');
+const fs = require('fs');
 const formidable = require('formidable');
 const Timestamper = require('./Timestamper');
 const Verifier = require('./Verifier');
@@ -34,8 +35,14 @@ function getIPAddress(local = false) {
   return address
 }
 
-// Simple server to accumulate hashes
-var server = http.createServer(function (req, res) {
+const options = {
+    key: fs.readFileSync('key.pem'),
+    cert: fs.readFileSync('cert.pem'),
+    passphrase: process.env.PASSPHRASE
+};
+
+// https server for timestamping and verification
+var server = https.createServer(options, function (req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
 
   if (req.method === 'POST') {
@@ -65,11 +72,10 @@ var server = http.createServer(function (req, res) {
       res.write(response[1]);
       res.end()
     })
-
   }
 });
 
-var port = 4000;
-var host = getIPAddress(process.argv[2] === 'true');
+const port = 4000;
+const host = getIPAddress(process.argv[2] === 'true');
 server.listen(port, host);
 console.log('Listening at http://' + host + ':' + port);
