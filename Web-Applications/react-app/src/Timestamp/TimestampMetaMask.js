@@ -1,11 +1,12 @@
 import '../css/Pages.css'
+
 import React, {Component} from 'react'
-import TimeStamping from '../../build/contracts/TimeStamping'
-import {getFileHash, toEther, fromEther} from '../utils/UtilityFunctions';
-import {FieldGroup, SubmitButton, ContractNotFound} from '../utils/HtmlElements';
-import Constants from '../Constants'
 import {Grid, Row, Col} from 'react-bootstrap'
 
+import TimeStamping from '../../build/contracts/TimeStamping'
+import {getFileHash, toEther, fromEther} from '../utils/UtilityFunctions';
+import {FieldGroup, SubmitButton, ContractNotFound, successfulTx} from '../utils/HtmlElements';
+import Constants from '../Constants'
 import {INVALID_FORM, LARGE_FILE, contractError} from '../utils/ErrorHandler'
 import wrapWithMetamask from "../MetaMaskWrapper";
 
@@ -41,16 +42,15 @@ class TimestampMetaMask_class extends Component {
   /*Override : Save the contract instance in the page state using the injected Web3 object (Metamask)
   * Saves the contract instance, its address and the Stamp price in Ether
   * */
-  componentWillMount() {
+  componentDidMount() {
     const contract = require('truffle-contract');
     const timeStamping = contract(TimeStamping);
     timeStamping.setProvider(this.state.web3.currentProvider);
     timeStamping.deployed().then(instance => {
-      this.setState({contractInstance: instance});
-      this.setState({contractAddress: instance.address});
+      this.setState({contractInstance: instance, contractAddress: instance.address});
       return instance.price.call()
     }).then(price => this.setState({stampPrice: toEther(price, this.state.web3)}))
-      .catch(error => console.log(error)); //TODO : change this error handler
+      .catch(error => this.setState({contractInstance : null, contractAddress : 0}));
   }
 
 
@@ -87,14 +87,14 @@ class TimestampMetaMask_class extends Component {
         gas: process.env.REACT_APP_GAS_LIMIT
       }).then(tx => {
         this.resetForm();
-        alert("Timestamping successful, tx : " + tx.tx); // TODO : constants for strings
+        alert(successfulTx(tx));
       }).catch(err => {
-        contractError(err);
         this.resetForm();
+        contractError(err);
       });
     } else {
-      alert(INVALID_FORM);
       this.resetForm();
+      alert(INVALID_FORM);
     }
   }
 

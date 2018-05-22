@@ -103,7 +103,7 @@ module.exports = {
       // When you `import` an asset, you get its (virtual) filename.
       // In production, they would get copied to the `build` folder.
       // "url" loader works like "file" loader except that it embeds assets
-      // smaller than specified limit in bytes as data URLs to avoid requests.
+      // smaller than specified limit in bytes as data URLs to avoid pendingRequests.
       // A missing `test` is equivalent to a match.
       {
         exclude: [

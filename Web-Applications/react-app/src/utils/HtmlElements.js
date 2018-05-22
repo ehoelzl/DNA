@@ -6,6 +6,22 @@ import '../css/Pages.css'
 import Constants from '../Constants'
 import {LARGE_FILE} from '../utils/ErrorHandler'
 
+const RequestStatus = {
+  NOT_REQUESTED: 0,
+  PENDING: 1,
+  REJECTED: 2,
+  CANCELLED: 3,
+  ACCEPTED: 4
+};
+
+const RequestStatus_String = {
+  NOT_REQUESTED: "-",
+  PENDING: "Pending",
+  REJECTED: "Rejected",
+  CANCELLED: "Cancelled",
+  ACCEPTED: "Accepted"
+};
+
 /*
 * React Component for a FieldGroup (Form field with additional useful features)
 * */
@@ -31,6 +47,7 @@ class SubmitButton extends Component {
   }
 }
 
+/*Simple component to display when contract is not deployed*/
 class ContractNotFound extends Component {
   render() {
     return (<div className="not-found">
@@ -39,11 +56,13 @@ class ContractNotFound extends Component {
   }
 }
 
+/*Converts a unix timestamp to a String with date and time*/
 const stampToDate = function (timestamp) {
   let date = new Date(timestamp * 1000);
   return date.toDateString() + " at " + date.toTimeString();
 };
 
+/*Represents the container that display the given timestamp from the given user*/
 const stampContainer = function (timestamp, user) {
   let container = "";
   if (timestamp !== 0) {
@@ -52,10 +71,26 @@ const stampContainer = function (timestamp, user) {
   } else {
     container = <Alert bsStyle="danger">Document not found in Database</Alert>
   }
-
   return <div className="stamp-result">{container}</div>
 };
 
+/*Returns the string associated to the given status (Between 0 and 3)*/
+const getStatusString = function (status) {
+  switch (status.toNumber()) {
+    case RequestStatus.NOT_REQUESTED:
+      return RequestStatus_String.NOT_REQUESTED;
+    case RequestStatus.PENDING:
+      return RequestStatus_String.PENDING;
+    case RequestStatus.REJECTED:
+      return RequestStatus_String.REJECTED;
+    case RequestStatus.ACCEPTED:
+      return RequestStatus_String.ACCEPTED;
+    default :
+      return ""
+  }
+};
+
+/*Utility function to validate emails*/
 const validateEmail = function (email, repeat) {
   if (email === "") {
     return null;
@@ -68,6 +103,7 @@ const validateEmail = function (email, repeat) {
   }
 };
 
+/*Utility function that returns true if the file is in PDF and less than 10Mb*/
 const validatePDF = function (file) {
   if (file === "") {
     alert('Please select a file');
@@ -79,12 +115,20 @@ const validatePDF = function (file) {
   return file !== "" && file.type === 'application/pdf' && file.size < Constants.MAX_FILE_SIZE;
 };
 
+const successfulTx = function (tx){
+  return "Successful, transaction hash :" + tx.tx
+};
+
 module.exports = {
   FieldGroup,
   SubmitButton,
   ContractNotFound,
   validateEmail,
   stampContainer,
+  getStatusString,
   stampToDate,
-  validatePDF
+  validatePDF,
+  successfulTx,
+  RequestStatus,
+  RequestStatus_String
 };

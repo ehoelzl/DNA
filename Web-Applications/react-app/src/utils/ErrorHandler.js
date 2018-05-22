@@ -9,7 +9,13 @@ const UNLOCK_METAMASK = "Please unlock your Metamask extension and try again";
 const INVALID_NETWORK = "Please choose the network that corresponds to your current Metamask account";
 const LARGE_FILE = "File is too large (exceeds 10MB)";
 const ALREADY_AUTHORIZED = "You already are authorized for this patent";
-const NOT_AUTHORIZED = "Not authorized";
+const NOT_OWNER = "Not owner";
+const ALREADY_REQUESTED = "You have already requested access to this patent";
+const NOT_PENDING = "Request not pending";
+const IPFS_ERROR ="There was an error communicating with IPFS";
+const KEY_ERROR = "The key does not match";
+const NOT_REQUESTED = "Patent not requested";
+const KEY_GENERATION_ERROR = "Could not generate a key";
 
 /*Handles serer error*/
 const serverError = function (error) {
@@ -21,6 +27,7 @@ const serverError = function (error) {
     alert('Error from server : ' + statusMessage)
   }
 };
+
 
 /*Handles contract call errors*/
 const contractError = function (error) {
@@ -48,7 +55,13 @@ module.exports = {
   INVALID_NETWORK,
   LARGE_FILE,
   ALREADY_AUTHORIZED,
-  NOT_AUTHORIZED,
+  ALREADY_REQUESTED,
+  NOT_OWNER,
+  NOT_REQUESTED,
+  NOT_PENDING,
+  IPFS_ERROR,
+  KEY_ERROR,
+  KEY_GENERATION_ERROR,
   contractError,
   serverError
 };

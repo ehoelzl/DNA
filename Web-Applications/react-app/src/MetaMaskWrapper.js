@@ -2,23 +2,24 @@ import './css/Pages.css'
 
 import React, {Component} from 'react';
 import {ButtonGroup, Button, Grid, Row} from 'react-bootstrap';
+
 import getWeb3 from './utils/getWeb3'
 import {METAMASK_NOTFOUND, INVALID_NETWORK, UNLOCK_METAMASK} from './utils/ErrorHandler'
 
 /*Constants for rendering and network selection*/
 
 const Networks = {
-  MAINNET : 1,
-  ROPSTEN : 3,
-  KOVAN : 4,
-  LOCALRPC : 5777
+  MAINNET: 1,
+  ROPSTEN: 3,
+  KOVAN: 42,
+  LOCALRPC: 5777
 };
 
 const NetworkStrings = {
-  MAINNET : "Ethereum Main Net",
-  ROPSTEN : "Ropsten Test Net",
-  KOVAN : "Kovan Test Net",
-  LOCALRPC : "Local RPC"
+  MAINNET: "Ethereum Main Net",
+  ROPSTEN: "Ropsten Test Net",
+  KOVAN: "Kovan Test Net",
+  LOCALRPC: "Local RPC"
 };
 
 
@@ -28,7 +29,7 @@ const NetworkStrings = {
 * The returned component communicates with the Web3 object injected by Metamask and handles the choice of Network
 * This page requires a Web3 object injected into the web page
 *
-* The component passed to the constructor as a props is the Child component (TimestampMetamask, VerifyMetamask, DepositPatent or BuyPatent)
+* The component passed to the constructor as a props is the Child component (TimestampMetamask, VerifyMetamask, DepositPatent or RequestAccess)
 * */
 function wrapWithMetamask(Wrapped, header) {
   return class extends Component {
@@ -58,7 +59,8 @@ function wrapWithMetamask(Wrapped, header) {
         this.setState({web3: result.web3});
         result.web3.eth.getAccounts((err, accounts) => {
           if (err || accounts.length === 0) {
-            alert(UNLOCK_METAMASK)
+            alert(UNLOCK_METAMASK);
+            this.resetState();
           } else {
             this.setNetwork(networkId);
           }
@@ -91,7 +93,7 @@ function wrapWithMetamask(Wrapped, header) {
               this.setState({selectedNetwork: Networks.LOCALRPC, loadChild: true});
               break;
             default :
-              this.setState({selectedNetwork: "Unknown Network", loadChild: false});
+              this.resetState();
               break;
           }
         }

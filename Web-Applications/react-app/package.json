@@ -18,7 +18,7 @@
     "crypto-js": "^3.1.9-1",
     "css-loader": "0.26.0",
     "detect-port": "1.0.1",
-    "dotenv": "^5.0.1",
+    "dotenv": "4.0.0",
     "eslint": "3.8.1",
     "eslint-config-react-app": "^0.5.0",
     "eslint-loader": "1.6.0",
@@ -27,6 +27,7 @@
     "eslint-plugin-jsx-a11y": "2.2.3",
     "eslint-plugin-react": "6.4.1",
     "ethereumjs-util": "^5.2.0",
+    "eth-ecies": "^1.0.2",
     "extract-text-webpack-plugin": "1.0.1",
     "file-loader": "0.9.0",
     "filereader": "^0.10.3",
@@ -66,7 +67,7 @@
     "whatwg-fetch": "1.0.0"
   },
   "dependencies": {
-    "dotenv": "5.0.1",
+    "dotenv": "4.0.0",
     "npm": "^6.0.1",
     "react": "^16.3.2",
     "react-dom": "16.3.2"
