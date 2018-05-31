@@ -1,6 +1,6 @@
 const mailer = require('./Mail-server');
 const contract = require('truffle-contract');
-const Patenting_abi = require('./build/contracts/Patenting.json');
+const Patenting_abi = require('../react-app/build/contracts/Patenting.json');
 const patenting = contract(Patenting_abi);
 
 class Patenting{
@@ -10,13 +10,22 @@ class Patenting{
         patenting.setProvider(provider_);
         patenting.deployed().then(instance => {
             this.contractInstance = instance;
-            this.event = instance.NewRental();
-            this.event.watch(function(err, res) {
+            this.newRequest = instance.NewRequest();
+            this.newRequest.watch(function(err, res) {
                 if (err)
                     console.log(err);
                 else {
-                    let rent = res.args;
-                    mailer.sendPatent(rent._ownerMail, rent._patentName, rent._rentee);
+                    let request = res.args;
+                    mailer.sendRequest(request._ownerMail, request._patentName, request._rentee);
+                }
+            })
+            this.requestResponse = instance.RequestResponse();
+            this.requestResponse.watch(function(err, res) {
+                if (err)
+                    console.log(err);
+                else {
+                    let response = res.args;
+                    mailer.sendRequestResponse(response._requesterMail, response._patentName, response._accepted);
                 }
             })
         })

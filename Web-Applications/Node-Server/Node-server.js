@@ -54,10 +54,10 @@ var server = https.createServer(options, function (req, res) {
     form.parse(req, async function (err, fields, files) {
       try {
         if (op === TIMESTAMP){
-          console.log("=================== POST for timestamping =================== ");
+          console.log("=================== POST for timestamping ===================");
           response = timestamper.addTimestamp(fields);
         } else if (op === VERIFY){
-          console.log("===================  POST for verification =================== ");
+          console.log("===================  POST for verification ===================");
           let stamp_user = verifier.getTimestamp(fields);
           let stamp = await stamp_user[0];
           let email = stamp_user[1];
@@ -78,4 +78,4 @@ var server = https.createServer(options, function (req, res) {
 const port = 4000;
 const host = getIPAddress(process.argv[2] === 'true');
 server.listen(port, host);
-console.log('Listening at http://' + host + ':' + port);
+console.log('Listening at https://' + host + ':' + port);

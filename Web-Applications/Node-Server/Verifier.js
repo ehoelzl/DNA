@@ -3,7 +3,7 @@ const constants = require('./utils');
 const utils = constants.utils;
 
 const contract = require('truffle-contract');
-const TimeStamping_abi = require('./build/contracts/TimeStamping.json');
+const TimeStamping_abi = require('../react-app/build/contracts/TimeStamping.json');
 const timeStamping = contract(TimeStamping_abi);
 
 
