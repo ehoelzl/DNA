@@ -19,25 +19,20 @@
     text-align: center
 }
 
-.stamp-result {
-    top: 25px;
-    position: relative;
-    width: 50%;
-    height: 150px;
-    text-align: center;
-    left: 25%;
-}
 
 .buttons-container {
     text-align: center;
-    padding-bottom: 20px;
+    padding-bottom: 75px;
 }
 
 .paragraph {
     font-size: 18px;
-    padding-bottom: 20px;
+    padding-bottom: 50px;
 }
 
+.encrypt-button{
+    padding-bottom: 10px;
+}
 .title {
     font-size: 35px;
     text-align: center;
@@ -68,7 +63,7 @@
     text-align: center;
 }
 
-.download-button{
+.download-label{
     background-color: #e5e5e5;
 }
 

@@ -1,13 +1,14 @@
 import '../css/Pages.css'
 import React, {Component} from 'react';
 import {Table, Grid, Row} from 'react-bootstrap';
-import {stampToDate, getStatusString, ContractNotFound, successfulTx} from '../utils/HtmlElements';
-import {toEther} from '../utils/UtilityFunctions';
+import {ContractNotFound} from '../utils/FunctionalComponents';
+import {toEther, stampToDate, successfullTx} from '../utils/UtilityFunctions';
+import {getStatusString} from'../Constants';
 import Patenting from '../../build/contracts/Patenting';
 import wrapWithMetamask from '../MetaMaskWrapper'
 
 import {generatePrivateKey, generatePublicKey} from '../utils/KeyGenerator'
-import {ALREADY_AUTHORIZED, contractError} from '../utils/ErrorHandler'
+import {ALREADY_REQUESTED, contractError} from '../utils/ErrorHandler'
 
 
 /*Component for requesting access to a patent*/
@@ -44,8 +45,10 @@ class RequestAccess_class extends Component {
 
 
   resetPatents() {
-    this.setState({patents: []});
-    this.getPatents(this.state.numPatents)
+    setTimeout(() => {
+      this.setState({patents: []});
+      this.getPatents(this.state.numPatents)
+    }, 3000)
   }
 
   /*Function that gets all patent information form the contract and stores them in the state*/
@@ -86,7 +89,7 @@ class RequestAccess_class extends Component {
     if (patent.owner !== this.state.web3.eth.coinbase) {
       this.state.contractInstance.canRequest.call(patent.name, this.state.web3.eth.coinbase).then(canRequest => {
         if (canRequest) {
-          generatePrivateKey(this.state.web3, patent.hash).then(key => { //Generate privateKey = ECDSA(sha3(sha256(file)))
+          generatePrivateKey(this.state.web3, patent.hash).then(key => { //Generate privateKey = ECDSA(sha3(sha256(file))
             let publicKey = generatePublicKey(key); // Generate public key associated to this private key
             return this.state.contractInstance.requestAccess(patent.name, publicKey, { // New request = (account, publicKey, "")
               from: this.state.web3.eth.coinbase,
@@ -94,13 +97,13 @@ class RequestAccess_class extends Component {
               gas: process.env.REACT_APP_GAS_LIMIT
             });
           }).then(tx => {
-            alert(successfulTx(tx));
+            alert(successfullTx(tx));
             this.resetPatents();
           }).catch(e => {
             contractError(e);
           });
         } else {
-          alert(ALREADY_AUTHORIZED)
+          alert(ALREADY_REQUESTED)
         }
       })
     } else {

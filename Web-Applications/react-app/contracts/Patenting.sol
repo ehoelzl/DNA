@@ -66,10 +66,17 @@ contract Patenting is AccessRestricted {
     function requestAccess(string _patentName, string _encryptionKey) public payable {
         require(patents[_patentName].timestamp != 0 && canRequest(_patentName, msg.sender) && msg.value >= patents[_patentName].price);
         Patent storage p = patents[_patentName];
-        if (p.requests[msg.sender].status == RequestStatus.Not_requested){
+        if (p.requests[msg.sender].status == RequestStatus.Not_requested) {
             p.buyers[p.numRequests++] = msg.sender;
         }
         p.requests[msg.sender] = Request(RequestStatus.Pending, patents[_patentName].price, _encryptionKey, "");
+    }
+
+    function resendRequest(string _patentName) public payable {
+        require(patents[_patentName].timestamp != 0 && canRequest(_patentName, msg.sender) && msg.value >= patents[_patentName].price && !isNotRequested(_patentName, msg.sender));
+        Request storage r = patents[_patentName].requests[msg.sender];
+        r.status = RequestStatus.Pending;
+        r.deposit = patents[_patentName].price;
     }
 
     /* Function to grant access to a user
@@ -84,7 +91,8 @@ contract Patenting is AccessRestricted {
         require(r.deposit == patents[_patentName].price);
         msg.sender.transfer(r.deposit);
         r.deposit = 0;
-        r.status = RequestStatus.Accepted; // Accept Request
+        r.status = RequestStatus.Accepted;
+        // Accept Request
         r.encryptedIpfsKey = _encryptedIpfsKey;
     }
 
@@ -96,9 +104,11 @@ contract Patenting is AccessRestricted {
         require(patents[_patentName].timestamp != 0 && isOwner(_patentName, msg.sender) && isPending(_patentName, _user));
         Request storage r = patents[_patentName].requests[_user];
         require(r.deposit == patents[_patentName].price);
-        _user.transfer(r.deposit); // Refund back to user
+        _user.transfer(r.deposit);
+        // Refund back to user
         r.deposit = 0;
-        r.status = RequestStatus.Rejected; // Reject Request
+        r.status = RequestStatus.Rejected;
+        // Reject Request
     }
 
     /* Function that cancels a request (can only be called by user)
@@ -110,7 +120,8 @@ contract Patenting is AccessRestricted {
         require(r.deposit == patents[_patentName].price);
         msg.sender.transfer(r.deposit);
         r.deposit = 0;
-        r.status = RequestStatus.Cancelled; // Cancel request
+        r.status = RequestStatus.Cancelled;
+        // Cancel request
     }
 
     /*Allows the owner to withdraw the remaining funds*/
@@ -120,10 +131,12 @@ contract Patenting is AccessRestricted {
 
     /*-----------------------------------View functions that do not require transactions-----------------------------------*/
 
+    /*Returns true if the given account can request the given patent : is either Not_requested, cancelled or rejected*/
     function canRequest(string _patentName, address _account) public view returns (bool){
         return !(isPending(_patentName, _account) || isAccepted(_patentName, _account) || isOwner(_patentName, _account));
     }
 
+    /*Returns the RequestStatus of the given patent for the given account*/
     function getRequestStatus(string _patentName, address _account) public view returns (RequestStatus){
         return patents[_patentName].requests[_account].status;
     }
@@ -133,7 +146,7 @@ contract Patenting is AccessRestricted {
         return patents[_patentName].requests[_account].status == RequestStatus.Not_requested;
     }
 
-    /*Returns tru of the given account has a pending request on the given patent*/
+    /*Returns true of the given account has a pending request on the given patent*/
     function isPending(string _patentName, address _account) public view returns (bool){
         return patents[_patentName].requests[_account].status == RequestStatus.Pending;
     }
@@ -168,6 +181,7 @@ contract Patenting is AccessRestricted {
         return patents[_patentName].price;
     }
 
+    /*Returns the number of requests for the given patent*/
     function getNumRequests(string _patentName) public view returns (uint){
         return patents[_patentName].numRequests;
     }
@@ -177,10 +191,13 @@ contract Patenting is AccessRestricted {
         return patents[_patentName].buyers[_index];
     }
 
+    /*Returns the requester's public key*/
     function getEncryptionKey(string _patentName, address _user) public view returns (string){
         require(msg.sender == patents[_patentName].owner);
         return patents[_patentName].requests[_user].encryptionKey;
     }
+
+    /*Returns the encrypted IPFS encryption key*/
     function getEncryptedIpfsKey(string _patentName) public view returns (string){
         require(isAccepted(_patentName, msg.sender));
         return patents[_patentName].requests[msg.sender].encryptedIpfsKey;

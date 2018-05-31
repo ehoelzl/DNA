@@ -4,12 +4,18 @@ import {ListGroup, ListGroupItem, Button, ButtonGroup, Panel, Row, Col} from 're
 
 import {generatePrivateKey} from '../utils/KeyGenerator'
 import {NOT_PENDING, KEY_GENERATION_ERROR, KEY_ERROR, IPFS_ERROR, contractError} from '../utils/ErrorHandler'
-import {saveByteArray, publicKeyEncrypt} from '../utils/UtilityFunctions'
-import {successfulTx} from '../utils/HtmlElements'
+import {saveByteArray, successfullTx} from '../utils/UtilityFunctions'
+import {publicKeyEncrypt} from '../utils/CryptoUtils'
 import Bundle from '../utils/ipfsBundle'
 
-/*Component to view the pendingRequests of a given patent*/
-class PatentRequests extends Component {
+
+/*---------------------------------------------------------------------------------- DONE ----------------------------------------------------------------------------------*/
+
+
+/*Component to manage the pendingRequests of a given patent*/
+class PatentManager extends Component {
+
+  /*Constructor with IPFS bundle*/
   constructor(props) {
     super(props);
     this.bundle = new Bundle();
@@ -23,7 +29,7 @@ class PatentRequests extends Component {
     this.downloadCopy = this.downloadCopy.bind(this);
   }
 
-  /*Called whenever new props are passed*/
+  /*Called whenever new props are passed or props are updated*/
   static getDerivedStateFromProps(nextProps, prevState) {
     if (nextProps.patent.name !== prevState.patent.name) {
       return ({
@@ -86,8 +92,8 @@ class PatentRequests extends Component {
         gas: process.env.REACT_APP_GAS_LIMIT
       })
     }).then(tx => {
-      this.setState({pendingRequests: []});
-      alert(successfulTx(tx))
+      setTimeout(() => this.setState({pendingRequests: []}), 3000);
+      alert(successfullTx(tx))
     }).catch(e => {
       if (e === KEY_GENERATION_ERROR) {
         alert(KEY_GENERATION_ERROR)
@@ -103,18 +109,19 @@ class PatentRequests extends Component {
       from: this.state.web3.eth.coinbase,
       gas: process.env.REACT_APP_GAS_LIMIT
     }).then(tx => {
-      this.setState({pendingRequests: []});
-      alert(successfulTx(tx))
+      setTimeout(() => this.setState({pendingRequests: []}), 3000);
+      alert(successfullTx(tx))
     }).catch(e => {
       contractError(e)
     })
   }
 
-  /*Button to download the document*/
+  /*Decrypts and downloads the file from IPFS the document*/
   downloadCopy() {
     generatePrivateKey(this.state.web3, this.state.patent.hash).then(key => {
       let hash = this.state.patent.hash;
       let ipfsLoc = this.state.patent.ipfsLocation;
+      alert("Download will start shortly");
       return this.bundle.getDecryptedFile(hash, ipfsLoc, key)
     }).then(bytes => {
       saveByteArray(this.state.patent.name, bytes, window, document)
@@ -126,6 +133,9 @@ class PatentRequests extends Component {
       }
     })
   }
+
+  /*--------------------------------- USER INTERFACE COMPONENTS ---------------------------------*/
+
 
   /*Render pending requests as ListGroup*/
   renderRequests() {
@@ -158,7 +168,7 @@ class PatentRequests extends Component {
         <Panel.Body>{this.state.pendingRequests.length} Pending
           request{this.state.pendingRequests.length === 1 ? '' : 's'}</Panel.Body>
         <ListGroup>
-          <ListGroupItem className="download-button" onClick={this.downloadCopy}>Download a copy</ListGroupItem>
+          <ListGroupItem className="download-label" onClick={this.downloadCopy}>Download a copy</ListGroupItem>
           {this.renderRequests()}
         </ListGroup>
       </Panel>
@@ -166,4 +176,4 @@ class PatentRequests extends Component {
   }
 }
 
-export default PatentRequests
+export default PatentManager

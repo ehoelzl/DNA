@@ -1,21 +1,17 @@
 * {
   box-sizing: border-box;
 }
-body {
-  margin: 0;
-}
+
 body{
   background-color:rgba(34,34,34,0.05);
   font-family: FreeSans, Arimo, "Droid Sans", Helvetica, Arial, sans-serif;
-  margin : 70px 0 0 0;
+  margin : 80px 0 0 0;
 }
 
 .article{
   background-color: #ebebeb;
 }
-.paragraph{
-  font-size: 17px;
-}
+
 .page-title{
   opacity:0.95;
   font-size: 35px;

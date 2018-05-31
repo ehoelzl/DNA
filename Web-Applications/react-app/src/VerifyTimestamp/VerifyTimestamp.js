@@ -1,6 +1,6 @@
 import '../css/Pages.css'
 import React, {Component} from 'react'
-import {ButtonGroup, Button, Grid, Row} from 'react-bootstrap'
+import {ButtonGroup, Button, Grid, Row, Col} from 'react-bootstrap'
 
 import VerifyMetaMask from "./VerifyMetaMask";
 import VerifyFree from "./VerifyFree";
@@ -53,12 +53,16 @@ class VerifyTimestamp extends Component {
   /*Button group to select the service*/
   buttons() {
     return (
-      <ButtonGroup bsSize="large">
-        <Button onClick={this.setService.bind(this, Service.METAMASK)}
-                disabled={this.state.selectedService === Service.METAMASK}>Metamask
-          Client</Button>
-        <Button onClick={this.setService.bind(this, Service.SERVER)}
-                disabled={this.state.selectedService === Service.SERVER}>Server</Button>
+      <ButtonGroup justified>
+        <ButtonGroup bsSize="large">
+          <Button onClick={this.setService.bind(this, Service.METAMASK)}
+                  disabled={this.state.selectedService === Service.METAMASK}>Metamask
+            Client</Button>
+        </ButtonGroup>
+        <ButtonGroup bsSize="large">
+          <Button onClick={this.setService.bind(this, Service.SERVER)}
+                  disabled={this.state.selectedService === Service.SERVER}>Server</Button>
+        </ButtonGroup>
       </ButtonGroup>
     )
   }
@@ -95,7 +99,7 @@ class VerifyTimestamp extends Component {
             Otherwise, you must include the signature we sent back when the document was time-stamped.
           </p>
         </Row>
-        <Row bsClass="buttons-container">{this.buttons()}</Row>
+        <Row bsClass="buttons-container"><Col md={6} mdOffset={3}>{this.buttons()}</Col></Row>
         <Row>{this.renderChild()}</Row>
       </Grid>
     );

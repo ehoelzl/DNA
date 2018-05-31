@@ -1,7 +1,7 @@
 import './css/Pages.css'
 
 import React, {Component} from 'react';
-import {ButtonGroup, Button, Grid, Row} from 'react-bootstrap';
+import {ButtonGroup, Button, Grid, Row, Col} from 'react-bootstrap';
 
 import getWeb3 from './utils/getWeb3'
 import {METAMASK_NOTFOUND, INVALID_NETWORK, UNLOCK_METAMASK} from './utils/ErrorHandler'
@@ -106,15 +106,23 @@ function wrapWithMetamask(Wrapped, header) {
     * */
     buttons() {
       return (
-        <ButtonGroup bsSize="large">
-          <Button onClick={this.getWeb3Object.bind(this, Networks.MAINNET)}
-                  disabled={this.state.selectedNetwork === Networks.MAINNET}>{NetworkStrings.MAINNET}</Button>
-          <Button onClick={this.getWeb3Object.bind(this, Networks.ROPSTEN)}
-                  disabled={this.state.selectedNetwork === Networks.ROPSTEN}>{NetworkStrings.ROPSTEN}</Button>
-          <Button onClick={this.getWeb3Object.bind(this, Networks.KOVAN)}
-                  disabled={this.state.selectedNetwork === Networks.KOVAN}>{NetworkStrings.KOVAN}</Button>
-          <Button onClick={this.getWeb3Object.bind(this, Networks.LOCALRPC)}
-                  disabled={this.state.selectedNetwork === Networks.LOCALRPC}>{NetworkStrings.LOCALRPC}</Button>
+        <ButtonGroup justified>
+          <ButtonGroup bsSize="large">
+            <Button onClick={this.getWeb3Object.bind(this, Networks.MAINNET)}
+                    disabled={this.state.selectedNetwork === Networks.MAINNET}>{NetworkStrings.MAINNET}</Button>
+          </ButtonGroup>
+          <ButtonGroup bsSize="large">
+            <Button onClick={this.getWeb3Object.bind(this, Networks.ROPSTEN)}
+                    disabled={this.state.selectedNetwork === Networks.ROPSTEN}>{NetworkStrings.ROPSTEN}</Button>
+          </ButtonGroup>
+          <ButtonGroup bsSize="large">
+            <Button onClick={this.getWeb3Object.bind(this, Networks.KOVAN)}
+                    disabled={this.state.selectedNetwork === Networks.KOVAN}>{NetworkStrings.KOVAN}</Button>
+          </ButtonGroup>
+          <ButtonGroup bsSize="large">
+            <Button onClick={this.getWeb3Object.bind(this, Networks.LOCALRPC)}
+                    disabled={this.state.selectedNetwork === Networks.LOCALRPC}>{NetworkStrings.LOCALRPC}</Button>
+          </ButtonGroup>
         </ButtonGroup>
       );
     }
@@ -127,7 +135,7 @@ function wrapWithMetamask(Wrapped, header) {
       return (
         <Grid>
           <Row>{header}</Row>
-          <Row bsClass="buttons-container">{this.buttons()}</Row>
+          <Row bsClass="buttons-container"><Col md={10} mdOffset={1}>{this.buttons()}</Col></Row>
           <Row>{this.state.loadChild ? <Wrapped web3={this.state.web3}/> : ""}</Row>
         </Grid>
       );

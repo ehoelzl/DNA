@@ -2,9 +2,10 @@ import '../css/Pages.css'
 import React, {Component} from 'react'
 import axios from "axios/index";
 import TimeStamping from '../../build/contracts/TimeStamping'
-import {FieldGroup, stampContainer, SubmitButton} from '../utils/HtmlElements';
-import {getFileHash, extractJson} from "../utils/UtilityFunctions";
-import Constants from '../Constants';
+import {FieldGroup, StampContainer, SubmitButton} from '../utils/FunctionalComponents';
+import {extractJson} from "../utils/UtilityFunctions";
+import {getFileHash} from '../utils/CryptoUtils';
+import {Constants} from '../Constants';
 import {Grid, Row, Col} from 'react-bootstrap'
 
 import {serverError, INVALID_FORM, LARGE_FILE} from '../utils/ErrorHandler'
@@ -105,14 +106,6 @@ class VerifyFree extends Component {
 
   /*--------------------------------- USER INTERFACE COMPONENTS ---------------------------------*/
 
-
-  /*Render results if displayResult = True*/
-  searchResults() {
-    if (this.state.displayResult) {
-      return stampContainer(this.state.timestamp, this.state.email)
-    }
-  }
-
   renderForm() {
     return (
       <form onSubmit={this.submitVerification}>
@@ -138,7 +131,7 @@ class VerifyFree extends Component {
         <Row><Col sm={12} md={2} mdOffset={4}>
           {this.renderForm()}
         </Col></Row>
-        <Row>{this.searchResults()}</Row>
+        <Row>{this.state.displayResult ? <StampContainer timestamp={this.state.timestamp} user={this.state.email}/> : ""}</Row>
       </Grid>
 
     )

@@ -2,13 +2,14 @@ import '../css/Pages.css'
 
 import React, {Component} from 'react';
 import {Button, Grid, Row, Col} from 'react-bootstrap';
-import {FieldGroup, SubmitButton, ContractNotFound, validateEmail, validatePDF} from '../utils/HtmlElements';
-import {getFileHash, toEther, fromEther} from '../utils/UtilityFunctions';
+import {FieldGroup, SubmitButton, ContractNotFound} from '../utils/FunctionalComponents';
+import {validateEmail, validatePDF, toEther, fromEther} from '../utils/UtilityFunctions';
+import {getFileHash} from '../utils/CryptoUtils'
 import wrapWithMetamask from '../MetaMaskWrapper'
 import Patenting from '../../build/contracts/Patenting';
 import Bundle from '../utils/ipfsBundle';
 
-import Constants from '../Constants';
+import {Constants} from '../Constants';
 import {generatePrivateKey} from '../utils/KeyGenerator'
 import {INVALID_FORM, KEY_GENERATION_ERROR, IPFS_ERROR, contractError} from '../utils/ErrorHandler'
 
@@ -18,6 +19,9 @@ const FileState = {
   ENCRYPTING: 1,
   ENCRYPTED: 2
 };
+
+/*---------------------------------------------------------------------------------- DONE ----------------------------------------------------------------------------------*/
+
 
 /*Component for Patent Deposit*/
 class DepositPatent_class extends Component {
@@ -119,9 +123,7 @@ class DepositPatent_class extends Component {
     if (this.state.file !== "" && this.state.hash !== "" && this.state.fileState === FileState.NOT_ENCRYPTED) {
       this.setState({fileState: FileState.ENCRYPTING});
       generatePrivateKey(this.state.web3, this.state.hash).then(key => { // Ask user to generate key
-        return this.bundle.encryptFile(this.state.file, key); // Encrypt file using the key
-      }).then(res => {
-        return this.bundle.getHash() // Get the IPFS location
+        return this.bundle.encryptFile(this.state.file, key); // Encrypt file using the key and return the IPFS hash of the result
       }).then(files => {
         this.setState({ipfsLocation: files[0].path, fileState: FileState.ENCRYPTED})
       }).catch(err => {
@@ -174,9 +176,10 @@ class DepositPatent_class extends Component {
         return this.bundle.addFile() // Add the encrypted file to the
       }).then(filesAdded => {
         this.resetForm();
-        alert("Patent has been added, IPFS link : ipfs.io/ipfs/" + filesAdded[0].path); //TODO : change strings to constants and add transaction hash
+        alert("Patent has been added, IPFS link : ipfs.io/ipfs/" + filesAdded[0].path);
       }).catch(error => {
-        this.resetForm();
+        this.setState({waitingTransaction: false});
+        //this.resetForm();
         contractError(error); //Handles the error
       });
     } else {
@@ -259,7 +262,7 @@ class DepositPatent_class extends Component {
         <FieldGroup name={Constants.FILE} id="formsControlsFile" label="File" type="file" placeholder=""
                     help="File of the patent (PDF only)" onChange={this.handleChange}/>
 
-        {this.encryptFileButton()}
+        <div className="encrypt-button">{this.encryptFileButton()}</div>
         <SubmitButton running={this.state.waitingTransaction}/>
       </form>
     );

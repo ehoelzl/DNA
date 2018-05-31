@@ -3,10 +3,10 @@ import '../css/Pages.css'
 import React, {Component} from 'react'
 import {Grid, Row, Col} from 'react-bootstrap'
 
-import {getFileHash} from '../utils/UtilityFunctions';
-import {FieldGroup, SubmitButton, ContractNotFound, stampContainer} from '../utils/HtmlElements';
+import {getFileHash} from '../utils/CryptoUtils';
+import {FieldGroup, SubmitButton, ContractNotFound, StampContainer} from '../utils/FunctionalComponents';
 import TimeStamping from '../../build/contracts/TimeStamping'
-import Constants from '../Constants'
+import {Constants} from '../Constants'
 import {contractError, INVALID_FORM, LARGE_FILE} from '../utils/ErrorHandler'
 import wrapWithMetamask from "../MetaMaskWrapper";
 
@@ -28,7 +28,7 @@ class VerifyMetaMask_class extends Component {
       timestamp: 0,
       user: 0,
       displayResult: false,
-      waitingTransaction : false
+      waitingTransaction: false
     };
 
     this.submitFile = this.submitFile.bind(this);
@@ -45,15 +45,15 @@ class VerifyMetaMask_class extends Component {
     const timeStamping = contract(TimeStamping);
     timeStamping.setProvider(this.state.web3.currentProvider);
     timeStamping.deployed().then(instance => {
-      this.setState({contractInstance: instance, contractAddress : instance.address});
-    }).catch(error => this.setState({contractInstance : null, contractAddress : 0}))
+      this.setState({contractInstance: instance, contractAddress: instance.address});
+    }).catch(error => this.setState({contractInstance: null, contractAddress: 0}))
   }
 
   /*--------------------------------- HELPER METHODS AND VALIDATION ---------------------------------*/
 
   /*Helper method to reset the form*/
   resetForm() {
-    this.setState({hash: "", timestamp: 0, user: 0, displayResult: false, waitingTransaction : false});
+    this.setState({hash: "", timestamp: 0, user: 0, displayResult: false, waitingTransaction: false});
   }
 
   /*--------------------------------- EVENT HANDLERS ---------------------------------*/
@@ -75,11 +75,11 @@ class VerifyMetaMask_class extends Component {
   submitFile(e) {
     e.preventDefault();
     if (this.state.hash !== "") {
-      this.setState({waitingTransaction : true});
+      this.setState({waitingTransaction: true});
       this.state.contractInstance.getTimestamp.call(this.state.hash).then(res => {
         this.setState({timestamp: res.toNumber()});
         return this.state.contractInstance.getUser.call(this.state.hash);
-      }).then(res => this.setState({user: res, displayResult: true, waitingTransaction : false}))
+      }).then(res => this.setState({user: res, displayResult: true, waitingTransaction: false}))
         .catch(error => {
           this.resetForm();
           contractError(error);
@@ -111,11 +111,12 @@ class VerifyMetaMask_class extends Component {
     } else {
       return (
         <Grid>
-          <Row bsClass="contract-address"><Col xsHidden>TimeStamping contract at {this.state.contractAddress}</Col></Row>
-          <Row><Col sm={12} md={2} mdOffset={4}>
+          <Row bsClass="contract-address"><Col xsHidden>TimeStamping contract
+            at {this.state.contractAddress}</Col></Row>
+          <Row><Col sm={12} md={2} mdOffset={5}>
             {this.renderForm()}
           </Col></Row>
-          <Row>{this.state.displayResult ? stampContainer(this.state.timestamp, this.state.user) : ""}</Row>
+          <Row><Col sm={12} md={8} mdOffset={2}> {this.state.displayResult ? <StampContainer timestamp={this.state.timestamp} user={this.state.user}/> : ""}</Col></Row>
         </Grid>)
     }
   }

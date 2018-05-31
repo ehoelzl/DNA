@@ -1,4 +1,4 @@
-import {getEncryptedFileBuffer, getDecryptedFileBuffer} from './UtilityFunctions'
+import {getEncryptedFileBuffer, getDecryptedFileBuffer} from './CryptoUtils'
 import {KEY_ERROR, IPFS_ERROR} from '../utils/ErrorHandler'
 import sha256 from 'sha256'
 
@@ -17,7 +17,7 @@ class Bundle {
   encryptFile(file, key) {
     return getEncryptedFileBuffer(file, window, key).then(res => {
       this.encryptedFile = res;
-      return new Promise((resolve, reject) => resolve("file encrypted"))
+      return this.getHash()//new Promise((resolve, reject) => resolve("file encrypted"))
     })
   }
 
@@ -48,6 +48,8 @@ class Bundle {
             reject(IPFS_ERROR)
           }
         })
+      } else {
+        reject(IPFS_ERROR)
       }
     })
   }

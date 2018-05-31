@@ -1,14 +1,18 @@
 import '../css/Pages.css'
 import React, {Component} from 'react';
-import {Table, Grid, Row} from 'react-bootstrap';
-import {getStatusString, ContractNotFound, RequestStatus_String} from '../utils/HtmlElements';
-import {privateKeyDecrypt, saveByteArray} from '../utils/UtilityFunctions';
+import {Grid, Row, PanelGroup} from 'react-bootstrap';
+import {ContractNotFound} from '../utils/FunctionalComponents';
+import {getStatusString} from '../Constants';
+import {saveByteArray, toEther} from '../utils/UtilityFunctions';
+import {privateKeyDecrypt} from '../utils/CryptoUtils'
 import Patenting from '../../build/contracts/Patenting';
 import wrapWithMetamask from '../MetaMaskWrapper'
 import {NOT_REQUESTED, contractError} from "../utils/ErrorHandler";
 
-import {generateKey} from '../utils/KeyGenerator';
+import {generatePrivateKey} from '../utils/KeyGenerator';
 import Bundle from '../utils/ipfsBundle';
+
+import RequestPanel from './RequestPanel';
 
 class MyRequests_class extends Component{
 
@@ -19,8 +23,10 @@ class MyRequests_class extends Component{
       web3 : props.web3,
       contractInstance : null,
       numRequests : 0,
+      activeKey : 1,
       requests : []
-    }
+    };
+    this.handleSelect = this.handleSelect.bind(this)
   }
 
   componentDidMount() {
@@ -32,7 +38,7 @@ class MyRequests_class extends Component{
       return instance.patentCount.call()
     }).then(count => {
       this.getMyRequests(count.toNumber());
-    }).catch(error => console.log('Error' + error)); //Todo : change this error handler
+    }).catch(error => this.setState({contractInstance : null}));
   }
 
   getMyRequests(numPatents){
@@ -59,6 +65,10 @@ class MyRequests_class extends Component{
           return instance.getPatentLocation.call(patentName);
         }).then(loc => {
           new_entry['ipfsLocation'] = loc;
+          return instance.getPrice.call(patentName)
+        }).then( price => {
+          new_entry['price'] = toEther(price, this.state.web3);
+          new_entry['id'] = (this.state.numRequests + 1);
           let requests = this.state.requests;
           requests.push(new_entry);
           this.setState({pendingRequests : requests, numRequests: this.state.numRequests + 1});
@@ -71,15 +81,40 @@ class MyRequests_class extends Component{
     }
   }
 
+
+  handleSelect(activeKey){
+    this.setState({ activeKey :activeKey })
+  }
+
   downloadCopy(request){
     let privateKey;
-    generateKey(this.state.web3, request.hash).then(pk => {
+    generatePrivateKey(this.state.web3, request.hash).then(pk => {
         privateKey = pk;
-        return this.state.contractInstance.getEncryptedIpfsKey.call(request.name, {from: this.state.web3.coinbase})
+        return this.state.contractInstance.getEncryptedIpfsKey.call(request.name, {from: this.state.web3.eth.coinbase})
       }).then(encryptedKey => {
         let key = privateKeyDecrypt(encryptedKey, privateKey);
         return this.bundle.getDecryptedFile(request.hash, request.ipfsLocation, key);
     }).then(buffer => saveByteArray(request.name, buffer, window, document))
+  }
+
+
+
+
+  /*Returns a full table with patents*/
+  renderTable() {
+    if (this.state.numRequests !== 0) {
+      let panels = this.state.requests.map(request => {
+        return <RequestPanel web3={this.state.web3} instance={this.state.contractInstance} bundle={this.bundle} request={request} key={request.id}/>
+      });
+      return (
+        <PanelGroup
+          accordion activeKey={this.state.activeKey} onSelect={this.handleSelect} id="accordion-controlled"
+          className="requests-container">
+          {panels}
+        </PanelGroup>)
+    } else {
+      return <div className='not-found'><h3>You do not have any requests on this network</h3></div>
+    }
   }
 
   /*Header for the Component, For the Metamask wrapper*/
@@ -97,37 +132,6 @@ class MyRequests_class extends Component{
     );
   }
 
-  /*Returns a table row for the given patent*/
-  getRow(request) {
-    return (
-      <tr key={request.name} onClick={this.downloadCopy.bind(this, request)}>
-        <td>{request.name}</td>
-        <td>{request.hash}</td>
-        <td>{request.status}</td>
-      </tr>
-    )
-  }
-
-  /*Returns a full table with patents*/
-  renderTable() {
-    if (this.state.numRequests !== 0) {
-      let table = this.state.requests.map(request => this.getRow(request));
-      let header = (
-        <tr>
-          <th>Patent Name</th>
-          <th>Document Hash</th>
-          <th>Request Status</th>
-        </tr>
-      );
-      return (
-        <Table striped hover responsive className='patent-table'>
-          <thead>{header}</thead>
-          <tbody>{table}</tbody>
-        </Table>)
-    } else {
-      return <div className='not-found'><h3>You do not have any deposited requests on this network</h3></div>
-    }
-  }
   /*Rendering function of the component*/
   render() {
     if (this.state.contractInstance === null) {
@@ -140,7 +144,6 @@ class MyRequests_class extends Component{
             <br/> Current account {this.state.web3.eth.accounts[0]} (From Metamask)
           </Row>
           <Row>{this.renderTable()}</Row>
-          {/*<Row>{this.state.displayDetails ? this.renderDetails() : this.renderTable()}</Row>*/}
         </Grid>)
     }
   }

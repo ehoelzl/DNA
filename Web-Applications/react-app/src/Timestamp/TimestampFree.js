@@ -2,9 +2,10 @@ import '../css/Pages.css'
 import axios from 'axios'
 import React, {Component} from 'react'
 import TimeStamping from '../../build/contracts/TimeStamping'
-import {getFileHash} from '../utils/UtilityFunctions';
-import {FieldGroup, SubmitButton, validateEmail} from '../utils/HtmlElements';
-import Constants from '../Constants'
+import {getFileHash} from '../utils/CryptoUtils';
+import {validateEmail} from '../utils/UtilityFunctions';
+import {FieldGroup, SubmitButton} from '../utils/FunctionalComponents'
+import {Constants} from '../Constants'
 import {Grid, Row, Col} from 'react-bootstrap'
 import {serverError, INVALID_FORM, LARGE_FILE} from '../utils/ErrorHandler'
 

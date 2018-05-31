@@ -1,96 +1,10 @@
-import sha256 from "sha256";
-import AES from 'crypto-js/aes'
-import Utf8 from 'crypto-js/enc-utf8'
 
-import {encrypt, decrypt} from 'eth-ecies'
 
-/* Utility function to get the sha256 hash of a file
-* Returns a Promise containing the hash of the file hashed as a byte array using SHA256
-* */
-const getFileHash = function (file, window) {
-  return new Promise(function (resolve, reject) {
-    let f = file;
-
-    if (typeof window.FileReader !== 'function') {
-      reject('Browser does not support FileReader');
-    }
-
-    if (!f) {
-      reject("Please select a file");
-    } else {
-      let fr = new window.FileReader();
-      fr.onload = computeHash;
-      fr.readAsArrayBuffer(f);
-    }
-
-    function computeHash(data) {
-      let buffer = data.target.result;
-      let bytes = new Uint8Array(buffer);
-      resolve(sha256(bytes));
-    }
-  })
-};
-
-/*Function used to return the encrypted Byte content of a file
-* Uses AES encryption with the given key
-* */
-const getEncryptedFileBuffer = function (file, window, key) {
-  return new Promise(function (resolve, reject) {
-    let f = file;
-    if (typeof window.FileReader !== 'function') {
-      reject('Browser does not support FileReader');
-    }
-    if (!f) {
-      reject("Please select a file");
-    } else if (!key) {
-      reject("Please select a key");
-    } else {
-      let fr = new window.FileReader();
-      fr.onload = getBuffer;
-      fr.readAsArrayBuffer(f);
-    }
-
-    function getBuffer(data) {
-      let buffer = Buffer.from(data.target.result);
-      let encrypted = Buffer.from(AES.encrypt(JSON.stringify(buffer), key).toString());
-      resolve(encrypted)
-    }
-
-  })
-};
-
-/*Function used to return the decrypted Byte content of a file
-* Uses AES encryption with the given key
-* */
-const getDecryptedFileBuffer = function (fileBuffer, key) {
-  try {
-    let bytes = AES.decrypt(fileBuffer.toString(), key);
-    let decrypted = JSON.parse(bytes.toString(Utf8));
-    return Buffer.from(decrypted)
-  } catch (error){
-    return Buffer.from("");
-  }
-
-};
-
-/* Function encrypts given data with public Key
-* */
-const publicKeyEncrypt = function (data, publicKey) {
-  let toEncrypt = Buffer.from(data);
-  let pk = Buffer.from(publicKey, 'hex');
-  return encrypt(pk, toEncrypt).toString('base64');
-};
-
-/*Function that decrypts the given data with the given privateKey*/
-const privateKeyDecrypt = function (data, privateKey) {
-  let pk = Buffer.from(privateKey, 'hex');
-  let bufferEncryptedData = new Buffer(data, 'base64');
-  let decryptedData = decrypt(pk, bufferEncryptedData);
-  return decryptedData.toString('utf-8');
-};
+import {LARGE_FILE} from "./ErrorHandler";
+import {Constants} from "../Constants";
 
 /*Function that triggers the download of the given bytes*/
-const saveByteArray = function (name, bytes, window, document) {
+const saveByteArray = (name, bytes, window, document) => {
   let blob = new Blob([bytes]);
   let link = document.createElement('a');
   link.href = window.URL.createObjectURL(blob);
@@ -100,7 +14,7 @@ const saveByteArray = function (name, bytes, window, document) {
 
 /*Utility function that extracts the json from a file and returns a promise that resolves into the json object,
 * or is rejected if the parsing could not occur*/
-const extractJson = function (file, window) {
+const extractJson = (file, window)  => {
   return new Promise(function (resolve, reject) {
     let f = file;
     if (typeof window.FileReader !== 'function') {
@@ -127,32 +41,66 @@ const extractJson = function (file, window) {
   })
 };
 
+/*Converts a unix timestamp to a String with date and time*/
+const stampToDate = (timestamp) => {
+  let date = new Date(timestamp * 1000);
+  return date.toDateString() + " at " + date.toTimeString();
+};
+
+const successfullTx = (tx) => {
+  return "Successful, transaction hash :" + tx.tx
+};
 
 /* Helper function that converts Wei to Ether*/
-const toEther = function (priceInWei, web3) {
+const toEther = (priceInWei, web3) => {
   if (web3 != null) {
     return web3.fromWei(priceInWei.toNumber(), 'ether');
   }
 };
 
 /*Helper function that converts Ether to Wei*/
-const fromEther = function (priceInEth, web3) {
+const fromEther = (priceInEth, web3) => {
   if (web3 !== null) {
     return web3.toWei(priceInEth, 'ether');
   }
 };
 
+/*Utility function to validate emails*/
+const validateEmail = (email, repeat) => {
+  if (email === "") {
+    return null;
+  } else if (email === repeat) {
+    return 'success'
+  } else if (email.includes(repeat)) {
+    return 'warning';
+  } else {
+    return 'error'
+  }
+};
+
+/*Utility function that returns true if the file is in PDF and less than 10Mb*/
+const validatePDF = (file) => {
+  if (file === "") {
+    alert('Please select a file');
+  } else if (file.size > Constants.MAX_FILE_SIZE) {
+    alert(LARGE_FILE)
+  } else if (file.type !== 'application/pdf') {
+    alert('File must be in PDF format');
+  }
+  return file !== "" && file.type === 'application/pdf' && file.size < Constants.MAX_FILE_SIZE;
+};
+
+
 
 module.exports = {
-  getFileHash,
-  getEncryptedFileBuffer,
-  getDecryptedFileBuffer,
-  publicKeyEncrypt,
-  privateKeyDecrypt,
   extractJson,
   saveByteArray,
+  stampToDate,
+  successfullTx,
   toEther,
-  fromEther
+  fromEther,
+  validatePDF,
+  validateEmail
 };
 
 

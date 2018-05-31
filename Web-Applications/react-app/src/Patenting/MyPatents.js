@@ -1,13 +1,17 @@
 import '../css/Pages.css'
 import React, {Component} from 'react';
 import {Table, Grid, Row, Button, ButtonGroup, Glyphicon} from 'react-bootstrap';
-import {stampToDate, ContractNotFound} from '../utils/HtmlElements';
+import {ContractNotFound} from '../utils/FunctionalComponents';
+import {stampToDate} from '../utils/UtilityFunctions';
 import Patenting from '../../build/contracts/Patenting';
 import wrapWithMetamask from '../MetaMaskWrapper';
 
-import PatentRequests from './PatentRequests'
+import PatentManager from './PatentManager'
 
 import {contractError, NOT_OWNER} from '../utils/ErrorHandler'
+
+
+/*---------------------------------------------------------------------------------- DONE ----------------------------------------------------------------------------------*/
 
 /*Component to view User's deposited patents*/
 class MyPatents_class extends Component {
@@ -88,11 +92,12 @@ class MyPatents_class extends Component {
 
   /*--------------------------------- EVENT HANDLERS ---------------------------------*/
 
-
+  /*Displays the details of a given patent*/
   openDetails(patent) {
     this.setState({displayDetails: true, selectedPatent: patent});
   }
 
+  /*Buttons to scroll through documents*/
   nextPatent() {
     if (this.state.displayDetails && this.state.selectedPatent !== null && this.state.selectedPatent.index < this.state.numPatents - 1) {
       this.setState({selectedPatent: this.state.patents[this.state.selectedPatent.index + 1]})
@@ -107,6 +112,7 @@ class MyPatents_class extends Component {
 
   /*--------------------------------- USER INTERFACE COMPONENTS ---------------------------------*/
 
+  /*Button toolbar to scroll through documents*/
   buttonToolbar() {
     return (
       <ButtonGroup justified>
@@ -124,13 +130,15 @@ class MyPatents_class extends Component {
   }
 
 
+  /*Renders the details of a selected patent*/
   renderDetails() {
     return (
-      <div className="requests-container">
-        {this.buttonToolbar()}
-        <PatentRequests web3={this.state.web3} contractInstance={this.state.contractInstance}
-                        patent={this.state.selectedPatent}/>
-      </div>
+
+        <div className="requests-container">
+          {this.buttonToolbar()}
+          <PatentManager web3={this.state.web3} contractInstance={this.state.contractInstance}
+                         patent={this.state.selectedPatent}/>
+        </div>
     )
   }
 
@@ -140,9 +148,9 @@ class MyPatents_class extends Component {
       <Grid>
         <Row bsClass='title'>My patents</Row>
         <Row bsClass='paragraph'>
-          <p>This page allows users to view the Patents they have deposited, and accept requests for these
+          <p>This page allows users to view the Documents they have deposited, and manage requests for these
             Patents. <br/>
-            To see the requests, please click on the corresponding patent and you will be redirected<br/>
+            To see the details, just click on the row.<br/>
             <br/>You only need to <b>unlock your Metamask extension</b>.
           </p>
         </Row>
