@@ -26,6 +26,7 @@ class TimestampFree extends Component {
   * */
   constructor(props) {
     super(props);
+
     this.state = {
       hash: "",
       email_address: "",
@@ -81,6 +82,7 @@ class TimestampFree extends Component {
         alert(res.data);
         this.resetForm()
       }).catch(e => { //If response code is else than 200 OK
+        console.log(e)
         serverError(e);
         this.resetForm();
       });

@@ -128,10 +128,10 @@ class VerifyFree extends Component {
         <Row bsClass="contract-address"><Col xsHidden>TimeStamping contract
           at {TimeStamping.networks[3].address} (Ropsten
           Testnet)</Col></Row>
-        <Row><Col sm={12} md={2} mdOffset={4}>
+        <Row><Col sm={12} md={4} mdOffset={5}>
           {this.renderForm()}
         </Col></Row>
-        <Row>{this.state.displayResult ? <StampContainer timestamp={this.state.timestamp} user={this.state.email}/> : ""}</Row>
+        <Row><Col sm={12} md={8} mdOffset={2}>{this.state.displayResult ? <StampContainer timestamp={this.state.timestamp} user={this.state.email}/> : ""}</Col></Row>
       </Grid>
 
     )

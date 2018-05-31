@@ -14,6 +14,7 @@ contract Patenting is AccessRestricted {
     struct Request {
         RequestStatus status;
         uint deposit;
+        string email;
         string encryptionKey;
         string encryptedIpfsKey;
     }
@@ -40,6 +41,12 @@ contract Patenting is AccessRestricted {
         address _rentee
     );
 
+    event RequestResponse(
+        string _requesterEmail,
+        string _patentName,
+        bool _accepted
+    );
+
     /* Constructor of the contract
     * {param} uint : The price for depositing a pattern in Wei
     */
@@ -63,13 +70,14 @@ contract Patenting is AccessRestricted {
     *          _encryptionKey : key to encrypt AES key with (key exchange protocol)
     * {costs} price of the patent : will be frozen until request is accepted, rejected, or cancelled
     */
-    function requestAccess(string _patentName, string _encryptionKey) public payable {
+    function requestAccess(string _patentName, string _encryptionKey, string _email) public payable {
         require(patents[_patentName].timestamp != 0 && canRequest(_patentName, msg.sender) && msg.value >= patents[_patentName].price);
         Patent storage p = patents[_patentName];
         if (p.requests[msg.sender].status == RequestStatus.Not_requested) {
             p.buyers[p.numRequests++] = msg.sender;
         }
-        p.requests[msg.sender] = Request(RequestStatus.Pending, patents[_patentName].price, _encryptionKey, "");
+        p.requests[msg.sender] = Request(RequestStatus.Pending, patents[_patentName].price, _email, _encryptionKey, "");
+        NewRequest(patents[_patentName].email, _patentName, msg.sender);
     }
 
     function resendRequest(string _patentName) public payable {
@@ -94,6 +102,7 @@ contract Patenting is AccessRestricted {
         r.status = RequestStatus.Accepted;
         // Accept Request
         r.encryptedIpfsKey = _encryptedIpfsKey;
+        RequestResponse(r.email, _patentName, true);
     }
 
     /* Function to reject access to a patent
@@ -109,6 +118,7 @@ contract Patenting is AccessRestricted {
         r.deposit = 0;
         r.status = RequestStatus.Rejected;
         // Reject Request
+        RequestResponse(r.email, _patentName, false);
     }
 
     /* Function that cancels a request (can only be called by user)
