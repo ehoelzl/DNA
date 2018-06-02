@@ -67,12 +67,12 @@ class VerifyFree extends Component {
       let file = e.target.files[0];
       if (file.size < Constants.MAX_FILE_SIZE) {
         if (e.target.name === Constants.FILE) {
-          getFileHash(file, window).then(res => this.setState({hash: res})).catch(err => alert(err))
+          getFileHash(file, window).then(res => this.setState({hash: res})).catch(err => window.dialog.showAlert(err))
         } else if (e.target.name === Constants.SIGNATURE) {
-          extractJson(file, window).then(res => this.setState({signature: res})).catch(err => alert(err))
+          extractJson(file, window).then(res => this.setState({signature: res})).catch(err => window.dialog.showAlert(err))
         }
       } else {
-        alert(LARGE_FILE)
+        window.dialog.showAlert(LARGE_FILE)
       }
     }
   }
@@ -99,7 +99,7 @@ class VerifyFree extends Component {
         this.resetForm()
       })
     } else {
-      alert(INVALID_FORM);
+      window.dialog.showAlert(INVALID_FORM);
       this.resetForm()
     }
   }

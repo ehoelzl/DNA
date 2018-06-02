@@ -64,9 +64,9 @@ class VerifyMetaMask_class extends Component {
     if (e.target.name === Constants.FILE) {
       let file = e.target.files[0];
       if (file.size < Constants.MAX_FILE_SIZE) {
-        getFileHash(file, window).then(res => this.setState({hash: res})).catch(err => alert(err))
+        getFileHash(file, window).then(res => this.setState({hash: res})).catch(err => window.dialog.showAlert(err))
       } else {
-        alert(LARGE_FILE)
+        window.dialog.showAlert(LARGE_FILE)
       }
     }
   }
@@ -86,7 +86,7 @@ class VerifyMetaMask_class extends Component {
         });
     } else {
       this.resetForm();
-      alert(INVALID_FORM);
+      window.dialog.showAlert(INVALID_FORM);
     }
   }
 
@@ -116,7 +116,8 @@ class VerifyMetaMask_class extends Component {
           <Row><Col sm={12} md={2} mdOffset={5}>
             {this.renderForm()}
           </Col></Row>
-          <Row><Col sm={12} md={8} mdOffset={2}> {this.state.displayResult ? <StampContainer timestamp={this.state.timestamp} user={this.state.user}/> : ""}</Col></Row>
+          <Row><Col sm={12} md={8} mdOffset={2}> {this.state.displayResult ?
+            <StampContainer timestamp={this.state.timestamp} user={this.state.user}/> : ""}</Col></Row>
         </Grid>)
     }
   }

@@ -1,5 +1,6 @@
+/*Set of utility functions used multiple times */
 
-
+import Dialog from 'react-bootstrap-dialog';
 import {LARGE_FILE} from "./ErrorHandler";
 import {Constants} from "../Constants";
 
@@ -9,12 +10,15 @@ const saveByteArray = (name, bytes, window, document) => {
   let link = document.createElement('a');
   link.href = window.URL.createObjectURL(blob);
   link.download = name + ".pdf";
+  link.style.display = 'none';
+  document.body.appendChild(link);
   link.click();
+  document.body.removeChild(link);
 };
 
 /*Utility function that extracts the json from a file and returns a promise that resolves into the json object,
 * or is rejected if the parsing could not occur*/
-const extractJson = (file, window)  => {
+const extractJson = (file, window) => {
   return new Promise(function (resolve, reject) {
     let f = file;
     if (typeof window.FileReader !== 'function') {
@@ -48,7 +52,15 @@ const stampToDate = (timestamp) => {
 };
 
 const successfullTx = (tx) => {
-  return "Successful, transaction hash :" + tx.tx
+  window.dialog.show({
+    title: "Successful Transaction",
+    body: "Hash : " + tx.tx,
+    bsSize: "large",
+    actions: [
+      Dialog.OKAction()
+    ]
+
+  });
 };
 
 /* Helper function that converts Wei to Ether*/
@@ -81,15 +93,14 @@ const validateEmail = (email, repeat) => {
 /*Utility function that returns true if the file is in PDF and less than 10Mb*/
 const validatePDF = (file) => {
   if (file === "") {
-    alert('Please select a file');
+    window.dialog.showAlert('Please select a file');
   } else if (file.size > Constants.MAX_FILE_SIZE) {
-    alert(LARGE_FILE)
+    window.dialog.showAlert(LARGE_FILE)
   } else if (file.type !== 'application/pdf') {
-    alert('File must be in PDF format');
+    window.dialog.showAlert('File must be in PDF format');
   }
   return file !== "" && file.type === 'application/pdf' && file.size < Constants.MAX_FILE_SIZE;
 };
-
 
 
 module.exports = {

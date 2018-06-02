@@ -29,7 +29,7 @@ const NetworkStrings = {
 * The returned component communicates with the Web3 object injected by Metamask and handles the choice of Network
 * This page requires a Web3 object injected into the web page
 *
-* The component passed to the constructor as a props is the Child component (TimestampMetamask, VerifyMetamask, DepositPatent or RequestAccess)
+* The component passed to the constructor as a props is the Child component (TimestampMetamask, VerifyMetamask, DepositFile or Store)
 * */
 function wrapWithMetamask(Wrapped, header) {
   return class extends Component {
@@ -59,14 +59,14 @@ function wrapWithMetamask(Wrapped, header) {
         this.setState({web3: result.web3});
         result.web3.eth.getAccounts((err, accounts) => {
           if (err || accounts.length === 0) {
-            alert(UNLOCK_METAMASK);
+            window.dialog.showAlert(UNLOCK_METAMASK);
             this.resetState();
           } else {
             this.setNetwork(networkId);
           }
         })
       }).catch(e => {
-        alert(METAMASK_NOTFOUND);
+        window.dialog.showAlert(METAMASK_NOTFOUND);
       });
     }
 
@@ -76,7 +76,7 @@ function wrapWithMetamask(Wrapped, header) {
       this.state.web3.version.getNetwork((err, id) => {
         id = parseInt(id, 10);
         if (id !== networkId) {
-          alert(INVALID_NETWORK);
+          window.dialog.showAlert(INVALID_NETWORK);
           this.resetState();
         } else {
           switch (id) {

@@ -1,3 +1,4 @@
+/*Set of constants for the app*/
 const Constants = {
   EMAIL: 'email',
   HASH: 'hash',

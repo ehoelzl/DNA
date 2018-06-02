@@ -79,15 +79,14 @@ class TimestampFree extends Component {
         url: SERVER_ADDRESS,
         data: form
       }).then(res => { //If response code is 200 OK
-        alert(res.data);
+        window.dialog.showAlert(res.data);
         this.resetForm()
       }).catch(e => { //If response code is else than 200 OK
-        console.log(e)
         serverError(e);
         this.resetForm();
       });
     } else {
-      alert(INVALID_FORM);
+      window.dialog.showAlert(INVALID_FORM);
       this.resetForm();
     }
   }
@@ -105,9 +104,9 @@ class TimestampFree extends Component {
     if (e.target.name === Constants.FILE) {
       let file = e.target.files[0];
       if (file.size < Constants.MAX_FILE_SIZE) {
-        getFileHash(file, window).then(res => this.setState({hash: res, fileName: file.name})).catch(err => alert(err))
+        getFileHash(file, window).then(res => this.setState({hash: res, fileName: file.name})).catch(err => window.dialog.showAlert(err))
       } else {
-        alert(LARGE_FILE)
+        window.dialog.showAlert(LARGE_FILE)
       }
     } else {
       state[e.target.name] = e.target.value;

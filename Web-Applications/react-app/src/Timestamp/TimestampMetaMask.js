@@ -52,7 +52,7 @@ class TimestampMetaMask_class extends Component {
       this.setState({contractInstance: instance, contractAddress: instance.address});
       return instance.price.call()
     }).then(price => this.setState({stampPrice: toEther(price, this.state.web3)}))
-      .catch(error => this.setState({contractInstance : null, contractAddress : 0}));
+      .catch(error => this.setState({contractInstance: null, contractAddress: 0}));
   }
 
 
@@ -89,14 +89,14 @@ class TimestampMetaMask_class extends Component {
         gas: process.env.REACT_APP_GAS_LIMIT
       }).then(tx => {
         this.resetForm();
-        alert(successfullTx(tx));
+        successfullTx(tx);
       }).catch(err => {
         this.resetForm();
         contractError(err);
       });
     } else {
       this.resetForm();
-      alert(INVALID_FORM);
+      window.dialog.showAlert(INVALID_FORM);
     }
   }
 
@@ -110,9 +110,9 @@ class TimestampMetaMask_class extends Component {
     if (e.target.name === Constants.FILE) {
       let file = e.target.files[0];
       if (file.size < Constants.MAX_FILE_SIZE) {
-        getFileHash(file, window).then(res => this.setState({hash: res})).catch(err => alert(err))
+        getFileHash(file, window).then(res => this.setState({hash: res})).catch(err => window.dialog.showAlert(err))
       } else {
-        alert(LARGE_FILE)
+        window.dialog.showAlert(LARGE_FILE)
       }
     }
   }
@@ -158,7 +158,8 @@ class TimestampMetaMask_class extends Component {
     } else {
       return (
         <Grid>
-          <Row bsClass="contract-address"><Col xsHidden>TimeStamping contract at {this.state.contractAddress} <br/> Stamp price
+          <Row bsClass="contract-address"><Col xsHidden>TimeStamping contract at {this.state.contractAddress}
+            <br/> Stamp price
             at {this.state.stampPrice} ETH <br/> Using address {this.state.web3.eth.coinbase}</Col></Row>
           <Row><Col sm={12} md={2} mdOffset={5}>
             {this.renderForm()}

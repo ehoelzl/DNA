@@ -4,10 +4,11 @@ import {Button, ButtonGroup, Panel, Label} from 'react-bootstrap';
 import {RequestStatus_String} from '../Constants';
 import {saveByteArray, fromEther, successfullTx} from '../utils/UtilityFunctions';
 import {privateKeyDecrypt} from '../utils/CryptoUtils'
-import {contractError, KEY_GENERATION_ERROR, IPFS_ERROR, KEY_ERROR} from "../utils/ErrorHandler";
+import {contractError, KEY_GENERATION_ERROR, IPFS_ERROR, KEY_ERROR, ENCRYPTION_ERROR} from "../utils/ErrorHandler";
 
 import {generatePrivateKey} from '../utils/KeyGenerator';
 
+/*Component that represents a single request and implements the actions based on the state*/
 class RequestPanel extends Component {
 
   constructor(props) {
@@ -24,6 +25,7 @@ class RequestPanel extends Component {
     this.resendRequest = this.resendRequest.bind(this);
   }
 
+  /*To download a copy of the file if it is authorized*/
   downloadCopy() {
     let privateKey;
     let request = this.state.request;
@@ -31,32 +33,35 @@ class RequestPanel extends Component {
       privateKey = pk;
       return this.state.contractInstance.getEncryptedIpfsKey.call(request.name, {from: this.state.web3.eth.coinbase})
     }).then(encryptedKey => {
-      let key = privateKeyDecrypt(encryptedKey, privateKey);
-      alert("Download will start shortly");
-      return this.bundle.getDecryptedFile(request.hash, request.ipfsLocation, key);
+      return privateKeyDecrypt(encryptedKey, privateKey);
+    }).then(aes_key => {
+      window.dialog.showAlert("Download will start shortly");
+      return this.bundle.getDecryptedFile(request.hash, request.ipfsLocation, aes_key);
     }).then(buffer => saveByteArray(request.name, buffer, window, document))
       .catch(e => {
-        if (e === KEY_GENERATION_ERROR || e === KEY_ERROR || e === IPFS_ERROR) {
-          alert(e)
+        if (e === KEY_GENERATION_ERROR || e === KEY_ERROR || e === IPFS_ERROR || e === ENCRYPTION_ERROR) {
+          window.dialog.showAlert(e)
         } else {
           contractError(e)
         }
       })
   }
 
+  /*Cancels a request*/
   cancelRequest() {
     let request = this.state.request;
     this.state.contractInstance.cancelRequest(request.name, {
       from: this.state.web3.eth.coinbase,
       gas: process.env.REACT_APP_GAS_LIMIT
     }).then(tx => {
-      alert(successfullTx(tx));
+      successfullTx(tx);
       let req = this.state.request;
       req.status = RequestStatus_String.CANCELLED;
       this.setState({request: req});
     }).catch(e => contractError(e))
   }
 
+  /*Resend a cancelled or rejected request*/
   resendRequest() {
     let request = this.state.request;
     this.state.contractInstance.resendRequest(request.name, {
@@ -64,13 +69,14 @@ class RequestPanel extends Component {
       value: fromEther(request.price, this.state.web3),
       gas: process.env.REACT_APP_GAS_LIMIT
     }).then(tx => {
-      alert(successfullTx(tx));
+      successfullTx(tx);
       let req = this.state.request;
       req.status = RequestStatus_String.PENDING;
       this.setState({request: req});
     }).catch(e => contractError(e))
   }
 
+  /*Buttons depending on the state of the request*/
   getButton() {
     let button = "";
     switch (this.state.request.status) {
@@ -89,9 +95,11 @@ class RequestPanel extends Component {
       default:
         break
     }
-    return <ButtonGroup justified><ButtonGroup>{button}</ButtonGroup></ButtonGroup>
+    let contactButton = <Button onClick={() => open('mailto:'+this.state.request.ownerEmail)}>Contact Owner</Button>;
+    return <ButtonGroup justified><ButtonGroup>{button}</ButtonGroup><ButtonGroup>{contactButton}</ButtonGroup></ButtonGroup>
   }
 
+  /*Label that represents state of the request*/
   getLabel() {
     let labelStyle = "default";
     switch (this.state.request.status) {

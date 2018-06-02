@@ -1,5 +1,6 @@
-import React from 'react'
+/*Set of React Components that are reused and are functional*/
 
+import React from 'react'
 import {FormControl, FormGroup, ControlLabel, HelpBlock, Alert} from 'react-bootstrap'
 import Button from 'react-bootstrap-button-loader'
 import '../css/Pages.css'
@@ -22,7 +23,7 @@ const FieldGroup = (props) => {
 };
 
 /*Submit button Component with loading state */
-const SubmitButton = (props)=> {
+const SubmitButton = (props) => {
   return (<Button type='submit' loading={props.running} spinColor="#000">Submit</Button>);
 };
 
@@ -36,7 +37,7 @@ const ContractNotFound = (props) => {
 
 
 /*Represents the container that display the given timestamp from the given user*/
-const StampContainer = (props)  => {
+const StampContainer = (props) => {
   let container = "";
   if (props.timestamp !== 0) {
     let date = stampToDate(props.timestamp);
@@ -44,7 +45,8 @@ const StampContainer = (props)  => {
   } else {
     container = <Alert bsStyle="danger">Document not found in Database</Alert>
   }
-  return <div style={{marginTop : '20px', textAlign : 'center' }}>{container}</div>
+  return <div style={{marginTop: '20px', textAlign: 'center', marginBottom: '100px'}}>{container}</div>
 };
 
-module.exports = {FieldGroup,SubmitButton, ContractNotFound, StampContainer};
+
+module.exports = {FieldGroup, SubmitButton, ContractNotFound, StampContainer};

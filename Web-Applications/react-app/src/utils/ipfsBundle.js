@@ -2,7 +2,7 @@ import {getEncryptedFileBuffer, getDecryptedFileBuffer} from './CryptoUtils'
 import {KEY_ERROR, IPFS_ERROR} from '../utils/ErrorHandler'
 import sha256 from 'sha256'
 
-/*Simple bundle to upload and get files to IPFS*/
+/*Simple bundle to upload, encrypt and get files to IPFS*/
 class Bundle {
   constructor() {
     this.node = window.IpfsApi(process.env.REACT_APP_IPFS, 5001, {protocol: 'https'});

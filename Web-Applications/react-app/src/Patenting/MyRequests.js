@@ -3,28 +3,29 @@ import React, {Component} from 'react';
 import {Grid, Row, PanelGroup} from 'react-bootstrap';
 import {ContractNotFound} from '../utils/FunctionalComponents';
 import {getStatusString} from '../Constants';
-import {saveByteArray, toEther} from '../utils/UtilityFunctions';
-import {privateKeyDecrypt} from '../utils/CryptoUtils'
+import {toEther} from '../utils/UtilityFunctions';
 import Patenting from '../../build/contracts/Patenting';
 import wrapWithMetamask from '../MetaMaskWrapper'
 import {NOT_REQUESTED, contractError} from "../utils/ErrorHandler";
 
-import {generatePrivateKey} from '../utils/KeyGenerator';
 import Bundle from '../utils/ipfsBundle';
 
 import RequestPanel from './RequestPanel';
 
-class MyRequests_class extends Component{
 
-  constructor(props){
+/*Component for browsing submitted requests*/
+class MyRequests_class extends Component {
+
+  /*Constructor of the class*/
+  constructor(props) {
     super(props);
     this.bundle = new Bundle();
     this.state = {
-      web3 : props.web3,
-      contractInstance : null,
-      numRequests : 0,
-      activeKey : 1,
-      requests : []
+      web3: props.web3,
+      contractInstance: null,
+      numRequests: 0,
+      activeKey: 1,
+      requests: []
     };
     this.handleSelect = this.handleSelect.bind(this)
   }
@@ -38,13 +39,14 @@ class MyRequests_class extends Component{
       return instance.patentCount.call()
     }).then(count => {
       this.getMyRequests(count.toNumber());
-    }).catch(error => this.setState({contractInstance : null}));
+    }).catch(error => this.setState({contractInstance: null}));
   }
 
-  getMyRequests(numPatents){
-    if (this.state.contractInstance !== null){
+  /*Fetches the requests from the smart contract*/
+  getMyRequests(numPatents) {
+    if (this.state.contractInstance !== null) {
       let instance = this.state.contractInstance;
-      for (let i=0; i < numPatents; i++){
+      for (let i = 0; i < numPatents; i++) {
         let patentName;
         let new_entry = {};
         instance.patentNames.call(i).then(name => {
@@ -66,12 +68,15 @@ class MyRequests_class extends Component{
         }).then(loc => {
           new_entry['ipfsLocation'] = loc;
           return instance.getPrice.call(patentName)
-        }).then( price => {
+        }).then(price => {
           new_entry['price'] = toEther(price, this.state.web3);
+          return instance.getOwnerEmail.call(patentName);
+        }).then(mail => {
+          new_entry['ownerEmail'] = mail;
           new_entry['id'] = (this.state.numRequests + 1);
           let requests = this.state.requests;
           requests.push(new_entry);
-          this.setState({pendingRequests : requests, numRequests: this.state.numRequests + 1});
+          this.setState({pendingRequests: requests, numRequests: this.state.numRequests + 1});
         }).catch(e => {
           if (e.message !== NOT_REQUESTED) { //Catch error if the patent is not authorized
             contractError(e)
@@ -82,29 +87,17 @@ class MyRequests_class extends Component{
   }
 
 
-  handleSelect(activeKey){
-    this.setState({ activeKey :activeKey })
+  /*To change between requests*/
+  handleSelect(activeKey) {
+    this.setState({activeKey: activeKey})
   }
-
-  downloadCopy(request){
-    let privateKey;
-    generatePrivateKey(this.state.web3, request.hash).then(pk => {
-        privateKey = pk;
-        return this.state.contractInstance.getEncryptedIpfsKey.call(request.name, {from: this.state.web3.eth.coinbase})
-      }).then(encryptedKey => {
-        let key = privateKeyDecrypt(encryptedKey, privateKey);
-        return this.bundle.getDecryptedFile(request.hash, request.ipfsLocation, key);
-    }).then(buffer => saveByteArray(request.name, buffer, window, document))
-  }
-
-
-
 
   /*Returns a full table with patents*/
   renderTable() {
     if (this.state.numRequests !== 0) {
       let panels = this.state.requests.map(request => {
-        return <RequestPanel web3={this.state.web3} instance={this.state.contractInstance} bundle={this.bundle} request={request} key={request.id}/>
+        return <RequestPanel web3={this.state.web3} instance={this.state.contractInstance} bundle={this.bundle}
+                             request={request} key={request.id}/>
       });
       return (
         <PanelGroup
@@ -123,7 +116,8 @@ class MyRequests_class extends Component{
       <Grid>
         <Row bsClass='title'>My requests</Row>
         <Row bsClass='paragraph'>
-          <p>This page allows users to view the requests they have submitted and view documents they have access to. <br/>
+          <p>This page allows users to view the requests they have submitted and view documents they have access
+            to. <br/>
             <br/>You only need to <b>unlock your Metamask extension</b>.
           </p>
         </Row>
@@ -140,7 +134,7 @@ class MyRequests_class extends Component{
       return (
         <Grid>
           <Row bsClass='contract-address'>
-            Patenting contract at {this.state.contractInstance.address} <br/>
+            Contract at {this.state.contractInstance.address} <br/>
             <br/> Current account {this.state.web3.eth.accounts[0]} (From Metamask)
           </Row>
           <Row>{this.renderTable()}</Row>

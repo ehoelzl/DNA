@@ -20,10 +20,6 @@ export default class NavigationBar extends Component {
         </Navbar.Header>
         <Navbar.Collapse>
           <Nav>
-            <LinkContainer to="/Product">
-              <NavItem>Product</NavItem>
-            </LinkContainer>
-
             <NavDropdown title="Time-stamping" id="basic-nav-dropdown">
               <LinkContainer to="/Timestamp"><MenuItem>Document timestamping (free)</MenuItem></LinkContainer>
               <LinkContainer to="/PersonalTimestamp"><MenuItem>Document timestamping and
@@ -31,20 +27,17 @@ export default class NavigationBar extends Component {
               <MenuItem divider/>
               <LinkContainer to="/VerifyTimestamp"><MenuItem>Verify timestamp</MenuItem></LinkContainer>
             </NavDropdown>
-            <NavDropdown title="Patenting" id="basic-nav-dropdown">
-              <LinkContainer to="/DepositPatent"><MenuItem>Deposit a new Patent</MenuItem></LinkContainer>
-              <LinkContainer to="/RequestAccess"><MenuItem>Request access</MenuItem></LinkContainer>
+            <NavDropdown title="File Sharing" id="basic-nav-dropdown">
+              <LinkContainer to="/DepositFile"><MenuItem>Deposit a File</MenuItem></LinkContainer>
+              <LinkContainer to="/Store"><MenuItem>Store</MenuItem></LinkContainer>
               <MenuItem divider/>
-              <LinkContainer to="/MyPatents"><MenuItem>My Patents</MenuItem></LinkContainer>
+              <LinkContainer to="/MyFiles"><MenuItem>My Files</MenuItem></LinkContainer>
               <LinkContainer to="/MyRequests"><MenuItem>My requests</MenuItem></LinkContainer>
             </NavDropdown>
-            <LinkContainer to="/About">
-              <NavItem>About</NavItem>
-            </LinkContainer>
           </Nav>
           <Nav pullRight>
-            <LinkContainer to="/API">
-              <NavItem>API</NavItem>
+            <LinkContainer to="/About">
+              <NavItem>About</NavItem>
             </LinkContainer>
             <LinkContainer to="/AdditionalInfo"><NavItem>Additional information</NavItem></LinkContainer>
           </Nav>

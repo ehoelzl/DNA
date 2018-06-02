@@ -213,6 +213,10 @@ contract Patenting is AccessRestricted {
         return patents[_patentName].requests[msg.sender].encryptedIpfsKey;
     }
 
+    function getOwnerEmail(string _patentName) public view returns (string) {
+        return patents[_patentName].email;
+    }
+
     /*Returns the IPFS location of the patent*/
     function getPatentLocation(string _patentName) public view returns (string) {
         return patents[_patentName].ipfs;
