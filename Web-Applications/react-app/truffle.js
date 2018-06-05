@@ -4,7 +4,6 @@ var mnemonic = "response exit whisper shuffle energy obey upon bean system deriv
 var HDWalletProvider = require('truffle-hdwallet-provider');
 
 
-
 module.exports = {
   networks: {
     development: {

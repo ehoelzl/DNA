@@ -3,15 +3,20 @@ const contract = require('truffle-contract');
 const Patenting_abi = require('../react-app/build/contracts/Patenting.json');
 const patenting = contract(Patenting_abi);
 
-class Patenting{
+/**
+ * Watch for events emitted by the Smart Contract and notify users by email of these events
+ */
+class Patenting {
 
+    /**
+     *
+     * @param provider_
+     */
     constructor(provider_){
-        this.event = null;
         patenting.setProvider(provider_);
         patenting.deployed().then(instance => {
             this.contractInstance = instance;
-            this.newRequest = instance.NewRequest();
-            this.newRequest.watch(function(err, res) {
+            this.contractInstance.NewRequest().watch(function(err, res) {
                 if (err)
                     console.log(err);
                 else {
@@ -19,16 +24,16 @@ class Patenting{
                     mailer.sendRequest(request._ownerMail, request._patentName, request._rentee);
                 }
             })
-            this.requestResponse = instance.RequestResponse();
-            this.requestResponse.watch(function(err, res) {
+            this.contractInstance.RequestResponse().watch(function(err, res) {
                 if (err)
                     console.log(err);
                 else {
                     let response = res.args;
-                    mailer.sendRequestResponse(response._requesterMail, response._patentName, response._accepted);
+                    mailer.sendRequestResponse(response._requesterEmail, response._patentName, response._accepted);
                 }
             })
         })
     }
 }
+
 module.exports = Patenting;
