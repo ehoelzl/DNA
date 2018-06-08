@@ -2,6 +2,7 @@ pragma solidity ^0.4.2;
 
 import './AccessRestricted.sol';
 import './TimeStamping.sol';
+import './FiatContract.sol';
 
 contract Patenting is AccessRestricted {
 
@@ -47,19 +48,26 @@ contract Patenting is AccessRestricted {
         bool _accepted
     );
 
+    FiatContract fiat;
+
     /* Constructor of the contract
     * {param} uint : The price for depositing a pattern in Wei
     */
-    function Patenting(uint _patentPrice) public {
+    function Patenting(uint _patentPrice, address _fiatContract) public {
+        fiat = FiatContract(_fiatContract);
         patentPrice = _patentPrice;
+    }
+
+    function getEthPrice(uint _dollars) public view returns (uint) {
+        return fiat.USD(0) * 100 * _dollars;
     }
 
     /* Function to deposit a pattern
     * {params} the patent parameters
     * {costs} the price of a patent
     */
-    function depositPatent(string _patentName, string _patentHash, uint _price, string _ipfs, string _email) public payable costs(patentPrice) {
-        require(patents[_patentName].timestamp == 0);
+    function depositPatent(string _patentName, string _patentHash, uint _price, string _ipfs, string _email) public payable {
+        require(patents[_patentName].timestamp == 0 && msg.value >= getEthPrice(patentPrice));
         patents[_patentName] = Patent(msg.sender, now, _patentHash, _price, _ipfs, _email, 0);
         patentNames.push(_patentName);
         patentCount++;
@@ -71,20 +79,22 @@ contract Patenting is AccessRestricted {
     * {costs} price of the patent : will be frozen until request is accepted, rejected, or cancelled
     */
     function requestAccess(string _patentName, string _encryptionKey, string _email) public payable {
-        require(patents[_patentName].timestamp != 0 && canRequest(_patentName, msg.sender) && msg.value >= patents[_patentName].price);
+        uint ethPrice = getEthPrice(patents[_patentName].price);
+        require(patents[_patentName].timestamp != 0 && canRequest(_patentName, msg.sender) && msg.value >= ethPrice);
         Patent storage p = patents[_patentName];
         if (p.requests[msg.sender].status == RequestStatus.Not_requested) {
             p.buyers[p.numRequests++] = msg.sender;
         }
-        p.requests[msg.sender] = Request(RequestStatus.Pending, patents[_patentName].price, _email, _encryptionKey, "");
+        p.requests[msg.sender] = Request(RequestStatus.Pending, ethPrice, _email, _encryptionKey, "");
         NewRequest(patents[_patentName].email, _patentName, msg.sender);
     }
 
     function resendRequest(string _patentName) public payable {
-        require(patents[_patentName].timestamp != 0 && canRequest(_patentName, msg.sender) && msg.value >= patents[_patentName].price && !isNotRequested(_patentName, msg.sender));
+        uint ethPrice = getEthPrice(patents[_patentName].price);
+        require(patents[_patentName].timestamp != 0 && canRequest(_patentName, msg.sender) && msg.value >= ethPrice && !isNotRequested(_patentName, msg.sender));
         Request storage r = patents[_patentName].requests[msg.sender];
         r.status = RequestStatus.Pending;
-        r.deposit = patents[_patentName].price;
+        r.deposit = ethPrice;
     }
 
     /* Function to grant access to a user
@@ -96,7 +106,7 @@ contract Patenting is AccessRestricted {
     function grantAccess(string _patentName, address _user, string _encryptedIpfsKey) public {
         require(patents[_patentName].timestamp != 0 && isOwner(_patentName, msg.sender) && isPending(_patentName, _user));
         Request storage r = patents[_patentName].requests[_user];
-        require(r.deposit == patents[_patentName].price);
+        require(r.deposit >= 0);
         msg.sender.transfer(r.deposit);
         r.deposit = 0;
         r.status = RequestStatus.Accepted;
@@ -112,7 +122,7 @@ contract Patenting is AccessRestricted {
     function rejectAccess(string _patentName, address _user) public {
         require(patents[_patentName].timestamp != 0 && isOwner(_patentName, msg.sender) && isPending(_patentName, _user));
         Request storage r = patents[_patentName].requests[_user];
-        require(r.deposit == patents[_patentName].price);
+        require(r.deposit >= 0);
         _user.transfer(r.deposit);
         // Refund back to user
         r.deposit = 0;
@@ -127,7 +137,7 @@ contract Patenting is AccessRestricted {
     function cancelRequest(string _patentName) public {
         require(patents[_patentName].timestamp != 0 && !isOwner(_patentName, msg.sender) && isPending(_patentName, msg.sender));
         Request storage r = patents[_patentName].requests[msg.sender];
-        require(r.deposit == patents[_patentName].price);
+        require(r.deposit >= 0);
         msg.sender.transfer(r.deposit);
         r.deposit = 0;
         r.status = RequestStatus.Cancelled;

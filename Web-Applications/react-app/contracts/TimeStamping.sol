@@ -1,6 +1,7 @@
 pragma solidity ^0.4.0;
 
 import './AccessRestricted.sol';
+import './FiatContract.sol';
 
 contract TimeStamping is AccessRestricted {
 
@@ -14,8 +15,10 @@ contract TimeStamping is AccessRestricted {
 
     uint public stampCount;
 
-    function TimeStamping(uint _price) public {
+    FiatContract public fiat;
+    function TimeStamping(uint _price, address _fiatContract) public {
         price = _price;
+        fiat = FiatContract(_fiatContract);
         stampCount = 0;
     }
 
@@ -29,9 +32,14 @@ contract TimeStamping is AccessRestricted {
 
     }
 
+    /*Returns price */
+    function getEthPrice() public view returns (uint){
+        return fiat.USD(0) * 100 * price;
+    }
+
     //Stamp a hash, costs a certain amount (for precise time stamping)
-    function stamp(string _hash) public payable costs(price){
-        require(msg.sender != owner);
+    function stamp(string _hash) public payable{
+        require(msg.sender != owner && msg.value >= getEthPrice());
         stampHash(_hash, msg.sender);
     }
 

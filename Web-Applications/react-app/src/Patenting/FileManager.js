@@ -23,7 +23,8 @@ class FileManager extends Component {
       contractInstance: props.contractInstance,
       web3: props.web3,
       patent: props.patent,
-      pendingRequests: []
+      pendingRequests: [],
+      gasPrice : props.gasPrice
     };
 
     this.downloadCopy = this.downloadCopy.bind(this);
@@ -90,7 +91,8 @@ class FileManager extends Component {
     }).then(encrypted => {
       return this.state.contractInstance.grantAccess(this.state.patent.name, request.account, encrypted, {
         from: this.state.web3.eth.coinbase,
-        gas: process.env.REACT_APP_GAS_LIMIT
+        gas: process.env.REACT_APP_GAS_LIMIT,
+        gasPrice : this.state.gasPrice
       });
     }).then(tx => {
       setTimeout(() => this.setState({pendingRequests: []}), 4000);
@@ -108,7 +110,8 @@ class FileManager extends Component {
   rejectRequest(request) {
     this.state.contractInstance.rejectAccess(this.state.patent.name, request.account, {
       from: this.state.web3.eth.coinbase,
-      gas: process.env.REACT_APP_GAS_LIMIT
+      gas: process.env.REACT_APP_GAS_LIMIT,
+      gasPrice : this.state.gasPrice
     }).then(tx => {
       setTimeout(() => this.setState({pendingRequests: []}), 4000);
       successfullTx(tx)

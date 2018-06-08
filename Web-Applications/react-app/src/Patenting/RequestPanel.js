@@ -2,7 +2,7 @@ import '../css/Pages.css'
 import React, {Component} from 'react';
 import {Button, ButtonGroup, Panel, Label} from 'react-bootstrap';
 import {RequestStatus_String} from '../Constants';
-import {saveByteArray, fromEther, successfullTx} from '../utils/UtilityFunctions';
+import {saveByteArray, successfullTx} from '../utils/UtilityFunctions';
 import {privateKeyDecrypt} from '../utils/CryptoUtils'
 import {contractError, KEY_GENERATION_ERROR, IPFS_ERROR, KEY_ERROR, ENCRYPTION_ERROR} from "../utils/ErrorHandler";
 
@@ -17,7 +17,8 @@ class RequestPanel extends Component {
     this.state = {
       web3: props.web3,
       request: props.request,
-      contractInstance: props.instance
+      contractInstance: props.instance,
+      gasPrice : props.gasPrice
     };
 
     this.downloadCopy = this.downloadCopy.bind(this);
@@ -52,7 +53,8 @@ class RequestPanel extends Component {
     let request = this.state.request;
     this.state.contractInstance.cancelRequest(request.name, {
       from: this.state.web3.eth.coinbase,
-      gas: process.env.REACT_APP_GAS_LIMIT
+      gas: process.env.REACT_APP_GAS_LIMIT,
+      gasPrice : this.state.gasPrice
     }).then(tx => {
       successfullTx(tx);
       let req = this.state.request;
@@ -66,8 +68,9 @@ class RequestPanel extends Component {
     let request = this.state.request;
     this.state.contractInstance.resendRequest(request.name, {
       from: this.state.web3.eth.coinbase,
-      value: fromEther(request.price, this.state.web3),
-      gas: process.env.REACT_APP_GAS_LIMIT
+      value: request.ethPrice,
+      gas: process.env.REACT_APP_GAS_LIMIT,
+      gasPrice : this.state.gasPrice
     }).then(tx => {
       successfullTx(tx);
       let req = this.state.request;
@@ -84,10 +87,10 @@ class RequestPanel extends Component {
         button = <Button onClick={this.downloadCopy}> Download Copy</Button>;
         break;
       case RequestStatus_String.CANCELLED:
-        button = <Button onClick={this.resendRequest}> Re-send Request ({this.state.request.price} ETH)</Button>;
+        button = <Button onClick={this.resendRequest}> Re-send Request ({this.state.request.price} USD)</Button>;
         break;
       case RequestStatus_String.REJECTED:
-        button = <Button onClick={this.resendRequest}> Re-send Request ({this.state.request.price} ETH)</Button>;
+        button = <Button onClick={this.resendRequest}> Re-send Request ({this.state.request.price} USD)</Button>;
         break;
       case RequestStatus_String.PENDING:
         button = <Button onClick={this.cancelRequest}>Cancel and refund</Button>;

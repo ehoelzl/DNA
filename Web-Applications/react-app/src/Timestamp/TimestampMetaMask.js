@@ -4,7 +4,7 @@ import React, {Component} from 'react'
 import {Grid, Row, Col} from 'react-bootstrap'
 
 import TimeStamping from '../../build/contracts/TimeStamping'
-import {toEther, fromEther, successfullTx} from '../utils/UtilityFunctions';
+import {successfullTx} from '../utils/UtilityFunctions';
 import {getFileHash} from '../utils/CryptoUtils'
 import {FieldGroup, SubmitButton, ContractNotFound} from '../utils/FunctionalComponents';
 import {Constants} from '../Constants'
@@ -31,6 +31,8 @@ class TimestampMetaMask_class extends Component {
       contractInstance: null,
       contractAddress: 0,
       stampPrice: 0,
+      etherPrice : 0,
+      gasPrice : 0,
       hash: ""
     };
 
@@ -45,13 +47,17 @@ class TimestampMetaMask_class extends Component {
   * Saves the contract instance, its address and the Stamp price in Ether
   * */
   componentDidMount() {
+    this.state.web3.eth.getGasPrice((err, res) => this.setState({gasPrice : res.toNumber()}));
     const contract = require('truffle-contract');
     const timeStamping = contract(TimeStamping);
     timeStamping.setProvider(this.state.web3.currentProvider);
     timeStamping.deployed().then(instance => {
       this.setState({contractInstance: instance, contractAddress: instance.address});
       return instance.price.call()
-    }).then(price => this.setState({stampPrice: toEther(price, this.state.web3)}))
+    }).then(price => {
+      this.setState({stampPrice: price.toNumber()});
+      return this.state.contractInstance.getEthPrice.call()
+    }).then(ethPrice => this.setState({etherPrice : ethPrice}))
       .catch(error => this.setState({contractInstance: null, contractAddress: 0}));
   }
 
@@ -85,8 +91,9 @@ class TimestampMetaMask_class extends Component {
       this.setState({waitingTransaction: true});
       this.state.contractInstance.stamp(this.state.hash, {
         from: this.state.web3.eth.coinbase,
-        value: fromEther(this.state.stampPrice, this.state.web3),
-        gas: process.env.REACT_APP_GAS_LIMIT
+        value: this.state.etherPrice,
+        gas: process.env.REACT_APP_GAS_LIMIT,
+        gasPrice : this.state.gasPrice
       }).then(tx => {
         this.resetForm();
         successfullTx(tx);
@@ -160,7 +167,7 @@ class TimestampMetaMask_class extends Component {
         <Grid>
           <Row bsClass="contract-address"><Col xsHidden>TimeStamping contract at {this.state.contractAddress}
             <br/> Stamp price
-            at {this.state.stampPrice} ETH <br/> Using address {this.state.web3.eth.coinbase}</Col></Row>
+            at {this.state.stampPrice} USD <br/> Using address {this.state.web3.eth.coinbase}</Col></Row>
           <Row><Col sm={12} md={2} mdOffset={5}>
             {this.renderForm()}
           </Col></Row>

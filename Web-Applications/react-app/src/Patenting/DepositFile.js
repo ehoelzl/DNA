@@ -3,7 +3,7 @@ import '../css/Pages.css'
 import React, {Component} from 'react';
 import {Button, Grid, Row, Col} from 'react-bootstrap';
 import {FieldGroup, SubmitButton, ContractNotFound} from '../utils/FunctionalComponents';
-import {validateEmail, validatePDF, toEther, fromEther} from '../utils/UtilityFunctions';
+import {validateEmail, validatePDF} from '../utils/UtilityFunctions';
 import {getFileHash} from '../utils/CryptoUtils'
 import wrapWithMetamask from '../MetaMaskWrapper'
 import Patenting from '../../build/contracts/Patenting';
@@ -43,6 +43,8 @@ class DepositFile_class extends Component {
       contractInstance: null,
       waitingTransaction: false,
       patentPrice: 0,
+      etherPrice : 0,
+      gasPrice : 0
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -53,13 +55,17 @@ class DepositFile_class extends Component {
   /*Called before the component is mounted
   * Instantiates the contract and stores the price of a patent*/
   componentDidMount() {
+    this.state.web3.eth.getGasPrice((err, res) => this.setState({gasPrice : res.toNumber()}));
     const contract = require('truffle-contract');
     const patenting = contract(Patenting);
     patenting.setProvider(this.state.web3.currentProvider);
     patenting.deployed().then(instance => {
       this.setState({contractInstance: instance});
       return instance.patentPrice.call()
-    }).then(price => this.setState({patentPrice: toEther(price, this.state.web3)}))
+    }).then(price => {
+      this.setState({patentPrice: price.toNumber()});
+      return this.state.contractInstance.getEthPrice.call(price.toNumber())
+    }).then(ethPrice => this.setState({etherPrice : ethPrice}))
       .catch(error => this.setState({contractInstance: null}));
   }
 
@@ -100,7 +106,7 @@ class DepositFile_class extends Component {
       return null
     } else if (!isNaN(this.state.price)) {
       let price = parseInt(this.state.price, 10);
-      return (price <= 1 && price >= 0 ? 'success' : 'warning');
+      return (price <= 1000 && price >= 0 ? 'success' : 'warning');
     } else {
       return 'error'
     }
@@ -168,10 +174,11 @@ class DepositFile_class extends Component {
     e.preventDefault();
     if (this.validateForm()) {
       this.setState({waitingTransaction: true});
-      this.state.contractInstance.depositPatent(this.state.patentName, this.state.hash, fromEther(this.state.price, this.state.web3), this.state.ipfsLocation, this.state.email_address, {
+      this.state.contractInstance.depositPatent(this.state.patentName, this.state.hash, this.state.price, this.state.ipfsLocation, this.state.email_address, {
         from: this.state.web3.eth.coinbase,
-        value: fromEther(this.state.patentPrice, this.state.web3),
-        gas: process.env.REACT_APP_GAS_LIMIT
+        value: this.state.etherPrice,
+        gas: process.env.REACT_APP_GAS_LIMIT,
+        gasPrice : this.state.gasPrice
       }).then(tx => {
         return this.bundle.addFile() // Add the encrypted file to the
       }).then(filesAdded => {
@@ -259,8 +266,8 @@ class DepositFile_class extends Component {
         <FieldGroup name="patentName" id="formsControlsName" label="File Name" type="text"
                     value={this.state.patentName} placeholder="Enter the File name" help="Max 100 chars"
                     onChange={this.handleChange} validation={this.validateName()}/>
-        <FieldGroup name="price" id="formsControlsName" label="Price in ETH" type="text"
-                    value={this.state.price} help="Max 1 ETH"
+        <FieldGroup name="price" id="formsControlsName" label="Price in USD" type="text"
+                    value={this.state.price} help="Max $1000"
                     onChange={this.handleChange} validation={this.validatePrice()}/>
         <FieldGroup name="email_address" id="formsControlsEmail" label="Email address" type="email"
                     value={this.state.email_address} placeholder="john@doe.com" help=""
@@ -287,7 +294,7 @@ class DepositFile_class extends Component {
         <Grid>
           <Row bsClass="contract-address">
             <Col xsHidden>Contract at {this.state.contractInstance.address}</Col>
-            <Row>Deposit price at {this.state.patentPrice} ETH </Row>
+            <Row>Deposit price at {this.state.patentPrice} USD </Row>
             <Row><Col xsHidden>Current account {this.state.web3.eth.accounts[0]} (From Metamask)</Col></Row>
           </Row>
           <Row><Col sm={3} md={5} mdOffset={3} className="form">{this.renderForm()}</Col></Row>

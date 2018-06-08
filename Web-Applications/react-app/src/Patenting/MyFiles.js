@@ -26,6 +26,7 @@ class MyFiles_class extends Component {
       patents: [],
       displayDetails: false,
       selectedPatent: null,
+      gasPrice : 0
     };
 
     this.getMyPatents = this.getMyPatents.bind(this);
@@ -35,6 +36,7 @@ class MyFiles_class extends Component {
 
   /*Method called before the component is mounted, initializes the contract and the page content*/
   componentDidMount() {
+    this.state.web3.eth.getGasPrice((err, res) => this.setState({gasPrice : res.toNumber()}));
     const contract = require('truffle-contract');
     const patenting = contract(Patenting);
     patenting.setProvider(this.state.web3.currentProvider);
@@ -137,7 +139,7 @@ class MyFiles_class extends Component {
         <div className="requests-container">
           {this.buttonToolbar()}
           <FileManager web3={this.state.web3} contractInstance={this.state.contractInstance}
-                       patent={this.state.selectedPatent}/>
+                       patent={this.state.selectedPatent} gasPrice={this.state.gasPrice}/>
         </div>
     )
   }

@@ -3,7 +3,6 @@ import React, {Component} from 'react';
 import {Grid, Row, PanelGroup} from 'react-bootstrap';
 import {ContractNotFound} from '../utils/FunctionalComponents';
 import {getStatusString} from '../Constants';
-import {toEther} from '../utils/UtilityFunctions';
 import Patenting from '../../build/contracts/Patenting';
 import wrapWithMetamask from '../MetaMaskWrapper'
 import {NOT_REQUESTED, contractError} from "../utils/ErrorHandler";
@@ -25,12 +24,14 @@ class MyRequests_class extends Component {
       contractInstance: null,
       numRequests: 0,
       activeKey: 1,
-      requests: []
+      requests: [],
+      gasPrice : 0,
     };
     this.handleSelect = this.handleSelect.bind(this)
   }
 
   componentDidMount() {
+    this.state.web3.eth.getGasPrice((err, res) => this.setState({gasPrice : res.toNumber()}));
     const contract = require('truffle-contract');
     const patenting = contract(Patenting);
     patenting.setProvider(this.state.web3.currentProvider);
@@ -69,7 +70,10 @@ class MyRequests_class extends Component {
           new_entry['ipfsLocation'] = loc;
           return instance.getPrice.call(patentName)
         }).then(price => {
-          new_entry['price'] = toEther(price, this.state.web3);
+          new_entry['price'] = price.toNumber();
+          return instance.getEthPrice(price);
+        }).then(ethPrice => {
+          new_entry['ethPrice'] = ethPrice;
           return instance.getOwnerEmail.call(patentName);
         }).then(mail => {
           new_entry['ownerEmail'] = mail;
@@ -97,7 +101,7 @@ class MyRequests_class extends Component {
     if (this.state.numRequests !== 0) {
       let panels = this.state.requests.map(request => {
         return <RequestPanel web3={this.state.web3} instance={this.state.contractInstance} bundle={this.bundle}
-                             request={request} key={request.id}/>
+                             request={request} key={request.id} gasPrice={this.state.gasPrice}/>
       });
       return (
         <PanelGroup

@@ -2,7 +2,7 @@ import '../css/Pages.css'
 import React, {Component} from 'react';
 import {Table, Grid, Row} from 'react-bootstrap';
 import {ContractNotFound} from '../utils/FunctionalComponents';
-import {toEther, stampToDate, successfullTx} from '../utils/UtilityFunctions';
+import {stampToDate, successfullTx} from '../utils/UtilityFunctions';
 import {getStatusString} from '../Constants';
 import Patenting from '../../build/contracts/Patenting';
 import wrapWithMetamask from '../MetaMaskWrapper'
@@ -11,7 +11,6 @@ import Dialog from 'react-bootstrap-dialog'
 import {generatePrivateKey, generatePublicKey} from '../utils/KeyGenerator'
 import {ALREADY_REQUESTED, KEY_GENERATION_ERROR, contractError} from '../utils/ErrorHandler'
 
-// TODO : add email verification before sending request
 /*Component for requesting access to a patent*/
 class Store_class extends Component {
 
@@ -24,7 +23,8 @@ class Store_class extends Component {
       contractInstance: null,
       selectedPatent: "",
       numPatents: 0,
-      patents: []
+      patents: [],
+      gasPrice : 0
     };
 
     this.getPatents = this.getPatents.bind(this);
@@ -32,6 +32,7 @@ class Store_class extends Component {
 
   /*Method called before the component is mounted, initializes the contract and the page content*/
   componentDidMount() {
+    this.state.web3.eth.getGasPrice((err, res) => this.setState({gasPrice : res.toNumber()}));
     const contract = require('truffle-contract');
     const patenting = contract(Patenting);
     patenting.setProvider(this.state.web3.currentProvider);
@@ -74,7 +75,10 @@ class Store_class extends Component {
           new_entry['status'] = getStatusString(status);
           return instance.getPrice.call(new_entry['name'])
         }).then(price => {
-          new_entry['price'] = price;
+          new_entry['price'] = price.toNumber();
+          return instance.getEthPrice(price);
+        }).then(ethPrice => {
+          new_entry['ethPrice'] = ethPrice;
           let patents = this.state.patents;
           patents.push(new_entry);
           this.setState({patents: patents});
@@ -118,8 +122,9 @@ class Store_class extends Component {
         let publicKey = generatePublicKey(key); // Generate public key associated to this private key
         return this.state.contractInstance.requestAccess(patent.name, publicKey, email, { // New request = (account, publicKey, "")
           from: this.state.web3.eth.coinbase,
-          value: patent.price,
-          gas: process.env.REACT_APP_GAS_LIMIT
+          value: patent.ethPrice,
+          gas: process.env.REACT_APP_GAS_LIMIT,
+          gasPrice : this.state.gasPrice
         });
       }).then(tx => {
         successfullTx(tx);
@@ -164,7 +169,7 @@ class Store_class extends Component {
         <td>{patent.name}</td>
         <td>{patent.owner === this.state.web3.eth.coinbase ? 'You' : patent.owner}</td>
         <td>{stampToDate(patent.timestamp)}</td>
-        <td>{toEther(patent.price, this.state.web3)}</td>
+        <td>{patent.price}</td>
         <td>{patent.status}</td>
       </tr>
     )
@@ -179,7 +184,7 @@ class Store_class extends Component {
           <th>File Name</th>
           <th>Owner's address</th>
           <th>Submission Date</th>
-          <th>Price (ETH)</th>
+          <th>Price (USD)</th>
           <th>Request Status</th>
         </tr>
       );

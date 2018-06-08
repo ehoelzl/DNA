@@ -96,10 +96,8 @@ const validatePDF = (file) => {
     window.dialog.showAlert('Please select a file');
   } else if (file.size > Constants.MAX_FILE_SIZE) {
     window.dialog.showAlert(LARGE_FILE)
-  } else if (file.type !== 'application/pdf') {
-    window.dialog.showAlert('File must be in PDF format');
   }
-  return file !== "" && file.type === 'application/pdf' && file.size < Constants.MAX_FILE_SIZE;
+  return file !== "" && file.size < Constants.MAX_FILE_SIZE;
 };
 
 
