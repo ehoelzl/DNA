@@ -39,7 +39,6 @@ export default class NavigationBar extends Component {
             <LinkContainer to="/About">
               <NavItem>About</NavItem>
             </LinkContainer>
-            <LinkContainer to="/AdditionalInfo"><NavItem>Additional information</NavItem></LinkContainer>
           </Nav>
         </Navbar.Collapse>
       </Navbar>

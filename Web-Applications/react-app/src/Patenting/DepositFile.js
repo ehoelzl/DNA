@@ -278,7 +278,7 @@ class DepositFile_class extends Component {
                     validation={validateEmail(this.state.email_address, this.state.repeat_email)}/>
 
         <FieldGroup name={Constants.FILE} id="formsControlsFile" label="File" type="file" placeholder=""
-                    help="File (PDF only)" onChange={this.handleChange}/>
+                    help="File" onChange={this.handleChange}/>
 
         <div className="encrypt-button">{this.encryptFileButton()}</div>
         <SubmitButton running={this.state.waitingTransaction}/>
