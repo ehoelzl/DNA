@@ -1,5 +1,0 @@
-#1. First run npm run build to get a prod env
-#2. docker build -t <imagename> .
-#3. docker run -ti --volumes-from Web-client --name config debian /bin/bash (other docker to edit config files)
-
-#4. Connect to localhost:8080

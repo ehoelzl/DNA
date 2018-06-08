@@ -88,4 +88,4 @@ var server = https.createServer( function (req, res) {
 const port = 4000;
 const host = getIPAddress(process.argv[2] === 'true');
 server.listen(port, host);
-console.log('Listening at https://' + host + ':' + port);
+console.log('Listening at http://' + host + ':' + port);

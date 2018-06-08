@@ -65,7 +65,7 @@ module.exports = {
             subject: 'New Request for your document ' + patentName,
             text: "Dear user, \n\nThis email is a notification regarding your deposited document " + patentName + ".\n" +
                 "User with address " + rentee + " has requested access. You can manage the request on the website. \n" +
-                "The funds have been transfered to your Ethereum address.\n\n"+
+                "\n When the request is accepted, the funds will be deposited into your account.\n\n"+
                 "This is an automatic email, please do not answer. \n\nThe DNA team \n\n",
         };
         transporter.sendMail(mailOptions, function (error, info) {
@@ -73,7 +73,7 @@ module.exports = {
               console.log(error);
             }
             else {
-              console.log('Email sent for document request' + info.response);
+              console.log('Email sent for document request ' + info.response);
             }
         });
     },
